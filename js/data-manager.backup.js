@@ -1,55 +1,37 @@
-// Data Manager - Handles all data operations using storage adapters
-// Now supports multiple storage backends (localStorage, Firebase, etc.)
+// Data Manager - Handles all localStorage operations
 
 class DataManager {
-    constructor(storageAdapter) {
-        this.storage = storageAdapter;
-        this.initialized = false;
-    }
-
-    // Initialize data manager and storage
-    async initialize() {
-        if (this.initialized) return;
-
-        try {
-            // Check if storage is ready
-            if (!this.storage.isReady()) {
-                console.error('Storage adapter not ready');
-                return false;
-            }
-
-            // Initialize default data structure
-            await this.initializeData();
-            this.initialized = true;
-            console.log(`✅ DataManager initialized with ${this.storage.getName()}`);
-            return true;
-
-        } catch (error) {
-            console.error('DataManager initialization failed:', error);
-            return false;
-        }
+    constructor() {
+        this.initializeData();
     }
 
     // Initialize default data structure
-    async initializeData() {
-        const keys = ['students', 'tasks', 'messages', 'quizzes', 'quizResults'];
-        
-        for (const key of keys) {
-            const data = await this.storage.get(key);
-            if (!data) {
-                await this.storage.set(key, []);
-            }
+    initializeData() {
+        if (!localStorage.getItem('students')) {
+            localStorage.setItem('students', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('tasks')) {
+            localStorage.setItem('tasks', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('messages')) {
+            localStorage.setItem('messages', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('quizzes')) {
+            localStorage.setItem('quizzes', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('quizResults')) {
+            localStorage.setItem('quizResults', JSON.stringify([]));
         }
         
         // Add sample data if empty
-        const students = await this.getStudents();
+        const students = this.getStudents();
         if (students.length === 0) {
-            await this.addSampleData();
+            this.addSampleData();
         }
     }
 
     // Add sample data for demonstration
-    async addSampleData() {
+    addSampleData() {
         const sampleStudents = [
             { 
                 id: 1, 
@@ -241,8 +223,8 @@ class DataManager {
             }
         ];
 
-        await this.storage.set('students', sampleStudents);
-        await this.storage.set('tasks', sampleTasks);
+        localStorage.setItem('students', JSON.stringify(sampleStudents));
+        localStorage.setItem('tasks', JSON.stringify(sampleTasks));
         
         // Sample Quizzes
         const sampleQuizzes = [
@@ -256,39 +238,39 @@ class DataManager {
                         id: 1,
                         question: "How many pillars of Islam are there?",
                         options: ["3", "4", "5", "6"],
-                        correctAnswer: 2,
+                        correctAnswer: 2, // index 2 = "5"
                         marks: 2
                     },
                     {
                         id: 2,
                         question: "What is the first pillar of Islam?",
                         options: ["Salah", "Shahada", "Zakat", "Hajj"],
-                        correctAnswer: 1,
+                        correctAnswer: 1, // index 1 = "Shahada"
                         marks: 2
                     },
                     {
                         id: 3,
                         question: "How many times Muslims pray daily?",
                         options: ["3 times", "4 times", "5 times", "6 times"],
-                        correctAnswer: 2,
+                        correctAnswer: 2, // index 2 = "5 times"
                         marks: 2
                     },
                     {
                         id: 4,
                         question: "Which month is the month of fasting?",
                         options: ["Rajab", "Shaban", "Ramadan", "Shawwal"],
-                        correctAnswer: 2,
+                        correctAnswer: 2, // index 2 = "Ramadan"
                         marks: 2
                     },
                     {
                         id: 5,
                         question: "What is Zakat?",
                         options: ["Prayer", "Charity", "Fasting", "Pilgrimage"],
-                        correctAnswer: 1,
+                        correctAnswer: 1, // index 1 = "Charity"
                         marks: 2
                     }
                 ],
-                timeLimit: 10,
+                timeLimit: 10, // 10 minutes
                 passingPercentage: 60,
                 assignedTo: [1, 2, 3, 4],
                 deadline: "2025-10-20",
@@ -349,7 +331,7 @@ class DataManager {
                         type: "true_false",
                         question: "The Quran was revealed over a period of 23 years.",
                         options: ["True", "False"],
-                        correctAnswer: 0,
+                        correctAnswer: 0, // True
                         marks: 2
                     },
                     {
@@ -392,14 +374,14 @@ class DataManager {
             }
         ];
         
-        await this.storage.set('quizzes', sampleQuizzes);
+        localStorage.setItem('quizzes', JSON.stringify(sampleQuizzes));
         
-        // Sample Quiz Results
+        // Sample Quiz Results (some students already took quizzes)
         const sampleResults = [
             {
                 id: 2001,
                 quizId: 1001,
-                studentId: 1,
+                studentId: 1, // Ahmed Ali
                 answers: [
                     {questionId: 0, selectedAnswer: 2, correctAnswer: 2, isCorrect: true, marks: 2},
                     {questionId: 1, selectedAnswer: 1, correctAnswer: 1, isCorrect: true, marks: 2},
@@ -411,7 +393,7 @@ class DataManager {
                 totalMarks: 10,
                 percentage: 80,
                 passed: true,
-                timeTaken: 420,
+                timeTaken: 420, // 7 minutes in seconds
                 submittedAt: "2025-10-08T10:30:00.000Z",
                 autoGraded: true,
                 status: 'graded'
@@ -419,7 +401,7 @@ class DataManager {
             {
                 id: 2002,
                 quizId: 1002,
-                studentId: 2,
+                studentId: 2, // Fatima Hassan
                 answers: [
                     {questionId: 0, selectedAnswer: 1, correctAnswer: 1, isCorrect: true, marks: 3},
                     {questionId: 1, selectedAnswer: 0, correctAnswer: 0, isCorrect: true, marks: 3},
@@ -429,7 +411,7 @@ class DataManager {
                 totalMarks: 10,
                 percentage: 100,
                 passed: true,
-                timeTaken: 180,
+                timeTaken: 180, // 3 minutes
                 submittedAt: "2025-10-07T14:15:00.000Z",
                 autoGraded: true,
                 status: 'graded'
@@ -437,8 +419,9 @@ class DataManager {
             {
                 id: 2003,
                 quizId: 1003,
-                studentId: 1,
+                studentId: 1, // Ahmed Ali
                 answers: [
+                    // MCQ - Auto-graded
                     {
                         questionId: 0, 
                         answer: 1, 
@@ -447,6 +430,7 @@ class DataManager {
                         marks: 2,
                         autoGraded: true
                     },
+                    // True/False - Auto-graded
                     {
                         questionId: 1, 
                         answer: 0, 
@@ -455,6 +439,7 @@ class DataManager {
                         marks: 2,
                         autoGraded: true
                     },
+                    // Fill in Blank - Auto-graded
                     {
                         questionId: 2, 
                         answer: "Al-Fatiha", 
@@ -463,57 +448,60 @@ class DataManager {
                         marks: 2,
                         autoGraded: true
                     },
+                    // Short Answer - Pending manual grading
                     {
                         questionId: 3, 
                         answer: "Tawheed is the belief in the oneness of Allah. It means that Allah is one and has no partners.", 
-                        marks: null,
+                        marks: null, // Pending grading
                         autoGraded: false
                     },
+                    // Essay - Pending manual grading
                     {
                         questionId: 4, 
                         answer: "Knowledge is highly valued in Islam. The first revelation to Prophet Muhammad (PBUH) was 'Read'. This shows the importance of learning. Throughout Islamic history, scholars like Imam Bukhari and Ibn Sina contributed greatly to various fields. Education helps Muslims understand their faith better and contribute to society. The Prophet said 'Seeking knowledge is an obligation upon every Muslim', which emphasizes its importance.",
-                        marks: null,
+                        marks: null, // Pending grading
                         autoGraded: false
                     },
+                    // File Upload - Pending manual grading
                     {
                         questionId: 5, 
                         answer: {
                             fileName: "Arabic_Homework_Ahmed.pdf",
                             fileType: "application/pdf",
                             fileSize: 245760,
-                            fileData: "data:application/pdf;base64,..."
+                            fileData: "data:application/pdf;base64,..." // Simulated
                         },
-                        marks: null,
+                        marks: null, // Pending grading
                         autoGraded: false
                     }
                 ],
-                score: 6,
+                score: 6, // Auto-graded score only
                 autoGradedScore: 6,
                 manualGradedScore: 0,
                 totalMarks: 20,
-                percentage: 30,
-                passed: false,
-                timeTaken: 1200,
+                percentage: 30, // Partial percentage (auto-graded only)
+                passed: false, // May change after manual grading
+                timeTaken: 1200, // 20 minutes
                 submittedAt: "2025-10-09T09:30:00.000Z",
                 status: 'pending_review'
             }
         ];
         
-        await this.storage.set('quizResults', sampleResults);
+        localStorage.setItem('quizResults', JSON.stringify(sampleResults));
     }
 
     // Students Management
-    async getStudents() {
-        return (await this.storage.get('students')) || [];
+    getStudents() {
+        return JSON.parse(localStorage.getItem('students')) || [];
     }
 
-    async getStudentById(id) {
-        const students = await this.getStudents();
+    getStudentById(id) {
+        const students = this.getStudents();
         return students.find(s => s.id === parseInt(id));
     }
 
-    async addStudent(student) {
-        const students = await this.getStudents();
+    addStudent(student) {
+        const students = this.getStudents();
         const newStudent = {
             id: Date.now(),
             ...student,
@@ -522,32 +510,32 @@ class DataManager {
             updatedAt: new Date().toISOString()
         };
         students.push(newStudent);
-        await this.storage.set('students', students);
+        localStorage.setItem('students', JSON.stringify(students));
         return newStudent;
     }
 
-    async updateStudentProfile(studentId, updatedData) {
-        const students = await this.getStudents();
+    updateStudentProfile(studentId, updatedData) {
+        const students = this.getStudents();
         const studentIndex = students.findIndex(s => s.id === parseInt(studentId));
         
         if (studentIndex !== -1) {
             students[studentIndex] = {
                 ...students[studentIndex],
                 ...updatedData,
-                id: students[studentIndex].id,
-                notes: students[studentIndex].notes,
-                createdAt: students[studentIndex].createdAt,
+                id: students[studentIndex].id, // Preserve ID
+                notes: students[studentIndex].notes, // Preserve notes
+                createdAt: students[studentIndex].createdAt, // Preserve creation date
                 updatedAt: new Date().toISOString()
             };
-            await this.storage.set('students', students);
+            localStorage.setItem('students', JSON.stringify(students));
             return students[studentIndex];
         }
         return null;
     }
 
     // Student Notes Management
-    async addStudentNote(studentId, noteData) {
-        const students = await this.getStudents();
+    addStudentNote(studentId, noteData) {
+        const students = this.getStudents();
         const student = students.find(s => s.id === parseInt(studentId));
         
         if (student) {
@@ -563,16 +551,16 @@ class DataManager {
                 addedBy: 'Teacher'
             };
             
-            student.notes.unshift(newNote);
+            student.notes.unshift(newNote); // Add to beginning (newest first)
             student.updatedAt = new Date().toISOString();
-            await this.storage.set('students', students);
+            localStorage.setItem('students', JSON.stringify(students));
             return newNote;
         }
         return null;
     }
 
-    async updateStudentNote(studentId, noteId, updatedNote) {
-        const students = await this.getStudents();
+    updateStudentNote(studentId, noteId, updatedNote) {
+        const students = this.getStudents();
         const student = students.find(s => s.id === parseInt(studentId));
         
         if (student && student.notes) {
@@ -586,60 +574,60 @@ class DataManager {
                     editedAt: new Date().toISOString()
                 };
                 student.updatedAt = new Date().toISOString();
-                await this.storage.set('students', students);
+                localStorage.setItem('students', JSON.stringify(students));
                 return student.notes[noteIndex];
             }
         }
         return null;
     }
 
-    async deleteStudentNote(studentId, noteId) {
-        const students = await this.getStudents();
+    deleteStudentNote(studentId, noteId) {
+        const students = this.getStudents();
         const student = students.find(s => s.id === parseInt(studentId));
         
         if (student && student.notes) {
             student.notes = student.notes.filter(n => n.id !== parseInt(noteId));
             student.updatedAt = new Date().toISOString();
-            await this.storage.set('students', students);
+            localStorage.setItem('students', JSON.stringify(students));
             return true;
         }
         return false;
     }
 
-    async deleteStudent(id) {
-        let students = await this.getStudents();
+    deleteStudent(id) {
+        let students = this.getStudents();
         students = students.filter(s => s.id !== parseInt(id));
-        await this.storage.set('students', students);
+        localStorage.setItem('students', JSON.stringify(students));
         
         // Also remove student from all tasks
-        let tasks = await this.getTasks();
+        let tasks = this.getTasks();
         tasks = tasks.map(task => ({
             ...task,
             assignedTo: task.assignedTo.filter(sid => sid !== parseInt(id)),
-            completedBy: task.completedBy ? task.completedBy.filter(sid => sid !== parseInt(id)) : []
+            completedBy: task.completedBy.filter(sid => sid !== parseInt(id))
         }));
-        await this.storage.set('tasks', tasks);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
     // Tasks Management
-    async getTasks() {
-        return (await this.storage.get('tasks')) || [];
+    getTasks() {
+        return JSON.parse(localStorage.getItem('tasks')) || [];
     }
 
-    async getTaskById(id) {
-        const tasks = await this.getTasks();
+    getTaskById(id) {
+        const tasks = this.getTasks();
         return tasks.find(t => t.id === parseInt(id));
     }
 
-    async getTasksForStudent(studentId) {
-        const tasks = await this.getTasks();
+    getTasksForStudent(studentId) {
+        const tasks = this.getTasks();
         return tasks.filter(task => 
             task.assignedTo.includes(parseInt(studentId))
         );
     }
 
-    async addTask(task) {
-        const tasks = await this.getTasks();
+    addTask(task) {
+        const tasks = this.getTasks();
         const newTask = {
             id: Date.now(),
             ...task,
@@ -648,17 +636,18 @@ class DataManager {
             createdAt: new Date().toISOString()
         };
         tasks.push(newTask);
-        await this.storage.set('tasks', tasks);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
         return newTask;
     }
 
-    async updateTask(taskId, updatedData) {
-        const tasks = await this.getTasks();
+    updateTask(taskId, updatedData) {
+        const tasks = this.getTasks();
         const taskIndex = tasks.findIndex(t => t.id === parseInt(taskId));
         
         if (taskIndex !== -1) {
             const existingTask = tasks[taskIndex];
             
+            // If task type changed, reset completion data
             if (updatedData.type && updatedData.type !== existingTask.type) {
                 if (updatedData.type === 'daily') {
                     updatedData.completedBy = undefined;
@@ -669,6 +658,7 @@ class DataManager {
                     updatedData.dailyCompletions = undefined;
                 }
             } else {
+                // Keep existing completion data if type didn't change
                 updatedData.completedBy = existingTask.completedBy;
                 updatedData.dailyCompletions = existingTask.dailyCompletions;
             }
@@ -676,25 +666,25 @@ class DataManager {
             tasks[taskIndex] = {
                 ...existingTask,
                 ...updatedData,
-                id: existingTask.id,
-                createdAt: existingTask.createdAt,
+                id: existingTask.id, // Preserve ID
+                createdAt: existingTask.createdAt, // Preserve creation date
                 updatedAt: new Date().toISOString()
             };
             
-            await this.storage.set('tasks', tasks);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
             return tasks[taskIndex];
         }
         return null;
     }
 
-    async deleteTask(id) {
-        let tasks = await this.getTasks();
+    deleteTask(id) {
+        let tasks = this.getTasks();
         tasks = tasks.filter(t => t.id !== parseInt(id));
-        await this.storage.set('tasks', tasks);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    async toggleTaskCompletion(taskId, studentId) {
-        const tasks = await this.getTasks();
+    toggleTaskCompletion(taskId, studentId) {
+        const tasks = this.getTasks();
         const task = tasks.find(t => t.id === parseInt(taskId));
         
         if (task) {
@@ -702,63 +692,67 @@ class DataManager {
             const index = task.completedBy.indexOf(studentIdNum);
             
             if (index > -1) {
+                // Remove from completed
                 task.completedBy.splice(index, 1);
             } else {
+                // Add to completed
                 task.completedBy.push(studentIdNum);
             }
             
-            await this.storage.set('tasks', tasks);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
             return task;
         }
         return null;
     }
 
-    async isTaskCompletedByStudent(taskId, studentId) {
-        const task = await this.getTaskById(taskId);
+    isTaskCompletedByStudent(taskId, studentId) {
+        const task = this.getTaskById(taskId);
         return task ? task.completedBy.includes(parseInt(studentId)) : false;
     }
 
     // Daily Tasks Management
     getTodayDateString() {
         const today = new Date();
-        return today.toISOString().split('T')[0];
+        return today.toISOString().split('T')[0]; // Returns YYYY-MM-DD
     }
 
-    async getDailyTasksForStudent(studentId) {
-        const tasks = await this.getTasks();
+    getDailyTasksForStudent(studentId) {
+        const tasks = this.getTasks();
         return tasks.filter(task => 
             task.type === 'daily' && task.assignedTo.includes(parseInt(studentId))
         );
     }
 
-    async getRegularTasksForStudent(studentId) {
-        const tasks = await this.getTasks();
+    getRegularTasksForStudent(studentId) {
+        const tasks = this.getTasks();
         return tasks.filter(task => 
             task.type !== 'daily' && task.assignedTo.includes(parseInt(studentId))
         );
     }
 
-    async isDailyTaskCompletedToday(taskId, studentId) {
-        const task = await this.getTaskById(taskId);
+    isDailyTaskCompletedToday(taskId, studentId) {
+        const task = this.getTaskById(taskId);
         if (!task || task.type !== 'daily') return false;
         
         const today = this.getTodayDateString();
         const studentIdStr = studentId.toString();
         
+        // Use array format
         return task.dailyCompletions && 
                task.dailyCompletions[studentIdStr] && 
                Array.isArray(task.dailyCompletions[studentIdStr]) &&
                task.dailyCompletions[studentIdStr].includes(today);
     }
 
-    async toggleDailyTaskCompletion(taskId, studentId) {
-        const tasks = await this.getTasks();
+    toggleDailyTaskCompletion(taskId, studentId) {
+        const tasks = this.getTasks();
         const task = tasks.find(t => t.id === parseInt(taskId));
         
         if (task && task.type === 'daily') {
             const today = this.getTodayDateString();
             const studentIdStr = studentId.toString();
             
+            // Initialize if needed (use ARRAY format)
             if (!task.dailyCompletions) {
                 task.dailyCompletions = {};
             }
@@ -766,26 +760,30 @@ class DataManager {
                 task.dailyCompletions[studentIdStr] = [];
             }
             
+            // Toggle today's completion using ARRAY format
             const completionArray = task.dailyCompletions[studentIdStr];
             const index = completionArray.indexOf(today);
             
             if (index > -1) {
+                // Already completed - remove it
                 completionArray.splice(index, 1);
             } else {
+                // Not completed - add it
                 completionArray.push(today);
             }
             
-            await this.storage.set('tasks', tasks);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
             return task;
         }
         return null;
     }
 
-    async getDailyTaskStreak(taskId, studentId) {
-        const task = await this.getTaskById(taskId);
+    getDailyTaskStreak(taskId, studentId) {
+        const task = this.getTaskById(taskId);
         if (!task || task.type !== 'daily') return 0;
         
         const studentIdStr = studentId.toString();
+        // Use ARRAY format
         const completions = task.dailyCompletions && task.dailyCompletions[studentIdStr] 
             ? task.dailyCompletions[studentIdStr] 
             : [];
@@ -793,6 +791,7 @@ class DataManager {
         let streak = 0;
         let currentDate = new Date();
         
+        // Check backwards from today
         while (true) {
             const dateStr = currentDate.toISOString().split('T')[0];
             if (completions.includes(dateStr)) {
@@ -806,11 +805,12 @@ class DataManager {
         return streak;
     }
 
-    async getDailyTaskCompletionHistory(taskId, studentId, days = 7) {
-        const task = await this.getTaskById(taskId);
+    getDailyTaskCompletionHistory(taskId, studentId, days = 7) {
+        const task = this.getTaskById(taskId);
         if (!task || task.type !== 'daily') return [];
         
         const studentIdStr = studentId.toString();
+        // Use ARRAY format
         const completions = task.dailyCompletions && task.dailyCompletions[studentIdStr] 
             ? task.dailyCompletions[studentIdStr] 
             : [];
@@ -827,24 +827,21 @@ class DataManager {
             currentDate.setDate(currentDate.getDate() - 1);
         }
         
-        return history.reverse();
+        return history.reverse(); // Oldest first
     }
 
     // Statistics
-    async getStudentStats(studentId) {
-        const regularTasks = await this.getRegularTasksForStudent(studentId);
-        const dailyTasks = await this.getDailyTasksForStudent(studentId);
+    getStudentStats(studentId) {
+        const regularTasks = this.getRegularTasksForStudent(studentId);
+        const dailyTasks = this.getDailyTasksForStudent(studentId);
         
         const regularCompleted = regularTasks.filter(task => 
             task.completedBy && task.completedBy.includes(parseInt(studentId))
         ).length;
         
-        let dailyCompletedToday = 0;
-        for (const task of dailyTasks) {
-            if (await this.isDailyTaskCompletedToday(task.id, studentId)) {
-                dailyCompletedToday++;
-            }
-        }
+        const dailyCompletedToday = dailyTasks.filter(task => 
+            this.isDailyTaskCompletedToday(task.id, studentId)
+        ).length;
         
         return {
             total: regularTasks.length,
@@ -857,10 +854,11 @@ class DataManager {
         };
     }
 
-    async getOverallStats() {
-        const students = await this.getStudents();
-        const tasks = await this.getTasks();
+    getOverallStats() {
+        const students = this.getStudents();
+        const tasks = this.getTasks();
         
+        // Filter out daily tasks for overall stats (they're tracked separately)
         const oneTimeTasks = tasks.filter(t => t.type === 'one-time');
         const dailyTasks = tasks.filter(t => t.type === 'daily');
         
@@ -885,60 +883,58 @@ class DataManager {
         };
     }
 
-    async getStudentProgress() {
-        const students = await this.getStudents();
-        const progressData = [];
-        
-        for (const student of students) {
-            const stats = await this.getStudentStats(student.id);
-            progressData.push({
+    getStudentProgress() {
+        const students = this.getStudents();
+        return students.map(student => {
+            const stats = this.getStudentStats(student.id);
+            return {
                 student: student,
                 stats: stats
-            });
-        }
-        
-        return progressData;
+            };
+        });
     }
 
     // Messages Management
-    async getMessages() {
-        return (await this.storage.get('messages')) || [];
+    getMessages() {
+        return JSON.parse(localStorage.getItem('messages')) || [];
     }
 
-    async getMessagesForStudent(studentId) {
-        const messages = await this.getMessages();
+    getMessagesForStudent(studentId) {
+        const messages = this.getMessages();
         return messages.filter(msg => msg.studentId === parseInt(studentId))
             .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     }
 
-    async sendMessage(studentId, message, sender) {
-        const messages = await this.getMessages();
+    sendMessage(studentId, message, sender) {
+        const messages = this.getMessages();
         const newMessage = {
             id: Date.now(),
             studentId: parseInt(studentId),
             message: message,
-            sender: sender,
+            sender: sender, // 'teacher' or 'student'
             timestamp: new Date().toISOString(),
             read: false
         };
         messages.push(newMessage);
-        await this.storage.set('messages', messages);
+        localStorage.setItem('messages', JSON.stringify(messages));
         return newMessage;
     }
 
-    async markMessagesAsRead(studentId, sender) {
-        const messages = await this.getMessages();
+    markMessagesAsRead(studentId, sender) {
+        // Mark all messages from the opposite sender as read
+        const messages = this.getMessages();
         const readBy = sender === 'teacher' ? 'student' : 'teacher';
         messages.forEach(msg => {
             if (msg.studentId === parseInt(studentId) && msg.sender === readBy) {
                 msg.read = true;
             }
         });
-        await this.storage.set('messages', messages);
+        localStorage.setItem('messages', JSON.stringify(messages));
     }
 
-    async getUnreadCount(studentId, forUser) {
-        const messages = await this.getMessages();
+    getUnreadCount(studentId, forUser) {
+        // forUser: 'teacher' or 'student'
+        const messages = this.getMessages();
         return messages.filter(msg => 
             msg.studentId === parseInt(studentId) && 
             msg.sender !== forUser && 
@@ -946,26 +942,23 @@ class DataManager {
         ).length;
     }
 
-    async getLastMessage(studentId) {
-        const messages = await this.getMessagesForStudent(studentId);
+    getLastMessage(studentId) {
+        const messages = this.getMessagesForStudent(studentId);
         return messages.length > 0 ? messages[messages.length - 1] : null;
     }
 
-    async getAllChatsForTeacher() {
-        const students = await this.getStudents();
-        const chats = [];
-        
-        for (const student of students) {
-            const lastMessage = await this.getLastMessage(student.id);
-            const unreadCount = await this.getUnreadCount(student.id, 'teacher');
-            chats.push({
+    getAllChatsForTeacher() {
+        const students = this.getStudents();
+        return students.map(student => {
+            const lastMessage = this.getLastMessage(student.id);
+            const unreadCount = this.getUnreadCount(student.id, 'teacher');
+            return {
                 student: student,
                 lastMessage: lastMessage,
                 unreadCount: unreadCount
-            });
-        }
-        
-        return chats.sort((a, b) => {
+            };
+        }).sort((a, b) => {
+            // Sort by last message time, most recent first
             if (!a.lastMessage) return 1;
             if (!b.lastMessage) return -1;
             return new Date(b.lastMessage.timestamp) - new Date(a.lastMessage.timestamp);
@@ -976,24 +969,28 @@ class DataManager {
        QUIZ MANAGEMENT METHODS
        =================================== */
 
-    async getQuizzes() {
-        return (await this.storage.get('quizzes')) || [];
+    // Get all quizzes
+    getQuizzes() {
+        return JSON.parse(localStorage.getItem('quizzes') || '[]');
     }
 
-    async getQuizById(quizId) {
-        const quizzes = await this.getQuizzes();
+    // Get quiz by ID
+    getQuizById(quizId) {
+        const quizzes = this.getQuizzes();
         return quizzes.find(q => q.id === parseInt(quizId));
     }
 
-    async getQuizzesForStudent(studentId) {
-        const quizzes = await this.getQuizzes();
+    // Get quizzes for a specific student
+    getQuizzesForStudent(studentId) {
+        const quizzes = this.getQuizzes();
         return quizzes.filter(quiz => 
             quiz.assignedTo.includes(parseInt(studentId))
         );
     }
 
-    async addQuiz(quiz) {
-        const quizzes = await this.getQuizzes();
+    // Add new quiz
+    addQuiz(quiz) {
+        const quizzes = this.getQuizzes();
         const newQuiz = {
             id: Date.now(),
             ...quiz,
@@ -1001,12 +998,13 @@ class DataManager {
             createdBy: 'teacher'
         };
         quizzes.push(newQuiz);
-        await this.storage.set('quizzes', quizzes);
+        localStorage.setItem('quizzes', JSON.stringify(quizzes));
         return newQuiz;
     }
 
-    async updateQuiz(quizId, updatedData) {
-        const quizzes = await this.getQuizzes();
+    // Update quiz
+    updateQuiz(quizId, updatedData) {
+        const quizzes = this.getQuizzes();
         const quizIndex = quizzes.findIndex(q => q.id === parseInt(quizId));
         
         if (quizIndex !== -1) {
@@ -1015,50 +1013,57 @@ class DataManager {
                 ...updatedData,
                 updatedAt: new Date().toISOString()
             };
-            await this.storage.set('quizzes', quizzes);
+            localStorage.setItem('quizzes', JSON.stringify(quizzes));
             return quizzes[quizIndex];
         }
         return null;
     }
 
-    async deleteQuiz(quizId) {
-        let quizzes = await this.getQuizzes();
+    // Delete quiz
+    deleteQuiz(quizId) {
+        let quizzes = this.getQuizzes();
         quizzes = quizzes.filter(q => q.id !== parseInt(quizId));
-        await this.storage.set('quizzes', quizzes);
+        localStorage.setItem('quizzes', JSON.stringify(quizzes));
         
-        let results = await this.getQuizResults();
+        // Also delete all results for this quiz
+        let results = this.getQuizResults();
         results = results.filter(r => r.quizId !== parseInt(quizId));
-        await this.storage.set('quizResults', results);
+        localStorage.setItem('quizResults', JSON.stringify(results));
     }
 
     /* ===================================
        QUIZ RESULTS METHODS
        =================================== */
 
-    async getQuizResults() {
-        return (await this.storage.get('quizResults')) || [];
+    // Get all quiz results
+    getQuizResults() {
+        return JSON.parse(localStorage.getItem('quizResults') || '[]');
     }
 
-    async getResultsForQuiz(quizId) {
-        const results = await this.getQuizResults();
+    // Get results for a specific quiz
+    getResultsForQuiz(quizId) {
+        const results = this.getQuizResults();
         return results.filter(r => r.quizId === parseInt(quizId));
     }
 
-    async getResultsForStudent(studentId) {
-        const results = await this.getQuizResults();
+    // Get results for a specific student
+    getResultsForStudent(studentId) {
+        const results = this.getQuizResults();
         return results.filter(r => r.studentId === parseInt(studentId));
     }
 
-    async getQuizResult(quizId, studentId) {
-        const results = await this.getQuizResults();
+    // Get specific result
+    getQuizResult(quizId, studentId) {
+        const results = this.getQuizResults();
         return results.find(r => 
             r.quizId === parseInt(quizId) && 
             r.studentId === parseInt(studentId)
         );
     }
 
-    async submitQuiz(quizId, studentId, answers, timeTaken) {
-        const quiz = await this.getQuizById(quizId);
+    // Submit quiz and auto-grade (handles all question types)
+    submitQuiz(quizId, studentId, answers, timeTaken) {
+        const quiz = this.getQuizById(quizId);
         if (!quiz) return null;
 
         let autoGradedScore = 0;
@@ -1067,7 +1072,7 @@ class DataManager {
 
         const gradedAnswers = answers.map((answer, index) => {
             const question = quiz.questions[index];
-            const questionType = question.type || 'mcq';
+            const questionType = question.type || 'mcq'; // default to MCQ for backward compatibility
             
             let answerResult = {
                 questionId: index,
@@ -1081,7 +1086,9 @@ class DataManager {
                 teacherFeedback: null
             };
 
+            // Auto-gradable question types
             if (questionType === 'mcq' || questionType === 'true_false') {
+                // Multiple Choice or True/False
                 const isCorrect = answer === question.correctAnswer;
                 answerResult.correctAnswer = question.correctAnswer;
                 answerResult.isCorrect = isCorrect;
@@ -1090,6 +1097,7 @@ class DataManager {
                 autoGradedScore += answerResult.marks;
                 totalAutoGradableMarks += question.marks;
             } else if (questionType === 'fill_blank') {
+                // Fill in the Blank - check against accepted answers
                 const acceptedAnswers = question.acceptedAnswers || [question.correctAnswer];
                 const studentAnswerNorm = (answer || '').toString().trim().toLowerCase();
                 const isCorrect = acceptedAnswers.some(accepted => 
@@ -1098,13 +1106,14 @@ class DataManager {
                 answerResult.isCorrect = isCorrect;
                 answerResult.marks = isCorrect ? question.marks : 0;
                 answerResult.autoGraded = true;
-                answerResult.correctAnswer = acceptedAnswers[0];
+                answerResult.correctAnswer = acceptedAnswers[0]; // Show first accepted answer
                 autoGradedScore += answerResult.marks;
                 totalAutoGradableMarks += question.marks;
             } else {
+                // Manual grading required: short_answer, essay, file_upload
                 hasManualGrading = true;
                 answerResult.autoGraded = false;
-                answerResult.marks = null;
+                answerResult.marks = null; // Will be set by teacher
             }
 
             return answerResult;
@@ -1112,14 +1121,17 @@ class DataManager {
 
         const totalMarks = quiz.questions.reduce((sum, q) => sum + q.marks, 0);
         
+        // Determine status and scores
         let status, finalScore, percentage, passed;
         
         if (hasManualGrading) {
+            // Some questions need manual grading
             status = 'pending_review';
-            finalScore = null;
+            finalScore = null; // Can't calculate final score yet
             percentage = null;
             passed = null;
         } else {
+            // All questions auto-graded
             status = 'graded';
             finalScore = autoGradedScore;
             percentage = parseFloat(((finalScore / totalMarks) * 100).toFixed(2));
@@ -1137,27 +1149,29 @@ class DataManager {
             totalMarks: totalMarks,
             percentage: percentage,
             passed: passed,
-            status: status,
+            status: status, // 'pending_review', 'graded'
             timeTaken: timeTaken,
             submittedAt: new Date().toISOString(),
             gradedAt: hasManualGrading ? null : new Date().toISOString()
         };
 
-        const results = await this.getQuizResults();
+        const results = this.getQuizResults();
         results.push(result);
-        await this.storage.set('quizResults', results);
+        localStorage.setItem('quizResults', JSON.stringify(results));
         
         return result;
     }
 
-    async hasStudentTakenQuiz(quizId, studentId) {
-        const result = await this.getQuizResult(quizId, studentId);
+    // Check if student has already taken quiz
+    hasStudentTakenQuiz(quizId, studentId) {
+        const result = this.getQuizResult(quizId, studentId);
         return result !== undefined;
     }
 
-    async getQuizStatistics(quizId) {
-        const results = await this.getResultsForQuiz(quizId);
-        const quiz = await this.getQuizById(quizId);
+    // Get quiz statistics
+    getQuizStatistics(quizId) {
+        const results = this.getResultsForQuiz(quizId);
+        const quiz = this.getQuizById(quizId);
         
         if (results.length === 0) {
             return {
@@ -1193,9 +1207,11 @@ class DataManager {
         };
     }
 
-    async getStudentQuizStats(studentId) {
-        const results = await this.getResultsForStudent(studentId);
+    // Get student quiz statistics
+    getStudentQuizStats(studentId) {
+        const results = this.getResultsForStudent(studentId);
         
+        // Only count graded results for stats
         const gradedResults = results.filter(r => r.status === 'graded');
         
         if (gradedResults.length === 0) {
@@ -1225,18 +1241,21 @@ class DataManager {
        MANUAL GRADING METHODS
        =================================== */
 
-    async getPendingGradingResults() {
-        const results = await this.getQuizResults();
+    // Get results pending teacher review
+    getPendingGradingResults() {
+        const results = this.getQuizResults();
         return results.filter(r => r.status === 'pending_review');
     }
 
-    async getPendingResultsForQuiz(quizId) {
-        const results = await this.getResultsForQuiz(quizId);
+    // Get pending results for specific quiz
+    getPendingResultsForQuiz(quizId) {
+        const results = this.getResultsForQuiz(quizId);
         return results.filter(r => r.status === 'pending_review');
     }
 
-    async gradeAnswer(resultId, questionIndex, marks, feedback) {
-        const results = await this.getQuizResults();
+    // Grade a specific answer
+    gradeAnswer(resultId, questionIndex, marks, feedback) {
+        const results = this.getQuizResults();
         const resultIndex = results.findIndex(r => r.id === parseInt(resultId));
         
         if (resultIndex === -1) return null;
@@ -1246,14 +1265,17 @@ class DataManager {
         
         if (!answer) return null;
         
+        // Update answer with grading
         answer.marks = parseFloat(marks);
         answer.gradedBy = 'teacher';
         answer.gradedAt = new Date().toISOString();
         answer.teacherFeedback = feedback || null;
         
+        // Check if all answers are now graded
         const allGraded = result.answers.every(a => a.marks !== null);
         
         if (allGraded) {
+            // Calculate final scores
             const autoScore = result.autoGradedScore || 0;
             const manualScore = result.answers
                 .filter(a => !a.autoGraded)
@@ -1261,7 +1283,7 @@ class DataManager {
             
             const totalScore = autoScore + manualScore;
             const percentage = parseFloat(((totalScore / result.totalMarks) * 100).toFixed(2));
-            const quiz = await this.getQuizById(result.quizId);
+            const quiz = this.getQuizById(result.quizId);
             const passed = percentage >= (quiz?.passingPercentage || 40);
             
             result.manualGradedScore = manualScore;
@@ -1272,20 +1294,23 @@ class DataManager {
             result.gradedAt = new Date().toISOString();
         }
         
-        await this.storage.set('quizResults', results);
+        localStorage.setItem('quizResults', JSON.stringify(results));
         return results[resultIndex];
     }
 
-    async bulkGradeAnswers(resultId, gradings) {
+    // Bulk grade multiple answers for a result
+    bulkGradeAnswers(resultId, gradings) {
+        // gradings is array of {questionIndex, marks, feedback}
         let result = null;
-        for (const grading of gradings) {
-            result = await this.gradeAnswer(resultId, grading.questionIndex, grading.marks, grading.feedback);
-        }
+        gradings.forEach(grading => {
+            result = this.gradeAnswer(resultId, grading.questionIndex, grading.marks, grading.feedback);
+        });
         return result;
     }
 
-    async getUngradedAnswers(resultId) {
-        const results = await this.getQuizResults();
+    // Get ungraded answers for a result
+    getUngradedAnswers(resultId) {
+        const results = this.getQuizResults();
         const result = results.find(r => r.id === parseInt(resultId));
         
         if (!result) return [];
@@ -1296,33 +1321,6 @@ class DataManager {
     }
 }
 
-// Initialize data manager with storage adapter
-let dataManager;
+// Initialize data manager
+const dataManager = new DataManager();
 
-// Initialize on page load
-(async function initializeApp() {
-    try {
-        console.log('🚀 Initializing application...');
-        
-        // Create storage adapter
-        const storage = await StorageFactory.createStorage();
-        
-        // Create data manager with storage
-        dataManager = new DataManager(storage);
-        
-        // Initialize data manager
-        const success = await dataManager.initialize();
-        
-        if (success) {
-            console.log('✅ Application ready!');
-            
-            // Dispatch event to let UI know data is ready
-            window.dispatchEvent(new Event('dataManagerReady'));
-        } else {
-            console.error('❌ Application initialization failed');
-        }
-        
-    } catch (error) {
-        console.error('❌ Fatal error during initialization:', error);
-    }
-})();

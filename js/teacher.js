@@ -1,4 +1,6 @@
 // Teacher Dashboard JavaScript
+// NOTE: This file is being updated to work with async storage adapters
+// Some functions may still need async/await additions
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeTeacherDashboard();
@@ -6,23 +8,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Initialize Dashboard
-function initializeTeacherDashboard() {
-    updateDashboard();
-    loadStudentCheckboxes();
-    updateUnreadBadge();
+async function initializeTeacherDashboard() {
+    await updateDashboard();
+    await loadStudentCheckboxes();
+    await updateUnreadBadge();
     
     // Update unread badge every 5 seconds
     setInterval(updateUnreadBadge, 5000);
 }
 
 // Update Unread Badge
-function updateUnreadBadge() {
-    const students = dataManager.getStudents();
+async function updateUnreadBadge() {
+    const students = await dataManager.getStudents();
     let totalUnread = 0;
     
-    students.forEach(student => {
-        totalUnread += dataManager.getUnreadCount(student.id, 'teacher');
-    });
+    for (const student of students) {
+        totalUnread += await dataManager.getUnreadCount(student.id, 'teacher');
+    }
     
     const badge = document.getElementById('totalUnreadBadge');
     if (badge) {
@@ -74,7 +76,7 @@ function setupEventListeners() {
 }
 
 // Switch Between Sections
-function switchSection(sectionName) {
+async function switchSection(sectionName) {
     // Update nav items
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
@@ -93,24 +95,24 @@ function switchSection(sectionName) {
     
     // Load data for daily overview when switching to that section
     if (sectionName === 'daily-overview') {
-        selectTodayOverview(); // Initialize with today's data
+        await selectTodayOverview(); // Initialize with today's data
     } else if (sectionName === 'manage-tasks') {
-        loadAllTasks(); // Load all tasks
+        await loadAllTasks(); // Load all tasks
     }
 
     // Refresh data for the section
     if (sectionName === 'dashboard') {
-        updateDashboard();
+        await updateDashboard();
     } else if (sectionName === 'students') {
-        loadStudentsList();
+        await loadStudentsList();
     } else if (sectionName === 'analytics') {
-        updateAnalytics();
+        await updateAnalytics();
     }
 }
 
 // Update Dashboard
-function updateDashboard() {
-    const stats = dataManager.getOverallStats();
+async function updateDashboard() {
+    const stats = await dataManager.getOverallStats();
     
     // Update stat cards
     document.getElementById('totalStudents').textContent = stats.totalStudents;
@@ -119,13 +121,13 @@ function updateDashboard() {
     document.getElementById('pendingTasks').textContent = stats.pendingAssignments;
 
     // Load students progress
-    loadStudentsProgress();
+    await loadStudentsProgress();
 }
 
 // Load Students Progress
-function loadStudentsProgress() {
+async function loadStudentsProgress() {
     const progressList = document.getElementById('studentsProgressList');
-    const studentsProgress = dataManager.getStudentProgress();
+    const studentsProgress = await dataManager.getStudentProgress();
 
     if (studentsProgress.length === 0) {
         progressList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No students found. Add students to get started.</p>';
@@ -177,9 +179,9 @@ function loadStudentsProgress() {
 }
 
 // Load Student Checkboxes for Task Assignment
-function loadStudentCheckboxes() {
+async function loadStudentCheckboxes() {
     const container = document.getElementById('studentCheckboxes');
-    const students = dataManager.getStudents();
+    const students = await dataManager.getStudents();
 
     if (students.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No students available. Add students first.</p>';
@@ -272,9 +274,9 @@ function handleCreateTask(e) {
 }
 
 // Load Students List
-function loadStudentsList() {
+async function loadStudentsList() {
     const container = document.getElementById('studentsList');
-    const students = dataManager.getStudents();
+    const students = await dataManager.getStudents();
 
     // Update student count badge
     updateStudentCount(students.length);
@@ -284,15 +286,16 @@ function loadStudentsList() {
         return;
     }
 
-    container.innerHTML = students.map(student => {
+    const studentsHTML = [];
+    for (const student of students) {
         const initial = student.name.charAt(0).toUpperCase();
-        const stats = dataManager.getStudentStats(student.id);
+        const stats = await dataManager.getStudentStats(student.id);
         
         // Calculate percentages for dual progress bars
         const dailyPercent = stats.dailyTotal > 0 ? Math.round((stats.dailyCompletedToday / stats.dailyTotal) * 100) : 0;
         const oneTimePercent = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
-        return `
+        studentsHTML.push(`
             <div class="student-card fade-in">
                 <div class="student-card-avatar" onclick="viewStudentDetail(${student.id})" style="cursor: pointer;">${initial}</div>
                 <h3 onclick="viewStudentDetail(${student.id})" style="cursor: pointer;">${student.name}</h3>
@@ -330,8 +333,10 @@ function loadStudentsList() {
                     </button>
                 </div>
             </div>
-        `;
-    }).join('');
+        `);
+    }
+    
+    container.innerHTML = studentsHTML.join('');
 }
 
 // Update student count badge
@@ -485,9 +490,9 @@ function deleteStudent(id) {
 }
 
 // Update Analytics
-function updateAnalytics() {
-    const stats = dataManager.getOverallStats();
-    const tasks = dataManager.getTasks();
+async function updateAnalytics() {
+    const stats = await dataManager.getOverallStats();
+    const tasks = await dataManager.getTasks();
     const oneTimeTasksCount = tasks.filter(t => t.type === 'one-time').length;
     const dailyTasksCount = tasks.filter(t => t.type === 'daily').length;
 
@@ -525,11 +530,11 @@ window.onclick = function(event) {
 let selectedDateOverview = new Date();
 
 // Select Today for Overview
-function selectTodayOverview() {
+async function selectTodayOverview() {
     selectedDateOverview = new Date();
     updateDateDisplayOverview();
     updateActiveButtonOverview('todayBtn');
-    loadOverviewDataDashboard();
+    await loadOverviewDataDashboard();
 }
 
 // Select Yesterday for Overview
@@ -585,9 +590,9 @@ function updateActiveButtonOverview(buttonId) {
 }
 
 // Load Overview Data for Dashboard
-function loadOverviewDataDashboard() {
-    const students = dataManager.getStudents();
-    const dailyTasks = dataManager.getDailyTasks();
+async function loadOverviewDataDashboard() {
+    const students = await dataManager.getStudents();
+    const dailyTasks = await dataManager.getDailyTasks();
     
     if (students.length === 0 || dailyTasks.length === 0) {
         showEmptyStateOverview();
@@ -595,20 +600,23 @@ function loadOverviewDataDashboard() {
     }
     
     // Calculate student performance
-    const studentPerformance = students.map(student => {
-        const completedCount = dailyTasks.filter(task => {
-            return dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateStringOverview(selectedDateOverview));
-        }).length;
+    const studentPerformance = [];
+    for (const student of students) {
+        let completedCount = 0;
+        for (const task of dailyTasks) {
+            const isCompleted = await dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateStringOverview(selectedDateOverview));
+            if (isCompleted) completedCount++;
+        }
         
         const percentage = dailyTasks.length > 0 ? Math.round((completedCount / dailyTasks.length) * 100) : 0;
         
-        return {
+        studentPerformance.push({
             student: student,
             completed: completedCount,
             total: dailyTasks.length,
             percentage: percentage
-        };
-    });
+        });
+    }
     
     // Update statistics
     updateStatisticsOverview(students.length, dailyTasks.length, studentPerformance);
@@ -617,7 +625,7 @@ function loadOverviewDataDashboard() {
     displayBestStudentsOverview(studentPerformance);
     
     // Build and display table
-    buildOverviewTableDashboard(studentPerformance, dailyTasks);
+    await buildOverviewTableDashboard(studentPerformance, dailyTasks);
 }
 
 // Update Statistics for Overview
@@ -672,7 +680,7 @@ function displayBestStudentsOverview(studentPerformance) {
 }
 
 // Build Overview Table for Dashboard
-function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
+async function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
     const table = document.getElementById('overviewTable');
     const tbody = document.getElementById('overviewTableBody');
     
@@ -694,7 +702,8 @@ function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
     });
     
     // Build rows
-    tbody.innerHTML = studentPerformance.map(sp => {
+    const rows = [];
+    for (const sp of studentPerformance) {
         const student = sp.student;
         const initial = student.name.charAt(0).toUpperCase();
         const isTopPerformer = sp.percentage >= 80;
@@ -706,17 +715,18 @@ function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
         else if (sp.percentage >= 40) completionClass = 'average';
         
         // Build task status cells
-        const taskCells = dailyTasks.map(task => {
-            const isCompleted = dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateStringOverview(selectedDateOverview));
+        const taskCells = [];
+        for (const task of dailyTasks) {
+            const isCompleted = await dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateStringOverview(selectedDateOverview));
             const statusIcon = isCompleted ? '✅' : '❌';
             const statusClass = isCompleted ? 'completed' : 'pending';
             
-            return `<td><span class="task-status ${statusClass}">${statusIcon}</span></td>`;
-        }).join('');
+            taskCells.push(`<td><span class="task-status ${statusClass}">${statusIcon}</span></td>`);
+        }
         
         const trophyIcon = isTopPerformer ? '<span class="completion-trophy">🏆</span>' : '';
         
-        return `
+        rows.push(`
             <tr class="${isTopPerformer ? 'top-performer' : ''}">
                 <td class="sticky-col student-col">
                     <div class="student-cell">
@@ -733,15 +743,17 @@ function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
                         <span class="info-badge">Section ${student.section || 'N/A'}</span>
                     </div>
                 </td>
-                ${taskCells}
+                ${taskCells.join('')}
                 <td class="sticky-col completion-col">
                     <span class="completion-cell ${completionClass}">
                         ${sp.percentage}%${trophyIcon}
                     </span>
                 </td>
             </tr>
-        `;
-    }).join('');
+        `);
+    }
+    
+    tbody.innerHTML = rows.join('');
 }
 
 // Show Empty State for Overview
@@ -784,14 +796,14 @@ function showEmptyStateOverview() {
 }
 
 // Helper: Get Daily Tasks
-dataManager.getDailyTasks = function() {
-    const tasks = this.getTasks();
+dataManager.getDailyTasks = async function() {
+    const tasks = await this.getTasks();
     return tasks.filter(task => task.type === 'daily');
 };
 
 // Helper: Check if daily task is completed for specific date
-dataManager.isDailyTaskCompletedForDate = function(taskId, studentId, dateString) {
-    const task = this.getTaskById(taskId);
+dataManager.isDailyTaskCompletedForDate = async function(taskId, studentId, dateString) {
+    const task = await this.getTaskById(taskId);
     if (!task || !task.dailyCompletions) return false;
     
     const studentCompletions = task.dailyCompletions[studentId] || [];
@@ -835,7 +847,7 @@ function resetSampleData() {
 let currentTaskFilter = 'all';
 
 // Switch Manage Task Tabs
-function switchManageTaskTab(tabName) {
+async function switchManageTaskTab(tabName) {
     // Update tab buttons
     document.querySelectorAll('.manage-tab-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -852,12 +864,12 @@ function switchManageTaskTab(tabName) {
         document.getElementById('createTaskTab').classList.add('active');
     } else if (tabName === 'view') {
         document.getElementById('viewTasksTab').classList.add('active');
-        loadAllTasks(); // Load tasks when viewing
+        await loadAllTasks(); // Load tasks when viewing
     }
 }
 
 // Programmatic tab switch (without event)
-function switchManageTaskTabProgrammatic(tabName) {
+async function switchManageTaskTabProgrammatic(tabName) {
     // Update tab buttons
     document.querySelectorAll('.manage-tab-btn').forEach((btn, index) => {
         btn.classList.remove('active');
@@ -876,13 +888,13 @@ function switchManageTaskTabProgrammatic(tabName) {
         document.getElementById('createTaskTab').classList.add('active');
     } else if (tabName === 'view') {
         document.getElementById('viewTasksTab').classList.add('active');
-        loadAllTasks(); // Load tasks when viewing
+        await loadAllTasks(); // Load tasks when viewing
     }
 }
 
 // Load All Tasks
-function loadAllTasks() {
-    const tasks = dataManager.getTasks();
+async function loadAllTasks() {
+    const tasks = await dataManager.getTasks();
     const oneTimeTasks = tasks.filter(t => t.type === 'one-time');
     const dailyTasks = tasks.filter(t => t.type === 'daily');
     
