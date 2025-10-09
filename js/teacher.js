@@ -66,14 +66,6 @@ function setupEventListeners() {
         taskForm.addEventListener('submit', handleCreateTask);
     }
 
-    // Task Type Change
-    const taskType = document.getElementById('taskType');
-    if (taskType) {
-        taskType.addEventListener('change', function() {
-            updateStudentSelection(this.value);
-        });
-    }
-
     // Add Student Form
     const addStudentForm = document.getElementById('addStudentForm');
     if (addStudentForm) {
@@ -97,6 +89,13 @@ function switchSection(sectionName) {
     const targetSection = document.getElementById(sectionName + '-section');
     if (targetSection) {
         targetSection.classList.add('active');
+    }
+    
+    // Load data for daily overview when switching to that section
+    if (sectionName === 'daily-overview') {
+        selectTodayOverview(); // Initialize with today's data
+    } else if (sectionName === 'manage-tasks') {
+        loadAllTasks(); // Load all tasks
     }
 
     // Refresh data for the section
@@ -136,10 +135,9 @@ function loadStudentsProgress() {
     progressList.innerHTML = studentsProgress.map(item => {
         const { student, stats } = item;
         const initial = student.name.charAt(0).toUpperCase();
-        const badgeClass = stats.percentage >= 80 ? 'success' : stats.percentage >= 50 ? 'warning' : 'danger';
-        const badgeStyle = stats.percentage >= 80 ? 'background: #C8E6C9; color: #2E7D32;' : 
-                          stats.percentage >= 50 ? 'background: #FFE0B2; color: #E65100;' : 
-                          'background: #FFCDD2; color: #C62828;';
+        
+        // Calculate daily percentage
+        const dailyPercentage = stats.dailyTotal > 0 ? Math.round((stats.dailyCompletedToday / stats.dailyTotal) * 100) : 0;
 
         return `
             <div class="student-progress-item fade-in" onclick="viewStudentDetail(${student.id})" style="cursor: pointer;">
@@ -148,17 +146,30 @@ function loadStudentsProgress() {
                         <div class="student-avatar">${initial}</div>
                         <span class="student-name">${student.name}</span>
                     </div>
-                    <span class="completion-badge" style="${badgeStyle}">
-                        ${stats.completed}/${stats.total} Tasks
-                    </span>
-                </div>
-                <div class="progress-details">
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: ${stats.percentage}%"></div>
-                        </div>
+                    <div class="compact-badges">
+                        <span class="mini-badge daily">
+                            <i class="fas fa-calendar-day"></i> ${stats.dailyCompletedToday}/${stats.dailyTotal}
+                        </span>
+                        <span class="mini-badge onetime">
+                            <i class="fas fa-tasks"></i> ${stats.completed}/${stats.total}
+                        </span>
                     </div>
-                    <span class="progress-percentage">${stats.percentage}%</span>
+                </div>
+                <div class="progress-details-dual">
+                    <div class="mini-progress-row">
+                        <span class="mini-label">Daily:</span>
+                        <div class="mini-progress-bar">
+                            <div class="mini-progress-fill daily-mini" style="width: ${dailyPercentage}%"></div>
+                        </div>
+                        <span class="mini-percent">${dailyPercentage}%</span>
+                    </div>
+                    <div class="mini-progress-row">
+                        <span class="mini-label">Tasks:</span>
+                        <div class="mini-progress-bar">
+                            <div class="mini-progress-fill onetime-mini" style="width: ${stats.percentage}%"></div>
+                        </div>
+                        <span class="mini-percent">${stats.percentage}%</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -183,15 +194,35 @@ function loadStudentCheckboxes() {
     `).join('');
 }
 
-// Update Student Selection Based on Task Type
-function updateStudentSelection(taskType) {
-    const container = document.getElementById('studentCheckboxes');
-    if (taskType === 'group') {
-        container.style.opacity = '0.6';
-        container.style.pointerEvents = 'none';
-        // Select all for group tasks
-        container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+// Handle Task Type Change
+function handleTaskTypeChange() {
+    const taskType = document.getElementById('taskType').value;
+    const deadlineGroup = document.getElementById('deadlineGroup');
+    const taskTypeHint = document.getElementById('taskTypeHint');
+    
+    if (taskType === 'daily') {
+        // Hide deadline for daily tasks
+        deadlineGroup.style.display = 'none';
+        taskTypeHint.style.display = 'block';
     } else {
+        deadlineGroup.style.display = 'block';
+        taskTypeHint.style.display = 'none';
+    }
+}
+
+// Handle Assign to All Students Change
+function handleAssignToAllChange() {
+    const assignToAll = document.getElementById('assignToAll');
+    const container = document.getElementById('studentCheckboxes');
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    
+    if (assignToAll.checked) {
+        // Check all students and disable individual selection
+        checkboxes.forEach(cb => cb.checked = true);
+        container.style.opacity = '0.5';
+        container.style.pointerEvents = 'none';
+    } else {
+        // Enable individual selection
         container.style.opacity = '1';
         container.style.pointerEvents = 'auto';
     }
@@ -230,17 +261,23 @@ function handleCreateTask(e) {
     e.target.reset();
     
     // Show success message
-    alert('Task created successfully!');
+    alert('✅ Task created successfully!');
     
-    // Update dashboard
+    // Update dashboard and task list
     updateDashboard();
     loadStudentCheckboxes();
+    
+    // Switch to View All Tasks tab
+    switchManageTaskTabProgrammatic('view');
 }
 
 // Load Students List
 function loadStudentsList() {
     const container = document.getElementById('studentsList');
     const students = dataManager.getStudents();
+
+    // Update student count badge
+    updateStudentCount(students.length);
 
     if (students.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No students found. Click "Add Student" to get started.</p>';
@@ -250,16 +287,41 @@ function loadStudentsList() {
     container.innerHTML = students.map(student => {
         const initial = student.name.charAt(0).toUpperCase();
         const stats = dataManager.getStudentStats(student.id);
+        
+        // Calculate percentages for dual progress bars
+        const dailyPercent = stats.dailyTotal > 0 ? Math.round((stats.dailyCompletedToday / stats.dailyTotal) * 100) : 0;
+        const oneTimePercent = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
         return `
             <div class="student-card fade-in">
                 <div class="student-card-avatar" onclick="viewStudentDetail(${student.id})" style="cursor: pointer;">${initial}</div>
                 <h3 onclick="viewStudentDetail(${student.id})" style="cursor: pointer;">${student.name}</h3>
-                <p>${student.email || 'No email provided'}</p>
-                <p style="color: var(--primary-soft); font-weight: 600; margin-bottom: 1rem; cursor: pointer;" onclick="viewStudentDetail(${student.id})">
-                    ${stats.completed}/${stats.total} tasks completed
-                </p>
-                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                
+                <!-- New: Grade and Phone -->
+                <div class="compact-badges">
+                    <span class="mini-badge">${student.grade || 'N/A'}</span>
+                    ${student.phone ? `<span class="mini-badge"><i class="fas fa-phone"></i> ${student.phone}</span>` : ''}
+                </div>
+                
+                <!-- Compact Dual Progress Bars -->
+                <div class="progress-details-dual">
+                    <div class="mini-progress-row">
+                        <span class="mini-label">📅 Daily</span>
+                        <div class="mini-progress-bar">
+                            <div class="mini-progress-fill daily" style="width: ${dailyPercent}%"></div>
+                        </div>
+                        <span class="mini-label">${dailyPercent}%</span>
+                    </div>
+                    <div class="mini-progress-row">
+                        <span class="mini-label">📋 Tasks</span>
+                        <div class="mini-progress-bar">
+                            <div class="mini-progress-fill onetime" style="width: ${oneTimePercent}%"></div>
+                        </div>
+                        <span class="mini-label">${oneTimePercent}%</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
                     <button class="btn-secondary" onclick="viewStudentDetail(${student.id})" style="flex: 1;">
                         <i class="fas fa-eye"></i> View
                     </button>
@@ -270,6 +332,14 @@ function loadStudentsList() {
             </div>
         `;
     }).join('');
+}
+
+// Update student count badge
+function updateStudentCount(count) {
+    const badge = document.getElementById('studentCountBadge');
+    if (badge) {
+        badge.textContent = count;
+    }
 }
 
 // Show Add Student Modal
@@ -287,22 +357,121 @@ function closeAddStudentModal() {
 function handleAddStudent(e) {
     e.preventDefault();
 
-    const name = document.getElementById('studentName').value.trim();
-    const email = document.getElementById('studentEmail').value.trim();
+    // Get all form values
+    const studentData = {
+        name: document.getElementById('studentName').value.trim(),
+        studentId: document.getElementById('studentId').value.trim(),
+        dateOfBirth: document.getElementById('dateOfBirth').value,
+        grade: document.getElementById('grade').value,
+        section: document.getElementById('section').value,
+        phone: document.getElementById('studentPhone').value.trim(),
+        email: document.getElementById('studentEmail').value.trim(),
+        parentName: document.getElementById('parentName').value.trim(),
+        parentPhone: document.getElementById('parentPhone').value.trim(),
+        parentEmail: document.getElementById('parentEmail').value.trim(),
+        enrollmentDate: document.getElementById('enrollmentDate').value
+    };
 
-    if (!name) {
-        alert('Please enter student name!');
+    // Get initial notes if provided
+    const initialNotes = document.getElementById('initialNotes').value.trim();
+    
+    // Validation
+    if (!studentData.name) {
+        alert('❌ Student name is required!');
+        return;
+    }
+    
+    if (!studentData.studentId) {
+        alert('❌ Student ID is required!');
+        return;
+    }
+    
+    if (!studentData.dateOfBirth) {
+        alert('❌ Date of birth is required!');
+        return;
+    }
+    
+    if (!studentData.grade) {
+        alert('❌ Grade is required!');
+        return;
+    }
+    
+    if (!studentData.section) {
+        alert('❌ Section is required!');
+        return;
+    }
+    
+    if (!studentData.parentName) {
+        alert('❌ Parent/Guardian name is required!');
+        return;
+    }
+    
+    if (!studentData.parentPhone) {
+        alert('❌ Parent phone is required!');
+        return;
+    }
+    
+    if (!studentData.enrollmentDate) {
+        alert('❌ Enrollment date is required!');
         return;
     }
 
-    dataManager.addStudent({ name, email });
+    // Phone validation (basic)
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
+    if (studentData.phone && !phoneRegex.test(studentData.phone)) {
+        alert('❌ Invalid student phone format!');
+        return;
+    }
+    
+    if (!phoneRegex.test(studentData.parentPhone)) {
+        alert('❌ Invalid parent phone format!');
+        return;
+    }
 
+    // Email validation (if provided)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (studentData.email && !emailRegex.test(studentData.email)) {
+        alert('❌ Invalid student email format!');
+        return;
+    }
+    
+    if (studentData.parentEmail && !emailRegex.test(studentData.parentEmail)) {
+        alert('❌ Invalid parent email format!');
+        return;
+    }
+
+    // Date validation - student must be between 5 and 18 years old
+    const birthDate = new Date(studentData.dateOfBirth);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    
+    if (age < 5 || age > 20) {
+        if (!confirm(`⚠️ Student age appears to be ${age} years. Are you sure this is correct?`)) {
+            return;
+        }
+    }
+
+    // Add student
+    const newStudent = dataManager.addStudent(studentData);
+
+    // Add initial note if provided
+    if (initialNotes && newStudent) {
+        dataManager.addStudentNote(newStudent.id, {
+            category: 'General',
+            note: initialNotes
+        });
+    }
+
+    // Reset form and close modal
+    document.getElementById('addStudentForm').reset();
     closeAddStudentModal();
+    
+    // Refresh UI
     loadStudentsList();
     loadStudentCheckboxes();
     updateDashboard();
     
-    alert('Student added successfully!');
+    alert('✅ Student added successfully!');
 }
 
 // Delete Student
@@ -318,10 +487,22 @@ function deleteStudent(id) {
 // Update Analytics
 function updateAnalytics() {
     const stats = dataManager.getOverallStats();
+    const tasks = dataManager.getTasks();
+    const oneTimeTasksCount = tasks.filter(t => t.type === 'one-time').length;
+    const dailyTasksCount = tasks.filter(t => t.type === 'daily').length;
 
     document.getElementById('overallCompletion').textContent = stats.overallCompletion + '%';
-    document.getElementById('individualCount').textContent = stats.individualTasks;
-    document.getElementById('groupCount').textContent = stats.groupTasks;
+    
+    // Update task distribution counts
+    const oneTimeCountElement = document.getElementById('oneTimeCount');
+    if (oneTimeCountElement) {
+        oneTimeCountElement.textContent = oneTimeTasksCount;
+    }
+    
+    const dailyCountElement = document.getElementById('dailyCount');
+    if (dailyCountElement) {
+        dailyCountElement.textContent = dailyTasksCount;
+    }
 }
 
 // View Student Detail
@@ -336,4 +517,637 @@ window.onclick = function(event) {
         closeAddStudentModal();
     }
 }
+
+/* ===================================
+   DAILY OVERVIEW FUNCTIONS
+   =================================== */
+
+let selectedDateOverview = new Date();
+
+// Select Today for Overview
+function selectTodayOverview() {
+    selectedDateOverview = new Date();
+    updateDateDisplayOverview();
+    updateActiveButtonOverview('todayBtn');
+    loadOverviewDataDashboard();
+}
+
+// Select Yesterday for Overview
+function selectYesterdayOverview() {
+    selectedDateOverview = new Date();
+    selectedDateOverview.setDate(selectedDateOverview.getDate() - 1);
+    updateDateDisplayOverview();
+    updateActiveButtonOverview('yesterdayBtn');
+    loadOverviewDataDashboard();
+}
+
+// Select Custom Date for Overview
+function selectCustomDateOverview() {
+    const dateInput = document.getElementById('customDate');
+    if (dateInput && dateInput.value) {
+        selectedDateOverview = new Date(dateInput.value);
+        updateDateDisplayOverview();
+        updateActiveButtonOverview(null);
+        loadOverviewDataDashboard();
+    }
+}
+
+// Update Date Display for Overview
+function updateDateDisplayOverview() {
+    const displayElement = document.getElementById('selectedDateDisplay');
+    if (!displayElement) return;
+    
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = selectedDateOverview.toLocaleDateString('en-US', options);
+    
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (isSameDay(selectedDateOverview, today)) {
+        displayElement.textContent = `Today - ${formattedDate}`;
+    } else if (isSameDay(selectedDateOverview, yesterday)) {
+        displayElement.textContent = `Yesterday - ${formattedDate}`;
+    } else {
+        displayElement.textContent = formattedDate;
+    }
+}
+
+// Update Active Button for Overview
+function updateActiveButtonOverview(buttonId) {
+    const buttons = document.querySelectorAll('#daily-overview-section .date-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    if (buttonId) {
+        const button = document.getElementById(buttonId);
+        if (button) button.classList.add('active');
+    }
+}
+
+// Load Overview Data for Dashboard
+function loadOverviewDataDashboard() {
+    const students = dataManager.getStudents();
+    const dailyTasks = dataManager.getDailyTasks();
+    
+    if (students.length === 0 || dailyTasks.length === 0) {
+        showEmptyStateOverview();
+        return;
+    }
+    
+    // Calculate student performance
+    const studentPerformance = students.map(student => {
+        const completedCount = dailyTasks.filter(task => {
+            return dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateStringOverview(selectedDateOverview));
+        }).length;
+        
+        const percentage = dailyTasks.length > 0 ? Math.round((completedCount / dailyTasks.length) * 100) : 0;
+        
+        return {
+            student: student,
+            completed: completedCount,
+            total: dailyTasks.length,
+            percentage: percentage
+        };
+    });
+    
+    // Update statistics
+    updateStatisticsOverview(students.length, dailyTasks.length, studentPerformance);
+    
+    // Display best performing students
+    displayBestStudentsOverview(studentPerformance);
+    
+    // Build and display table
+    buildOverviewTableDashboard(studentPerformance, dailyTasks);
+}
+
+// Update Statistics for Overview
+function updateStatisticsOverview(studentCount, taskCount, studentPerformance) {
+    const totalStudentsEl = document.getElementById('totalStudentsOverview');
+    const totalTasksEl = document.getElementById('totalTasksOverview');
+    const overallCompletionEl = document.getElementById('overallCompletionOverview');
+    
+    if (totalStudentsEl) totalStudentsEl.textContent = studentCount;
+    if (totalTasksEl) totalTasksEl.textContent = taskCount;
+    
+    // Calculate overall completion
+    const totalPossible = studentCount * taskCount;
+    const totalCompleted = studentPerformance.reduce((sum, sp) => sum + sp.completed, 0);
+    const overallPercentage = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+    
+    if (overallCompletionEl) overallCompletionEl.textContent = overallPercentage + '%';
+}
+
+// Display Best Performing Students for Overview
+function displayBestStudentsOverview(studentPerformance) {
+    const container = document.getElementById('bestStudentsGrid');
+    if (!container) return;
+    
+    // Sort by percentage (descending) and take top 3
+    const topStudents = studentPerformance
+        .filter(sp => sp.percentage > 0)
+        .sort((a, b) => b.percentage - a.percentage)
+        .slice(0, 3);
+    
+    if (topStudents.length === 0) {
+        container.innerHTML = '<div class="no-best-students">No completed tasks yet for this date.</div>';
+        return;
+    }
+    
+    container.innerHTML = topStudents.map((sp, index) => {
+        const rank = index + 1;
+        const rankClass = `rank-${rank}`;
+        const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉';
+        
+        return `
+            <div class="best-student-card ${rankClass}">
+                <div class="best-student-rank">${medal}</div>
+                <div class="best-student-info">
+                    <h4>${sp.student.name}</h4>
+                    <p>${sp.student.grade || 'N/A'} - Section ${sp.student.section || 'N/A'}</p>
+                </div>
+                <div class="best-student-percentage">${sp.percentage}%</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Build Overview Table for Dashboard
+function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
+    const table = document.getElementById('overviewTable');
+    const tbody = document.getElementById('overviewTableBody');
+    
+    if (!table || !tbody) return;
+    
+    const thead = table.querySelector('thead tr');
+    
+    // Clear existing task columns (keep first 2 and last column)
+    while (thead.children.length > 3) {
+        thead.removeChild(thead.children[2]);
+    }
+    
+    // Add task columns
+    dailyTasks.forEach(task => {
+        const th = document.createElement('th');
+        th.innerHTML = `<i class="fas fa-check-circle"></i> ${truncateTextOverview(task.title, 20)}`;
+        th.title = task.title; // Full title on hover
+        thead.insertBefore(th, thead.lastElementChild);
+    });
+    
+    // Build rows
+    tbody.innerHTML = studentPerformance.map(sp => {
+        const student = sp.student;
+        const initial = student.name.charAt(0).toUpperCase();
+        const isTopPerformer = sp.percentage >= 80;
+        
+        // Determine completion color class
+        let completionClass = 'poor';
+        if (sp.percentage >= 80) completionClass = 'excellent';
+        else if (sp.percentage >= 60) completionClass = 'good';
+        else if (sp.percentage >= 40) completionClass = 'average';
+        
+        // Build task status cells
+        const taskCells = dailyTasks.map(task => {
+            const isCompleted = dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateStringOverview(selectedDateOverview));
+            const statusIcon = isCompleted ? '✅' : '❌';
+            const statusClass = isCompleted ? 'completed' : 'pending';
+            
+            return `<td><span class="task-status ${statusClass}">${statusIcon}</span></td>`;
+        }).join('');
+        
+        const trophyIcon = isTopPerformer ? '<span class="completion-trophy">🏆</span>' : '';
+        
+        return `
+            <tr class="${isTopPerformer ? 'top-performer' : ''}">
+                <td class="sticky-col student-col">
+                    <div class="student-cell">
+                        <div class="student-avatar-small">${initial}</div>
+                        <div class="student-name-info">
+                            <h4>${student.name}</h4>
+                            <p>${student.studentId || 'N/A'}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="sticky-col info-col">
+                    <div class="info-cell">
+                        <span class="info-badge">${student.grade || 'N/A'}</span>
+                        <span class="info-badge">Section ${student.section || 'N/A'}</span>
+                    </div>
+                </td>
+                ${taskCells}
+                <td class="sticky-col completion-col">
+                    <span class="completion-cell ${completionClass}">
+                        ${sp.percentage}%${trophyIcon}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Show Empty State for Overview
+function showEmptyStateOverview() {
+    const tbody = document.getElementById('overviewTableBody');
+    const dailyTasks = dataManager.getDailyTasks();
+    const students = dataManager.getStudents();
+    
+    if (!tbody) return;
+    
+    let message = '';
+    if (students.length === 0) {
+        message = '<i class="fas fa-users-slash"></i><h3>No Students Found</h3><p>Please add students first to see the overview.</p>';
+    } else if (dailyTasks.length === 0) {
+        message = '<i class="fas fa-tasks"></i><h3>No Daily Tasks Found</h3><p>Please create daily routine tasks to track completion.</p>';
+    }
+    
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="100">
+                <div class="empty-overview">
+                    ${message}
+                </div>
+            </td>
+        </tr>
+    `;
+    
+    const bestGrid = document.getElementById('bestStudentsGrid');
+    if (bestGrid) {
+        bestGrid.innerHTML = '<div class="no-best-students">No data available.</div>';
+    }
+    
+    const totalStudentsEl = document.getElementById('totalStudentsOverview');
+    const totalTasksEl = document.getElementById('totalTasksOverview');
+    const overallCompletionEl = document.getElementById('overallCompletionOverview');
+    
+    if (totalStudentsEl) totalStudentsEl.textContent = students.length;
+    if (totalTasksEl) totalTasksEl.textContent = dailyTasks.length;
+    if (overallCompletionEl) overallCompletionEl.textContent = '0%';
+}
+
+// Helper: Get Daily Tasks
+dataManager.getDailyTasks = function() {
+    const tasks = this.getTasks();
+    return tasks.filter(task => task.type === 'daily');
+};
+
+// Helper: Check if daily task is completed for specific date
+dataManager.isDailyTaskCompletedForDate = function(taskId, studentId, dateString) {
+    const task = this.getTaskById(taskId);
+    if (!task || !task.dailyCompletions) return false;
+    
+    const studentCompletions = task.dailyCompletions[studentId] || [];
+    return studentCompletions.includes(dateString);
+};
+
+// Helper: Get date string in YYYY-MM-DD format
+function getDateStringOverview(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Helper: Check if two dates are the same day
+function isSameDay(date1, date2) {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+}
+
+// Helper: Truncate text
+function truncateTextOverview(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+}
+
+// Reset Sample Data
+function resetSampleData() {
+    if (confirm('⚠️ This will clear all current data and reload fresh sample data. Continue?')) {
+        localStorage.clear();
+        alert('✅ Sample data reset! Page will reload now.');
+        location.reload();
+    }
+}
+
+/* ===================================
+   MANAGE TASKS FUNCTIONS
+   =================================== */
+
+let currentTaskFilter = 'all';
+
+// Switch Manage Task Tabs
+function switchManageTaskTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.manage-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.closest('.manage-tab-btn').classList.add('active');
+    
+    // Hide all tab contents
+    document.querySelectorAll('.manage-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Show selected tab
+    if (tabName === 'create') {
+        document.getElementById('createTaskTab').classList.add('active');
+    } else if (tabName === 'view') {
+        document.getElementById('viewTasksTab').classList.add('active');
+        loadAllTasks(); // Load tasks when viewing
+    }
+}
+
+// Programmatic tab switch (without event)
+function switchManageTaskTabProgrammatic(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.manage-tab-btn').forEach((btn, index) => {
+        btn.classList.remove('active');
+        if ((tabName === 'create' && index === 0) || (tabName === 'view' && index === 1)) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Hide all tab contents
+    document.querySelectorAll('.manage-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Show selected tab
+    if (tabName === 'create') {
+        document.getElementById('createTaskTab').classList.add('active');
+    } else if (tabName === 'view') {
+        document.getElementById('viewTasksTab').classList.add('active');
+        loadAllTasks(); // Load tasks when viewing
+    }
+}
+
+// Load All Tasks
+function loadAllTasks() {
+    const tasks = dataManager.getTasks();
+    const oneTimeTasks = tasks.filter(t => t.type === 'one-time');
+    const dailyTasks = tasks.filter(t => t.type === 'daily');
+    
+    // Update counts
+    document.getElementById('taskCountBadge').textContent = tasks.length;
+    document.getElementById('oneTimeTaskCount').textContent = oneTimeTasks.length;
+    document.getElementById('dailyTaskCount').textContent = dailyTasks.length;
+    
+    // Show/hide empty state
+    if (tasks.length === 0) {
+        document.getElementById('noTasksMessage').style.display = 'block';
+        document.getElementById('oneTimeTasksCategory').style.display = 'none';
+        document.getElementById('dailyTasksCategory').style.display = 'none';
+        return;
+    } else {
+        document.getElementById('noTasksMessage').style.display = 'none';
+    }
+    
+    // Load one-time tasks
+    const oneTimeContainer = document.getElementById('oneTimeTasksList');
+    if (oneTimeTasks.length > 0) {
+        document.getElementById('oneTimeTasksCategory').style.display = 'block';
+        oneTimeContainer.innerHTML = oneTimeTasks.map(task => renderTaskCard(task)).join('');
+    } else {
+        document.getElementById('oneTimeTasksCategory').style.display = 'none';
+    }
+    
+    // Load daily tasks
+    const dailyContainer = document.getElementById('dailyTasksList');
+    if (dailyTasks.length > 0) {
+        document.getElementById('dailyTasksCategory').style.display = 'block';
+        dailyContainer.innerHTML = dailyTasks.map(task => renderTaskCard(task)).join('');
+    } else {
+        document.getElementById('dailyTasksCategory').style.display = 'none';
+    }
+    
+    // Apply current filter
+    applyTaskFilter();
+}
+
+// Render Task Card (Compact List Item)
+function renderTaskCard(task) {
+    const students = dataManager.getStudents();
+    
+    let completionText = '';
+    if (task.type === 'one-time') {
+        const completed = task.completedBy ? task.completedBy.length : 0;
+        const total = task.assignedTo.length;
+        const pending = total - completed;
+        completionText = `<span class="status-success">✅ ${completed}</span> / <span class="status-pending">⏳ ${pending}</span>`;
+    } else {
+        // For daily tasks, show today's completion
+        const today = new Date().toISOString().split('T')[0];
+        let completedToday = 0;
+        if (task.dailyCompletions) {
+            completedToday = Object.keys(task.dailyCompletions).filter(studentId => {
+                const completions = task.dailyCompletions[studentId];
+                return Array.isArray(completions) && completions.includes(today);
+            }).length;
+        }
+        const total = task.assignedTo.length;
+        const pending = total - completedToday;
+        completionText = `<span class="status-success">✅ ${completedToday}</span> / <span class="status-pending">⏳ ${pending}</span> today`;
+    }
+    
+    const deadlineText = task.deadline ? 
+        `<span class="task-deadline"><i class="fas fa-calendar-alt"></i> ${new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>` : 
+        '<span class="no-deadline">No deadline</span>';
+    
+    const descriptionPreview = task.description ? 
+        (task.description.length > 60 ? task.description.substring(0, 60) + '...' : task.description) : 
+        '<span class="no-description">No description</span>';
+    
+    return `
+        <div class="task-item-compact">
+            <div class="task-item-main">
+                <div class="task-item-header">
+                    <h4 class="task-item-title">${task.title}</h4>
+                    <span class="task-type-badge-small ${task.type}">${task.type === 'daily' ? '🔄 Daily' : '📋 One-time'}</span>
+                </div>
+                <p class="task-item-description">${descriptionPreview}</p>
+            </div>
+            <div class="task-item-meta">
+                <span class="meta-students"><i class="fas fa-users"></i> ${task.assignedTo.length} student${task.assignedTo.length > 1 ? 's' : ''}</span>
+                ${deadlineText}
+                <span class="meta-completion">${completionText}</span>
+            </div>
+            <div class="task-item-actions">
+                <button class="btn-action-edit" onclick="showEditTaskModal(${task.id})" title="Edit Task">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-action-delete" onclick="handleDeleteTask(${task.id})" title="Delete Task">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Filter Tasks
+function filterTasks(type) {
+    currentTaskFilter = type;
+    
+    // Update active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    applyTaskFilter();
+}
+
+// Apply Task Filter
+function applyTaskFilter() {
+    const oneTimeCategory = document.getElementById('oneTimeTasksCategory');
+    const dailyCategory = document.getElementById('dailyTasksCategory');
+    
+    if (currentTaskFilter === 'all') {
+        oneTimeCategory.style.display = oneTimeCategory.querySelector('.tasks-grid-manage').innerHTML ? 'block' : 'none';
+        dailyCategory.style.display = dailyCategory.querySelector('.tasks-grid-manage').innerHTML ? 'block' : 'none';
+    } else if (currentTaskFilter === 'one-time') {
+        oneTimeCategory.style.display = 'block';
+        dailyCategory.style.display = 'none';
+    } else if (currentTaskFilter === 'daily') {
+        oneTimeCategory.style.display = 'none';
+        dailyCategory.style.display = 'block';
+    }
+}
+
+// Show Edit Task Modal
+function showEditTaskModal(taskId) {
+    const task = dataManager.getTaskById(taskId);
+    if (!task) {
+        alert('❌ Task not found!');
+        return;
+    }
+    
+    // Populate form with task data
+    document.getElementById('editTaskId').value = task.id;
+    document.getElementById('editTaskTitle').value = task.title;
+    document.getElementById('editTaskDescription').value = task.description || '';
+    document.getElementById('editTaskType').value = task.type;
+    document.getElementById('editTaskDeadline').value = task.deadline || '';
+    
+    // Show/hide deadline based on task type
+    handleEditTaskTypeChange();
+    
+    // Load student checkboxes for edit form
+    loadEditStudentCheckboxes(task.assignedTo);
+    
+    // Show modal
+    document.getElementById('editTaskModal').style.display = 'block';
+}
+
+// Close Edit Task Modal
+function closeEditTaskModal() {
+    document.getElementById('editTaskModal').style.display = 'none';
+    document.getElementById('editTaskForm').reset();
+}
+
+// Load Student Checkboxes for Edit Form
+function loadEditStudentCheckboxes(assignedStudentIds) {
+    const students = dataManager.getStudents();
+    const container = document.getElementById('editStudentCheckboxes');
+    
+    container.innerHTML = students.map(student => {
+        const isChecked = assignedStudentIds.includes(student.id);
+        return `
+            <label class="checkbox-item">
+                <input type="checkbox" name="editAssignedStudents" value="${student.id}" ${isChecked ? 'checked' : ''}>
+                <span>${student.name}</span>
+            </label>
+        `;
+    }).join('');
+    
+    // Check if all are selected
+    const allChecked = students.length > 0 && assignedStudentIds.length === students.length;
+    document.getElementById('editAssignToAll').checked = allChecked;
+}
+
+// Handle Edit Task Type Change
+function handleEditTaskTypeChange() {
+    const taskType = document.getElementById('editTaskType').value;
+    const deadlineGroup = document.getElementById('editDeadlineGroup');
+    const hint = document.getElementById('editTaskTypeHint');
+    
+    if (taskType === 'daily') {
+        deadlineGroup.style.display = 'none';
+        hint.style.display = 'block';
+    } else {
+        deadlineGroup.style.display = 'block';
+        hint.style.display = 'none';
+    }
+}
+
+// Handle Edit Assign To All Change
+function handleEditAssignToAllChange() {
+    const assignToAll = document.getElementById('editAssignToAll');
+    const checkboxes = document.querySelectorAll('input[name="editAssignedStudents"]');
+    
+    checkboxes.forEach(cb => {
+        cb.checked = assignToAll.checked;
+        cb.disabled = assignToAll.checked;
+    });
+}
+
+// Handle Update Task
+function handleUpdateTask(e) {
+    e.preventDefault();
+    
+    const taskId = document.getElementById('editTaskId').value;
+    const title = document.getElementById('editTaskTitle').value.trim();
+    const description = document.getElementById('editTaskDescription').value.trim();
+    const type = document.getElementById('editTaskType').value;
+    const deadline = type === 'one-time' ? document.getElementById('editTaskDeadline').value : null;
+    
+    // Get selected students
+    const selectedStudents = Array.from(
+        document.querySelectorAll('input[name="editAssignedStudents"]:checked')
+    ).map(cb => parseInt(cb.value));
+    
+    if (selectedStudents.length === 0) {
+        alert('❌ Please select at least one student!');
+        return;
+    }
+    
+    const updatedTask = {
+        title: title,
+        description: description,
+        type: type,
+        assignedTo: selectedStudents,
+        deadline: deadline
+    };
+    
+    const result = dataManager.updateTask(taskId, updatedTask);
+    
+    if (result) {
+        alert('✅ Task updated successfully!');
+        closeEditTaskModal();
+        loadAllTasks();
+        updateDashboard();
+    } else {
+        alert('❌ Failed to update task!');
+    }
+}
+
+// Handle Delete Task
+function handleDeleteTask(taskId) {
+    const task = dataManager.getTaskById(taskId);
+    if (!task) return;
+    
+    const studentCount = task.assignedTo.length;
+    const confirmMsg = `⚠️ Are you sure you want to delete "${task.title}"?\n\nThis will remove the task from ${studentCount} student${studentCount > 1 ? 's' : ''}.\n\nThis action cannot be undone.`;
+    
+    if (confirm(confirmMsg)) {
+        dataManager.deleteTask(taskId);
+        alert('✅ Task deleted successfully!');
+        loadAllTasks();
+        updateDashboard();
+    }
+}
+
+// Setup Edit Task Form Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const editTaskForm = document.getElementById('editTaskForm');
+    if (editTaskForm) {
+        editTaskForm.addEventListener('submit', handleUpdateTask);
+    }
+});
 

@@ -76,6 +76,180 @@
     gap: 1rem;
 }
 
+/* Compact Progress Section */
+.compact-progress-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .compact-progress-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+.compact-progress-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.compact-progress-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.compact-progress-card.daily-card {
+    border-color: #FFB74D;
+    background: linear-gradient(135deg, #FFFAF0 0%, #FFFFFF 100%);
+}
+
+.compact-progress-card.onetime-card {
+    border-color: #64B5F6;
+    background: linear-gradient(135deg, #F0F7FF 0%, #FFFFFF 100%);
+}
+
+.compact-progress-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.daily-card .compact-progress-header {
+    color: #E65100;
+}
+
+.onetime-card .compact-progress-header {
+    color: #1565C0;
+}
+
+.compact-progress-header i {
+    font-size: 1.1rem;
+}
+
+.compact-percentage {
+    margin-left: auto;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.compact-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.compact-progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.compact-progress-fill.daily-fill {
+    background: linear-gradient(90deg, #FF9800, #FFB74D);
+}
+
+.compact-progress-fill.onetime-fill {
+    background: linear-gradient(90deg, #2196F3, #64B5F6);
+}
+
+.compact-progress-fill.quiz-fill {
+    background: linear-gradient(90deg, #9C27B0, #BA68C8);
+}
+
+.compact-stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.compact-stats-row strong {
+    font-size: 1rem;
+    margin: 0 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+/* Compact Tab Navigation */
+.compact-tab-navigation {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: white;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.compact-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.compact-tab-btn i {
+    font-size: 1rem;
+}
+
+.compact-tab-btn:hover {
+    background: white;
+    color: var(--primary-soft);
+    box-shadow: 0 2px 8px rgba(123, 158, 189, 0.1);
+}
+
+.compact-tab-btn.active {
+    background: linear-gradient(135deg, var(--primary-soft), var(--primary-light));
+    color: white;
+    border-color: var(--primary-soft);
+    box-shadow: 0 2px 12px rgba(123, 158, 189, 0.25);
+}
+
+.tab-content-teacher {
+    display: none;
+    animation: fadeInQuick 0.3s ease-in-out;
+}
+
+.tab-content-teacher.active {
+    display: block;
+}
+
+@keyframes fadeInQuick {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Progress Overview Section */
 .progress-overview-section {
     display: grid;
@@ -312,14 +486,30 @@
     font-weight: 500;
 }
 
-.task-type-badge.individual {
+.task-type-badge.one-time {
     background: #e3f2fd;
     color: #1976D2;
 }
 
-.task-type-badge.group {
-    background: #f3e5f5;
-    color: #7B1FA2;
+.task-type-badge.daily {
+    background: linear-gradient(135deg, #FFE082, #FFD54F);
+    color: #F57C00;
+    font-weight: 600;
+}
+
+.daily-task-card {
+    border-left-color: #FF9800 !important;
+}
+
+.streak-badge-teacher {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    background: linear-gradient(135deg, #FF6F00, #FF8F00);
+    color: white;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
 }
 
 .deadline-badge {
@@ -411,6 +601,331 @@
     .task-detail-meta {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+/* ===================================
+   STUDENT PROFILE INFO SECTION
+   =================================== */
+
+.student-profile-info-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    animation: fadeIn 0.5s ease 0.1s backwards;
+}
+
+.profile-section-title {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #E2E8F0;
+}
+
+.profile-section-title i {
+    color: var(--primary-soft);
+    font-size: 1.5rem;
+}
+
+.profile-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-card {
+    background: #F8FAFC;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #E2E8F0;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    border-color: var(--primary-soft);
+    box-shadow: 0 4px 12px rgba(123, 158, 189, 0.1);
+    transform: translateY(-2px);
+}
+
+.info-card h4 {
+    font-size: 1rem;
+    color: var(--primary-soft);
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.info-card h4 i {
+    font-size: 1.1rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .student-profile-info-section {
+        padding: 1.5rem;
+    }
+    
+    .profile-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-card {
+        padding: 1rem;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .info-value {
+        text-align: left;
+        max-width: 100%;
+    }
+}
+
+/* ===================================
+   TEACHER NOTES SECTION
+   =================================== */
+
+.teacher-notes-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    animation: fadeIn 0.5s ease 0.2s backwards;
+}
+
+.notes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #E2E8F0;
+}
+
+.notes-title {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.notes-title i {
+    color: var(--primary-soft);
+    font-size: 1.5rem;
+}
+
+.notes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.note-card {
+    background: #F8FAFC;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary-soft);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+.note-card:hover {
+    box-shadow: 0 4px 12px rgba(123, 158, 189, 0.15);
+    transform: translateX(4px);
+}
+
+.note-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.note-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.note-category {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--primary-soft);
+    color: white;
+}
+
+.note-category.Academic {
+    background: #3B82F6;
+}
+
+.note-category.Behavioral {
+    background: #10B981;
+}
+
+.note-category.General {
+    background: #6B7280;
+}
+
+.note-category.Parent {
+    background: #8B5CF6;
+}
+
+.note-category.Achievement {
+    background: #F59E0B;
+}
+
+.note-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.note-date i {
+    font-size: 0.75rem;
+}
+
+.note-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.note-btn {
+    background: white;
+    border: 1px solid #CBD5E1;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.note-btn:hover {
+    background: #F1F5F9;
+    transform: translateY(-2px);
+}
+
+.note-btn.edit-btn {
+    color: #3B82F6;
+}
+
+.note-btn.delete-btn {
+    color: #EF4444;
+}
+
+.note-btn.edit-btn:hover {
+    background: #EFF6FF;
+    border-color: #3B82F6;
+}
+
+.note-btn.delete-btn:hover {
+    background: #FEF2F2;
+    border-color: #EF4444;
+}
+
+.note-content {
+    color: var(--text-primary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.note-edited {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.no-notes-message {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 3rem 1rem;
+    font-size: 1rem;
+}
+
+.no-notes-message i {
+    font-size: 3rem;
+    color: #CBD5E1;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .teacher-notes-section {
+        padding: 1.5rem;
+    }
+    
+    .notes-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .notes-header button {
+        width: 100%;
+    }
+    
+    .note-card {
+        padding: 1rem;
+    }
+    
+    .note-card-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .note-actions {
+        align-self: flex-end;
     }
 }
 

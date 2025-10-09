@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exams - Teacher Dashboard</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/teacher.css">
+    <link rel="stylesheet" href="css/exams.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h3>Teacher Portal</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="teacher-dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="teacher-dashboard.html#manage-tasks" class="nav-item">
+                    <i class="fas fa-tasks"></i>
+                    <span>Manage Tasks</span>
+                </a>
+                <a href="teacher-dashboard.html#students" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Students</span>
+                </a>
+                <a href="teacher-dashboard.html#daily-overview" class="nav-item">
+                    <i class="fas fa-table"></i>
+                    <span>Daily Tasks Overview</span>
+                </a>
+                <a href="teacher-exams.html" class="nav-item active">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Exams</span>
+                </a>
+                <a href="teacher-messages.html" class="nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="index.html" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+            <div class="top-bar">
+                <h1><i class="fas fa-graduation-cap"></i> Exams Management</h1>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="exam-tabs">
+                <button class="quiz-tab-btn active" onclick="switchQuizTab('create')">
+                    <i class="fas fa-plus-circle"></i> Create Exam
+                </button>
+                <button class="quiz-tab-btn" onclick="switchQuizTab('view')">
+                    <i class="fas fa-list"></i> All Exams
+                </button>
+                <button class="quiz-tab-btn" onclick="switchQuizTab('results')">
+                    <i class="fas fa-chart-line"></i> Results & Analytics
+                </button>
+                <button class="quiz-tab-btn" onclick="switchQuizTab('pending')">
+                    <i class="fas fa-clipboard-check"></i> Pending Reviews
+                    <span id="pendingCount" class="pending-badge" style="display: none;">0</span>
+                </button>
+            </div>
+
+            <!-- Create Quiz Tab -->
+            <div id="createQuizTab" class="quiz-tab-content active">
+                <h2><i class="fas fa-plus-circle"></i> Create New Exam</h2>
+                <form id="createQuizForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="quizTitle">Exam Title <span class="required">*</span></label>
+                                <input type="text" id="quizTitle" required placeholder="e.g., Islamic Studies - Final Exam">
+                            </div>
+                            <div class="form-group">
+                                <label for="quizSubject">Subject</label>
+                                <input type="text" id="quizSubject" placeholder="e.g., Islamic Studies">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quizDescription">Description</label>
+                            <textarea id="quizDescription" rows="2" placeholder="Brief description of the quiz"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="timeLimit">Time Limit (minutes) <span class="required">*</span></label>
+                                <input type="number" id="timeLimit" required min="1" max="180" placeholder="e.g., 30">
+                            </div>
+                            <div class="form-group">
+                                <label for="passingPercentage">Passing Percentage <span class="required">*</span></label>
+                                <input type="number" id="passingPercentage" required min="0" max="100" value="60" placeholder="e.g., 60">
+                            </div>
+                            <div class="form-group">
+                                <label for="quizDeadline">Deadline</label>
+                                <input type="date" id="quizDeadline">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Assign To <span class="required">*</span></label>
+                            <div style="margin-bottom: 1rem;">
+                                <label class="checkbox-item" style="background: #E3F2FD; padding: 0.75rem; border-radius: 8px;">
+                                    <input type="checkbox" id="assignQuizToAll" onchange="handleAssignQuizToAllChange()">
+                                    <span style="font-weight: 600; color: #1976D2;">Assign to All Students</span>
+                                </label>
+                            </div>
+                            <div id="quizStudentCheckboxes" class="checkbox-group">
+                                <!-- Checkboxes will be dynamically added here -->
+                            </div>
+                        </div>
+
+                        <hr style="margin: 2rem 0; border: none; border-top: 2px solid #E2E8F0;">
+
+                        <div class="questions-section">
+                            <div class="section-header" style="margin-bottom: 1.5rem;">
+                                <h3><i class="fas fa-question-circle"></i> Questions</h3>
+                                <button type="button" class="btn-add-question" onclick="addQuestion()">
+                                    <i class="fas fa-plus"></i> Add Question
+                                </button>
+                            </div>
+
+                            <div id="questionsContainer">
+                                <!-- Questions will be added here dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="form-actions" style="margin-top: 2rem;">
+                            <button type="button" class="btn-secondary" onclick="resetQuizForm()">
+                                <i class="fas fa-times"></i> Reset
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Create Quiz
+                            </button>
+                        </div>
+                    </form>
+            </div>
+
+            <!-- View All Quizzes Tab -->
+            <div id="viewQuizzesTab" class="quiz-tab-content">
+                <div class="quizzes-list-container">
+                    <div class="section-header">
+                        <h2><i class="fas fa-list"></i> All Quizzes <span class="count-badge" id="quizCountBadge">0</span></h2>
+                    </div>
+                    
+                    <div id="quizzesList" class="quizzes-grid">
+                        <!-- Quizzes will be loaded here -->
+                    </div>
+
+                    <div id="noQuizzesMessage" class="empty-state" style="display: none;">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>No Quizzes Yet</h3>
+                        <p>Create your first quiz using the Create Quiz tab!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results & Analytics Tab -->
+            <div id="resultsTab" class="quiz-tab-content">
+                <div class="results-container">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-line"></i> Quiz Results & Analytics</h2>
+                    </div>
+
+                    <div id="resultsContent">
+                        <!-- Results will be loaded here -->
+                    </div>
+
+                    <div id="noResultsMessage" class="empty-state" style="display: none;">
+                        <i class="fas fa-chart-bar"></i>
+                        <h3>No Results Yet</h3>
+                        <p>Results will appear here once students start taking quizzes!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Reviews Tab -->
+            <div id="pendingTab" class="quiz-tab-content">
+                <h2><i class="fas fa-clipboard-check"></i> Pending Manual Grading</h2>
+                <p style="color: #64748B; margin-bottom: 2rem;">
+                    Review and grade subjective questions (Short Answer, Essay, File Upload)
+                </p>
+
+                <div id="pendingReviewsContainer">
+                    <!-- Pending reviews will be loaded here -->
+                </div>
+
+                <div id="noPendingMessage" class="empty-state" style="display: none;">
+                    <i class="fas fa-check-circle" style="color: #22C55E;"></i>
+                    <h3>All Caught Up!</h3>
+                    <p>No pending reviews at the moment. Great job! 🎉</p>
+                </div>
+            </div>
+    </div>
+
+    <!-- Grading Modal -->
+    <div id="gradingModal" class="modal">
+        <div class="modal-content grading-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-clipboard-check"></i> Grade Answer</h3>
+                <button class="close-modal" onclick="closeGradingModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="gradingModalBody">
+                <!-- Will be dynamically filled -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data-manager.js"></script>
+    <script src="js/teacher-exams.js"></script>
+</body>
+</html>
+
