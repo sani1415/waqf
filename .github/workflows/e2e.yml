@@ -1,0 +1,29 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: |
+          npm ci || npm i
+          npx playwright install --with-deps
+      - name: Run E2E (Firebase)
+        env:
+          BASE_URL: ${{ secrets.BASE_URL || 'http://localhost:4173' }}
+        run: |
+          npx http-server -p 4173 -c-1 . &
+          npx wait-on http://localhost:4173
+          npx playwright test
+
+

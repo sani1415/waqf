@@ -16,8 +16,29 @@
 
 // ============================================
 // CHANGE THIS LINE TO SWITCH STORAGE BACKEND
+// You can also override at runtime via URL, e.g.:
+//   ?storage=localStorage   or   ?storage=firebase
 // ============================================
-const STORAGE_TYPE = 'firebase';  // Options: 'localStorage', 'firebase'
+const DEFAULT_STORAGE_TYPE = 'firebase';  // Options: 'localStorage', 'firebase'
+
+// Runtime override helper
+function getStorageTypeFromURL() {
+    try {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const value = params.get('storage');
+            if (value === 'localStorage' || value === 'firebase') {
+                console.log(`🔧 Storage override detected via URL: ${value}`);
+                return value;
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
+    return null;
+}
+
+const STORAGE_TYPE = getStorageTypeFromURL() || DEFAULT_STORAGE_TYPE;
 // ============================================
 
 /**
