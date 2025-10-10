@@ -59,8 +59,20 @@ function setupEventListeners() {
     if (menuToggle) {
         menuToggle.addEventListener('click', function() {
             sidebar.classList.toggle('active');
+            toggleOverlay();
         });
     }
+
+    // Click outside to close on mobile
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 1024 && sidebar.classList.contains('active')) {
+            const clickedInsideSidebar = sidebar.contains(e.target) || (menuToggle && menuToggle.contains(e.target));
+            if (!clickedInsideSidebar) {
+                sidebar.classList.remove('active');
+                toggleOverlay(false);
+            }
+        }
+    });
 
     // Create Task Form
     const taskForm = document.getElementById('createTaskForm');
@@ -73,6 +85,23 @@ function setupEventListeners() {
     if (addStudentForm) {
         addStudentForm.addEventListener('submit', handleAddStudent);
     }
+}
+
+// Overlay helper for mobile sidebar
+function toggleOverlay(show = true) {
+    let overlay = document.getElementById('sidebarOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sidebarOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.35);display:none;';
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('active');
+            toggleOverlay(false);
+        });
+    }
+    overlay.style.display = show ? 'block' : 'none';
 }
 
 // Switch Between Sections
