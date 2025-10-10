@@ -8,14 +8,14 @@ document.addEventListener('DOMContentLoaded', function() {
     updateUnreadBadge();
     
     // Update unread badge every 5 seconds
-    setInterval(updateUnreadBadge, 5000);
+    setInterval(() => updateUnreadBadge(), 5000);
 });
 
 // Update Unread Badge
-function updateUnreadBadge() {
+async function updateUnreadBadge() {
     if (!currentStudent) return;
     
-    const unreadCount = dataManager.getUnreadCount(currentStudent.id, 'student');
+    const unreadCount = await dataManager.getUnreadCount(currentStudent.id, 'student');
     const badge = document.getElementById('unreadBadge');
     
     if (badge) {
@@ -28,7 +28,7 @@ function updateUnreadBadge() {
 }
 
 // Initialize Student Dashboard
-function initializeStudentDashboard() {
+async function initializeStudentDashboard() {
     // Get current student ID from sessionStorage
     const studentId = sessionStorage.getItem('currentStudentId');
 
@@ -38,7 +38,7 @@ function initializeStudentDashboard() {
         return;
     }
 
-    currentStudent = dataManager.getStudentById(parseInt(studentId));
+    currentStudent = await dataManager.getStudentById(parseInt(studentId));
 
     if (!currentStudent) {
         alert('Student not found!');
@@ -48,8 +48,8 @@ function initializeStudentDashboard() {
 
     // Load student data
     loadStudentProfile();
-    loadStudentStats();
-    loadStudentTasks();
+    await loadStudentStats();
+    await loadStudentTasks();
 }
 
 // Load Student Profile
@@ -68,8 +68,8 @@ function loadStudentProfile() {
 }
 
 // Load Student Stats
-function loadStudentStats() {
-    const stats = dataManager.getStudentStats(currentStudent.id);
+async function loadStudentStats() {
+    const stats = await dataManager.getStudentStats(currentStudent.id);
 
     // Update daily progress bar
     updateDailyProgressBar(stats);
@@ -78,7 +78,7 @@ function loadStudentStats() {
     updateOneTimeProgressBar(stats);
     
     // Update quiz stats
-    updateQuizStats(currentStudent.id);
+    await updateQuizStats(currentStudent.id);
 }
 
 // Update Daily Progress Bar
@@ -144,7 +144,7 @@ function updateOneTimeProgressBar(stats) {
 }
 
 // Load Student Tasks
-function loadStudentTasks() {
+async function loadStudentTasks() {
     // Set today's date
     const today = new Date();
     const todayDateElement = document.getElementById('todayDate');
@@ -158,11 +158,22 @@ function loadStudentTasks() {
     }
 
     // Load daily tasks
-    const dailyTasks = dataManager.getDailyTasksForStudent(currentStudent.id);
-    loadDailyTaskSection('dailyTasksList', dailyTasks);
+    const dailyContainer = document.getElementById('dailyTasksList');
+    if (dailyContainer) {
+        dailyContainer.innerHTML = `
+            <div class="skeleton-list">
+                ${Array.from({length: 3}).map(()=>`<div class="skeleton skeleton-text" style="width:90%"></div>`).join('')}
+            </div>`;
+    }
+    const dailyTasks = await dataManager.getDailyTasksForStudent(currentStudent.id);
+    await loadDailyTaskSection('dailyTasksList', dailyTasks);
 
     // Load regular tasks
-    const regularTasks = dataManager.getRegularTasksForStudent(currentStudent.id);
+    const pendingContainer = document.getElementById('pendingTasksList');
+    const completedContainer = document.getElementById('completedTasksList');
+    if (pendingContainer) pendingContainer.innerHTML = `<div class="skeleton-list">${Array.from({length: 3}).map(()=>`<div class=\"skeleton skeleton-text\" style=\"width:95%\"></div>`).join('')}</div>`;
+    if (completedContainer) completedContainer.innerHTML = `<div class="skeleton-list">${Array.from({length: 2}).map(()=>`<div class=\"skeleton skeleton-text\" style=\"width:80%\"></div>`).join('')}</div>`;
+    const regularTasks = await dataManager.getRegularTasksForStudent(currentStudent.id);
     const pendingTasks = regularTasks.filter(task => 
         !task.completedBy.includes(currentStudent.id)
     );
@@ -232,7 +243,7 @@ function loadTaskSection(containerId, tasks, isCompleted) {
 }
 
 // Load Daily Task Section
-function loadDailyTaskSection(containerId, tasks) {
+async function loadDailyTaskSection(containerId, tasks) {
     const container = document.getElementById(containerId);
 
     if (tasks.length === 0) {
@@ -245,11 +256,12 @@ function loadDailyTaskSection(containerId, tasks) {
         return;
     }
 
-    container.innerHTML = tasks.map(task => {
-        const isCompletedToday = dataManager.isDailyTaskCompletedToday(task.id, currentStudent.id);
-        const streak = dataManager.getDailyTaskStreak(task.id, currentStudent.id);
+    const items = [];
+    for (const task of tasks) {
+        const isCompletedToday = await dataManager.isDailyTaskCompletedToday(task.id, currentStudent.id);
+        const streak = await dataManager.getDailyTaskStreak(task.id, currentStudent.id);
 
-        return `
+        items.push(`
             <div class="task-item daily-task ${isCompletedToday ? 'completed' : ''} fade-in">
                 <div class="task-header">
                     <div class="task-checkbox">
@@ -280,29 +292,30 @@ function loadDailyTaskSection(containerId, tasks) {
                     </div>
                 </div>
             </div>
-        `;
-    }).join('');
+        `);
+    }
+    container.innerHTML = items.join('');
 }
 
 // Toggle Daily Task Completion
-function toggleDailyTask(taskId) {
-    dataManager.toggleDailyTaskCompletion(taskId, currentStudent.id);
+async function toggleDailyTask(taskId) {
+    await dataManager.toggleDailyTaskCompletion(taskId, currentStudent.id);
     
     // Reload everything with animation
-    setTimeout(() => {
-        loadStudentStats();
-        loadStudentTasks();
+    setTimeout(async () => {
+        await loadStudentStats();
+        await loadStudentTasks();
     }, 200);
 }
 
 // Toggle Task Completion
-function toggleTask(taskId) {
-    dataManager.toggleTaskCompletion(taskId, currentStudent.id);
+async function toggleTask(taskId) {
+    await dataManager.toggleTaskCompletion(taskId, currentStudent.id);
     
     // Reload everything with animation
-    setTimeout(() => {
-        loadStudentStats();
-        loadStudentTasks();
+    setTimeout(async () => {
+        await loadStudentStats();
+        await loadStudentTasks();
     }, 200);
 }
 
@@ -377,6 +390,12 @@ function switchTab(tabName) {
     }
 }
 
+// Helper: Get current student ID from session
+function getStudentId() {
+    const id = sessionStorage.getItem('currentStudentId');
+    return id ? parseInt(id) : null;
+}
+
 // Logout / Go Back
 function goBackToList() {
     sessionStorage.removeItem('currentStudentId');
@@ -388,26 +407,22 @@ function goBackToList() {
    =================================== */
 
 // Load student quizzes
-function loadStudentQuizzes() {
+async function loadStudentQuizzes() {
     const studentId = getStudentId();
     if (!studentId) return;
     
-    const quizzes = dataManager.getQuizzesForStudent(studentId);
+    const quizzes = await dataManager.getQuizzesForStudent(studentId);
+    // Parallelize hasTaken checks for performance
+    const takenFlags = await Promise.all(quizzes.map(q => dataManager.hasStudentTakenQuiz(q.id, studentId)));
     const availableQuizzes = [];
     const completedQuizzes = [];
-    
-    quizzes.forEach(quiz => {
-        const hasTaken = dataManager.hasStudentTakenQuiz(quiz.id, studentId);
-        if (hasTaken) {
-            completedQuizzes.push(quiz);
-        } else {
-            availableQuizzes.push(quiz);
-        }
+    quizzes.forEach((quiz, idx) => {
+        if (takenFlags[idx]) completedQuizzes.push(quiz); else availableQuizzes.push(quiz);
     });
     
     loadAvailableQuizzes(availableQuizzes);
-    loadCompletedQuizzes(completedQuizzes, studentId);
-    updateQuizStats(studentId);
+    await loadCompletedQuizzes(completedQuizzes, studentId);
+    await updateQuizStats(studentId);
 }
 
 // Load available quizzes
@@ -469,7 +484,7 @@ function loadAvailableQuizzes(quizzes) {
 }
 
 // Load completed quizzes
-function loadCompletedQuizzes(quizzes, studentId) {
+async function loadCompletedQuizzes(quizzes, studentId) {
     const container = document.getElementById('completedQuizzesList');
     
     if (quizzes.length === 0) {
@@ -477,9 +492,10 @@ function loadCompletedQuizzes(quizzes, studentId) {
         return;
     }
     
-    container.innerHTML = quizzes.map(quiz => {
-        const result = dataManager.getQuizResult(quiz.id, studentId);
-        if (!result) return '';
+    const items = [];
+    for (const quiz of quizzes) {
+        const result = await dataManager.getQuizResult(quiz.id, studentId);
+        if (!result) continue;
         
         const totalMarks = quiz.questions.reduce((sum, q) => sum + q.marks, 0);
         const minutes = Math.floor(result.timeTaken / 60);
@@ -487,7 +503,7 @@ function loadCompletedQuizzes(quizzes, studentId) {
         
         const isPending = result.status === 'pending_review';
         
-        return `
+        items.push(`
             <div class="quiz-card-student completed ${isPending ? 'pending-review' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <h3 class="quiz-card-title-student">${quiz.title}</h3>
@@ -559,14 +575,15 @@ function loadCompletedQuizzes(quizzes, studentId) {
                     ` : ''}
                 </div>
             </div>
-        `;
-    }).join('');
+        `);
+    }
+    container.innerHTML = items.join('');
 }
 
 // Update quiz statistics in sidebar
-function updateQuizStats(studentId) {
-    const stats = dataManager.getStudentQuizStats(studentId);
-    const quizzes = dataManager.getQuizzesForStudent(studentId);
+async function updateQuizStats(studentId) {
+    const stats = await dataManager.getStudentQuizStats(studentId);
+    const quizzes = await dataManager.getQuizzesForStudent(studentId);
     const pending = quizzes.length - stats.totalQuizzes;
     
     document.getElementById('quizProgressPercent').textContent = 

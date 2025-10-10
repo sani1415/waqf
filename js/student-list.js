@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Load Student List
-function loadStudentList() {
+async function loadStudentList() {
     const container = document.getElementById('studentCards');
     const noStudentsMsg = document.getElementById('noStudentsMessage');
-    const students = dataManager.getStudents();
+    const students = await dataManager.getStudents();
 
     if (students.length === 0) {
         container.style.display = 'none';
@@ -20,18 +20,20 @@ function loadStudentList() {
     container.style.display = 'grid';
     noStudentsMsg.style.display = 'none';
 
-    container.innerHTML = students.map(student => {
+    const cards = [];
+    for (const student of students) {
         const initial = student.name.charAt(0).toUpperCase();
-        const stats = dataManager.getStudentStats(student.id);
+        const stats = await dataManager.getStudentStats(student.id);
 
-        return `
+        cards.push(`
             <div class="student-select-card fade-in" onclick="selectStudent(${student.id})">
                 <div class="student-card-avatar-large">${initial}</div>
                 <h3>${student.name}</h3>
                 <p>${stats.completed} of ${stats.total} tasks completed</p>
             </div>
-        `;
-    }).join('');
+        `);
+    }
+    container.innerHTML = cards.join('');
 }
 
 // Select Student and Navigate to Dashboard
@@ -74,7 +76,7 @@ function setupSearch() {
             noStudentsMsg.style.display = 'block';
             noStudentsMsg.querySelector('h3').textContent = 'No Students Found';
             noStudentsMsg.querySelector('p').textContent = 'No students match your search.';
-        } else if (dataManager.getStudents().length > 0) {
+        } else {
             container.style.display = 'grid';
             noStudentsMsg.style.display = 'none';
         }

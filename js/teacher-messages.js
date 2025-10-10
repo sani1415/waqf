@@ -5,16 +5,16 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMobileMenu();
     
     // Auto refresh every 5 seconds to check for new messages
-    setInterval(loadChatsList, 5000);
+    setInterval(() => loadChatsList(), 5000);
 });
 
 // Load Chats List
-function loadChatsList() {
+async function loadChatsList() {
     const container = document.getElementById('chatsList');
     const noChats = document.getElementById('noChats');
-    const chats = dataManager.getAllChatsForTeacher();
+    const chats = await dataManager.getAllChatsForTeacher();
 
-    if (chats.length === 0) {
+    if (!chats || chats.length === 0) {
         container.style.display = 'none';
         noChats.style.display = 'block';
         return;

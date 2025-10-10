@@ -8,11 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMessageForm();
     
     // Auto refresh messages every 3 seconds
-    setInterval(loadMessages, 3000);
+    setInterval(() => loadMessages(), 3000);
 });
 
 // Initialize Chat
-function initializeChat() {
+async function initializeChat() {
     const urlParams = new URLSearchParams(window.location.search);
     currentStudentId = urlParams.get('studentId');
 
@@ -22,7 +22,7 @@ function initializeChat() {
         return;
     }
 
-    currentStudent = dataManager.getStudentById(parseInt(currentStudentId));
+    currentStudent = await dataManager.getStudentById(parseInt(currentStudentId));
 
     if (!currentStudent) {
         alert('Student not found!');
@@ -31,8 +31,8 @@ function initializeChat() {
     }
 
     loadStudentInfo();
-    loadMessages();
-    markAsRead();
+    await loadMessages();
+    await markAsRead();
 }
 
 // Load Student Info
@@ -45,9 +45,9 @@ function loadStudentInfo() {
 }
 
 // Load Messages
-function loadMessages() {
+async function loadMessages() {
     const messagesArea = document.getElementById('messagesArea');
-    const messages = dataManager.getMessagesForStudent(currentStudentId);
+    const messages = await dataManager.getMessagesForStudent(currentStudentId);
 
     if (messages.length === 0) {
         messagesArea.innerHTML = `
@@ -119,8 +119,8 @@ function setupMessageForm() {
 }
 
 // Mark Messages as Read
-function markAsRead() {
-    dataManager.markMessagesAsRead(currentStudentId, 'teacher');
+async function markAsRead() {
+    await dataManager.markMessagesAsRead(currentStudentId, 'teacher');
 }
 
 // Scroll to Bottom

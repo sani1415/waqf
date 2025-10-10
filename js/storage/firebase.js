@@ -15,6 +15,8 @@ class FirebaseAdapter extends StorageAdapter {
         super();
         this.db = null;
         this.ready = false;
+        this.cache = {};
+        this.listeners = {};
     }
 
     /**
@@ -65,8 +67,26 @@ class FirebaseAdapter extends StorageAdapter {
                 throw new Error('Firebase adapter not initialized');
             }
 
-            const snapshot = await this.db.ref(key).once('value');
-            return snapshot.val() || null;
+            // Serve from cache if available
+            if (this.cache.hasOwnProperty(key)) {
+                return this.cache[key];
+            }
+
+            const ref = this.db.ref(key);
+            const snapshot = await ref.once('value');
+            const value = snapshot.val() || null;
+
+            // Cache value and attach a real-time listener to keep it fresh
+            this.cache[key] = value;
+            if (!this.listeners[key]) {
+                const handler = (snap) => {
+                    this.cache[key] = snap.val() || null;
+                };
+                ref.on('value', handler);
+                this.listeners[key] = () => ref.off('value', handler);
+            }
+
+            return value;
 
         } catch (error) {
             console.error(`Error getting ${key} from Firebase:`, error);
@@ -87,6 +107,8 @@ class FirebaseAdapter extends StorageAdapter {
             }
 
             await this.db.ref(key).set(data);
+            // Optimistically update cache
+            this.cache[key] = data;
 
         } catch (error) {
             console.error(`Error setting ${key} in Firebase:`, error);
@@ -106,6 +128,12 @@ class FirebaseAdapter extends StorageAdapter {
             }
 
             await this.db.ref(key).remove();
+            // Clear cache and listener
+            delete this.cache[key];
+            if (this.listeners[key]) {
+                this.listeners[key]();
+                delete this.listeners[key];
+            }
 
         } catch (error) {
             console.error(`Error deleting ${key} from Firebase:`, error);

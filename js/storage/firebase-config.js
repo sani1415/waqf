@@ -16,15 +16,15 @@
  *    - Start in "Test mode" for now (we'll secure it later)
  */
 
-// PLACEHOLDER CONFIG - REPLACE WITH YOUR FIREBASE CONFIG
+// LIVE CONFIG - filled from your Firebase console
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBzPoIbqyEUS0fmyZT6EOpCrxkSpKCGg1k",
+    authDomain: "waqf-task.firebaseapp.com",
+    databaseURL: "https://waqf-task-default-rtdb.firebaseio.com",
+    projectId: "waqf-task",
+    storageBucket: "waqf-task.firebasestorage.app",
+    messagingSenderId: "317347776811",
+    appId: "1:317347776811:web:cac00727d867f6b2299d6e"
 };
 
 // Example of a real config (DO NOT USE - this is just for reference):

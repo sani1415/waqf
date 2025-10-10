@@ -208,6 +208,20 @@ textarea {
     100% { transform: translateX(100%); }
 }
 
+/* Skeleton loaders */
+.skeleton {
+    background: linear-gradient(90deg, #f4f6f8 25%, #eceff1 37%, #f4f6f8 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    border-radius: 6px;
+}
+.skeleton-text { height: 14px; margin: 6px 0; }
+.skeleton-title { height: 18px; margin: 8px 0; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-badge { width: 70px; height: 18px; border-radius: 12px; }
+.skeleton-line-sm { height: 10px; margin: 4px 0; }
+.skeleton-list { display: grid; gap: 12px; }
+
 /* Modal */
 .modal {
     display: none;

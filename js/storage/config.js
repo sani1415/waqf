@@ -17,7 +17,7 @@
 // ============================================
 // CHANGE THIS LINE TO SWITCH STORAGE BACKEND
 // ============================================
-const STORAGE_TYPE = 'localStorage';  // Options: 'localStorage', 'firebase'
+const STORAGE_TYPE = 'firebase';  // Options: 'localStorage', 'firebase'
 // ============================================
 
 /**

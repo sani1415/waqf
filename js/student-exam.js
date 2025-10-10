@@ -8,7 +8,7 @@ let timeRemaining = 0; // in seconds
 let startTime = null;
 
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const urlParams = new URLSearchParams(window.location.search);
     const quizId = urlParams.get('quizId');
     const studentId = getStudentId();
@@ -20,13 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Check if student already took this quiz
-    if (dataManager.hasStudentTakenQuiz(quizId, studentId)) {
+    if (await dataManager.hasStudentTakenQuiz(quizId, studentId)) {
         alert('⚠️ You have already taken this quiz!');
         window.location.href = 'student-dashboard.html';
         return;
     }
     
-    loadQuiz(quizId);
+    await loadQuiz(quizId);
 });
 
 // Get student ID from session
@@ -35,8 +35,8 @@ function getStudentId() {
 }
 
 // Load quiz
-function loadQuiz(quizId) {
-    currentQuiz = dataManager.getQuizById(parseInt(quizId));
+async function loadQuiz(quizId) {
+    currentQuiz = await dataManager.getQuizById(parseInt(quizId));
     
     if (!currentQuiz) {
         alert('❌ Quiz not found!');
@@ -412,7 +412,7 @@ function nextQuestion() {
 }
 
 // Submit quiz
-function submitQuiz() {
+async function submitQuiz() {
     // Check if all questions are answered
     const unansweredCount = studentAnswers.filter(ans => ans === null).length;
     
@@ -439,7 +439,7 @@ function submitQuiz() {
     
     // Submit to dataManager (it will auto-grade)
     const studentId = getStudentId();
-    const result = dataManager.submitQuiz(currentQuiz.id, studentId, studentAnswers, timeTaken);
+    const result = await dataManager.submitQuiz(currentQuiz.id, studentId, studentAnswers, timeTaken);
     
     if (result) {
         // Show result immediately

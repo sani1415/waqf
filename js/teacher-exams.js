@@ -52,8 +52,8 @@ function switchQuizTab(tabName) {
    =================================== */
 
 // Load student checkboxes
-function loadQuizStudentCheckboxes() {
-    const students = dataManager.getStudents();
+async function loadQuizStudentCheckboxes() {
+    const students = await dataManager.getStudents();
     const container = document.getElementById('quizStudentCheckboxes');
     
     container.innerHTML = students.map(student => `
@@ -280,7 +280,7 @@ function renumberQuestions() {
 }
 
 // Handle create quiz submission
-function handleCreateQuiz(e) {
+async function handleCreateQuiz(e) {
     e.preventDefault();
     
     // Get basic quiz info
@@ -393,7 +393,7 @@ function handleCreateQuiz(e) {
     };
     
     // Save quiz
-    dataManager.addQuiz(newQuiz);
+    await dataManager.addQuiz(newQuiz);
     
     alert('✅ Quiz created successfully!');
     resetQuizForm();
@@ -414,8 +414,8 @@ function resetQuizForm() {
    VIEW QUIZZES FUNCTIONS
    =================================== */
 
-function loadAllQuizzes() {
-    const quizzes = dataManager.getQuizzes();
+async function loadAllQuizzes() {
+    const quizzes = await dataManager.getQuizzes();
     const container = document.getElementById('quizzesList');
     const countBadge = document.getElementById('quizCountBadge');
     const noQuizzesMessage = document.getElementById('noQuizzesMessage');
@@ -430,11 +430,13 @@ function loadAllQuizzes() {
     
     noQuizzesMessage.style.display = 'none';
     
-    container.innerHTML = quizzes.map(quiz => {
-        const stats = dataManager.getQuizStatistics(quiz.id);
+    container.innerHTML = await (async () => {
+        const cards = [];
+        for (const quiz of quizzes) {
+            const stats = await dataManager.getQuizStatistics(quiz.id);
         const totalMarks = quiz.questions.reduce((sum, q) => sum + q.marks, 0);
         
-        return `
+            cards.push(`
             <div class="quiz-card">
                 <div class="quiz-card-header">
                     <h3 class="quiz-title">${quiz.title}</h3>
@@ -496,8 +498,10 @@ function loadAllQuizzes() {
                     </button>
                 </div>
             </div>
-        `;
-    }).join('');
+        `);
+        }
+        return cards.join('');
+    })();
 }
 
 // View quiz results
@@ -516,14 +520,14 @@ function viewQuizResults(quizId) {
 }
 
 // Delete quiz
-function deleteQuiz(quizId) {
-    const quiz = dataManager.getQuizById(quizId);
+async function deleteQuiz(quizId) {
+    const quiz = await dataManager.getQuizById(quizId);
     if (!quiz) return;
     
     const confirmMsg = `⚠️ Are you sure you want to delete "${quiz.title}"?\n\nThis will remove:\n- The quiz from ${quiz.assignedTo.length} students\n- All student results for this quiz\n\nThis action cannot be undone.`;
     
     if (confirm(confirmMsg)) {
-        dataManager.deleteQuiz(quizId);
+        await dataManager.deleteQuiz(quizId);
         alert('✅ Quiz deleted successfully!');
         loadAllQuizzes();
     }
@@ -533,8 +537,8 @@ function deleteQuiz(quizId) {
    RESULTS & ANALYTICS FUNCTIONS
    =================================== */
 
-function loadQuizResultsSelector() {
-    const quizzes = dataManager.getQuizzes();
+async function loadQuizResultsSelector() {
+    const quizzes = await dataManager.getQuizzes();
     const container = document.getElementById('resultsContent');
     
     if (quizzes.length === 0) {
@@ -559,13 +563,13 @@ function loadQuizResultsSelector() {
     `;
 }
 
-function loadQuizResults(quizId) {
+async function loadQuizResults(quizId) {
     if (!quizId) return;
     
-    const quiz = dataManager.getQuizById(parseInt(quizId));
-    const stats = dataManager.getQuizStatistics(parseInt(quizId));
-    const results = dataManager.getResultsForQuiz(parseInt(quizId));
-    const students = dataManager.getStudents();
+    const quiz = await dataManager.getQuizById(parseInt(quizId));
+    const stats = await dataManager.getQuizStatistics(parseInt(quizId));
+    const results = await dataManager.getResultsForQuiz(parseInt(quizId));
+    const students = await dataManager.getStudents();
     
     const displayContainer = document.getElementById('quizResultsDisplay');
     
@@ -660,8 +664,8 @@ function loadQuizResults(quizId) {
    =================================== */
 
 // Update pending count badge
-function updatePendingCount() {
-    const pendingResults = dataManager.getPendingGradingResults();
+async function updatePendingCount() {
+    const pendingResults = await dataManager.getPendingGradingResults();
     const count = pendingResults.length;
     const badge = document.getElementById('pendingCount');
     
@@ -674,10 +678,10 @@ function updatePendingCount() {
 }
 
 // Load pending reviews
-function loadPendingReviews() {
+async function loadPendingReviews() {
     const container = document.getElementById('pendingReviewsContainer');
     const emptyMessage = document.getElementById('noPendingMessage');
-    const pendingResults = dataManager.getPendingGradingResults();
+    const pendingResults = await dataManager.getPendingGradingResults();
     
     if (pendingResults.length === 0) {
         container.innerHTML = '';
@@ -699,17 +703,16 @@ function loadPendingReviews() {
     
     let html = '';
     
-    Object.keys(groupedByStudent).forEach(studentId => {
+    for (const studentId of Object.keys(groupedByStudent)) {
         const results = groupedByStudent[studentId];
-        const student = dataManager.getStudentById(parseInt(studentId));
+        const student = await dataManager.getStudentById(parseInt(studentId));
         const studentName = student ? student.name : 'Unknown Student';
-        
-        results.forEach(result => {
-            const quiz = dataManager.getQuizById(result.quizId);
-            if (!quiz) return;
+        for (const result of results) {
+            const quiz = await dataManager.getQuizById(result.quizId);
+            if (!quiz) continue;
             
             // Get ungraded questions
-            const ungradedAnswers = dataManager.getUngradedAnswers(result.id);
+            const ungradedAnswers = await dataManager.getUngradedAnswers(result.id);
             
             if (ungradedAnswers.length === 0) return;
             
@@ -744,24 +747,24 @@ function loadPendingReviews() {
                     </div>
                 </div>
             `;
-        });
-    });
+        }
+    }
     
     container.innerHTML = html;
     updatePendingCount();
 }
 
 // Show grading modal
-function showGradingModal(resultId, questionIndex) {
-    const result = dataManager.getQuizResults().find(r => r.id === resultId);
+async function showGradingModal(resultId, questionIndex) {
+    const result = (await dataManager.getQuizResults()).find(r => r.id === resultId);
     if (!result) return;
     
-    const quiz = dataManager.getQuizById(result.quizId);
+    const quiz = await dataManager.getQuizById(result.quizId);
     if (!quiz) return;
     
     const question = quiz.questions[questionIndex];
     const answer = result.answers[questionIndex];
-    const student = dataManager.getStudentById(result.studentId);
+    const student = await dataManager.getStudentById(result.studentId);
     
     let answerDisplay = '';
     
@@ -864,13 +867,13 @@ function closeGradingModal() {
 }
 
 // Submit grade
-function submitGrade(event, resultId, questionIndex) {
+async function submitGrade(event, resultId, questionIndex) {
     event.preventDefault();
     
     const marks = parseFloat(document.getElementById('gradeMarks').value);
     const feedback = document.getElementById('gradeFeedback').value.trim();
     
-    const updatedResult = dataManager.gradeAnswer(resultId, questionIndex, marks, feedback);
+    const updatedResult = await dataManager.gradeAnswer(resultId, questionIndex, marks, feedback);
     
     if (!updatedResult) {
         alert('❌ Error grading answer. Please try again.');

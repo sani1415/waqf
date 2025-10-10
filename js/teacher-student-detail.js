@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Initialize Student Detail Page
-function initializeStudentDetail() {
+async function initializeStudentDetail() {
     // Get student ID from URL parameter or sessionStorage
     const urlParams = new URLSearchParams(window.location.search);
     const studentId = urlParams.get('studentId') || sessionStorage.getItem('viewStudentId');
@@ -19,7 +19,7 @@ function initializeStudentDetail() {
         return;
     }
 
-    currentStudent = dataManager.getStudentById(parseInt(studentId));
+    currentStudent = await dataManager.getStudentById(parseInt(studentId));
 
     if (!currentStudent) {
         alert('Student not found!');
@@ -33,8 +33,8 @@ function initializeStudentDetail() {
     // Load all student data
     loadStudentProfile();
     loadStudentProfileInfo();
-    loadStudentStats();
-    loadStudentTasks();
+    await loadStudentStats();
+    await loadStudentTasks();
     displayStudentNotes();
     
     // Setup form handlers
@@ -123,7 +123,7 @@ function closeEditStudentModal() {
 }
 
 // Handle Update Student
-function handleUpdateStudent(e) {
+async function handleUpdateStudent(e) {
     e.preventDefault();
     
     // Get updated data
@@ -172,7 +172,7 @@ function handleUpdateStudent(e) {
     }
     
     // Update student profile
-    const updated = dataManager.updateStudentProfile(currentStudent.id, updatedData);
+    const updated = await dataManager.updateStudentProfile(currentStudent.id, updatedData);
     
     if (updated) {
         currentStudent = updated;
@@ -191,8 +191,8 @@ function handleUpdateStudent(e) {
 }
 
 // Load Student Stats
-function loadStudentStats() {
-    const stats = dataManager.getStudentStats(currentStudent.id);
+async function loadStudentStats() {
+    const stats = await dataManager.getStudentStats(currentStudent.id);
 
     // Update COMPACT daily progress
     const dailyTotal = stats.dailyTotal || 0;
@@ -235,7 +235,7 @@ function loadStudentStats() {
     }
 
     // Update quiz stats
-    const quizStats = dataManager.getStudentQuizStats(currentStudent.id);
+    const quizStats = await dataManager.getStudentQuizStats(currentStudent.id);
     const quizPercentage = quizStats.averagePercentage ? parseFloat(quizStats.averagePercentage) : 0;
     
     document.getElementById('quizPercentageCompact').textContent = Math.round(quizPercentage) + '%';
@@ -251,13 +251,13 @@ function loadStudentStats() {
 }
 
 // Load Student Tasks
-function loadStudentTasks() {
+async function loadStudentTasks() {
     // Load daily tasks
-    const dailyTasks = dataManager.getDailyTasksForStudent(currentStudent.id);
-    loadDailyTaskSection('dailyTasksList', dailyTasks);
+    const dailyTasks = await dataManager.getDailyTasksForStudent(currentStudent.id);
+    await loadDailyTaskSection('dailyTasksList', dailyTasks);
     
     // Load regular one-time tasks
-    const tasks = dataManager.getRegularTasksForStudent(currentStudent.id);
+    const tasks = await dataManager.getRegularTasksForStudent(currentStudent.id);
     
     const pendingTasks = tasks.filter(task => 
         !task.completedBy.includes(currentStudent.id)

@@ -127,6 +127,20 @@ async function updateDashboard() {
 // Load Students Progress
 async function loadStudentsProgress() {
     const progressList = document.getElementById('studentsProgressList');
+    // Show skeletons while loading
+    progressList.innerHTML = `
+        <div class="skeleton-list">
+            ${Array.from({length: 5}).map(() => `
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton skeleton-title" style="width:40%"></div>
+                        <div class="skeleton skeleton-text" style="width:70%"></div>
+                    </div>
+                    <div class="skeleton skeleton-badge"></div>
+                </div>
+            `).join('')}
+        </div>`;
     const studentsProgress = await dataManager.getStudentProgress();
 
     if (studentsProgress.length === 0) {
@@ -231,7 +245,7 @@ function handleAssignToAllChange() {
 }
 
 // Handle Create Task
-function handleCreateTask(e) {
+async function handleCreateTask(e) {
     e.preventDefault();
 
     const title = document.getElementById('taskTitle').value.trim();
@@ -257,7 +271,7 @@ function handleCreateTask(e) {
         deadline: deadline
     };
 
-    dataManager.addTask(newTask);
+    await dataManager.addTask(newTask);
 
     // Reset form
     e.target.reset();
@@ -266,11 +280,11 @@ function handleCreateTask(e) {
     alert('✅ Task created successfully!');
     
     // Update dashboard and task list
-    updateDashboard();
-    loadStudentCheckboxes();
+    await updateDashboard();
+    await loadStudentCheckboxes();
     
     // Switch to View All Tasks tab
-    switchManageTaskTabProgrammatic('view');
+    await switchManageTaskTabProgrammatic('view');
 }
 
 // Load Students List
@@ -359,7 +373,7 @@ function closeAddStudentModal() {
 }
 
 // Handle Add Student
-function handleAddStudent(e) {
+async function handleAddStudent(e) {
     e.preventDefault();
 
     // Get all form values
@@ -457,11 +471,11 @@ function handleAddStudent(e) {
     }
 
     // Add student
-    const newStudent = dataManager.addStudent(studentData);
+    const newStudent = await dataManager.addStudent(studentData);
 
     // Add initial note if provided
     if (initialNotes && newStudent) {
-        dataManager.addStudentNote(newStudent.id, {
+        await dataManager.addStudentNote(newStudent.id, {
             category: 'General',
             note: initialNotes
         });
@@ -472,20 +486,20 @@ function handleAddStudent(e) {
     closeAddStudentModal();
     
     // Refresh UI
-    loadStudentsList();
-    loadStudentCheckboxes();
-    updateDashboard();
+    await loadStudentsList();
+    await loadStudentCheckboxes();
+    await updateDashboard();
     
     alert('✅ Student added successfully!');
 }
 
 // Delete Student
-function deleteStudent(id) {
+async function deleteStudent(id) {
     if (confirm('Are you sure you want to remove this student? This action cannot be undone.')) {
-        dataManager.deleteStudent(id);
-        loadStudentsList();
-        loadStudentCheckboxes();
-        updateDashboard();
+        await dataManager.deleteStudent(id);
+        await loadStudentsList();
+        await loadStudentCheckboxes();
+        await updateDashboard();
     }
 }
 
@@ -757,10 +771,10 @@ async function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
 }
 
 // Show Empty State for Overview
-function showEmptyStateOverview() {
+async function showEmptyStateOverview() {
     const tbody = document.getElementById('overviewTableBody');
-    const dailyTasks = dataManager.getDailyTasks();
-    const students = dataManager.getStudents();
+    const dailyTasks = await dataManager.getDailyTasks();
+    const students = await dataManager.getStudents();
     
     if (!tbody) return;
     
@@ -937,7 +951,6 @@ async function loadAllTasks() {
 
 // Render Task Card (Compact List Item)
 function renderTaskCard(task) {
-    const students = dataManager.getStudents();
     
     let completionText = '';
     if (task.type === 'one-time') {
@@ -1009,22 +1022,27 @@ function filterTasks(type) {
 function applyTaskFilter() {
     const oneTimeCategory = document.getElementById('oneTimeTasksCategory');
     const dailyCategory = document.getElementById('dailyTasksCategory');
+    const oneTimeList = document.getElementById('oneTimeTasksList');
+    const dailyList = document.getElementById('dailyTasksList');
+
+    const oneTimeHasItems = !!(oneTimeList && oneTimeList.innerHTML && oneTimeList.innerHTML.trim());
+    const dailyHasItems = !!(dailyList && dailyList.innerHTML && dailyList.innerHTML.trim());
     
     if (currentTaskFilter === 'all') {
-        oneTimeCategory.style.display = oneTimeCategory.querySelector('.tasks-grid-manage').innerHTML ? 'block' : 'none';
-        dailyCategory.style.display = dailyCategory.querySelector('.tasks-grid-manage').innerHTML ? 'block' : 'none';
+        if (oneTimeCategory) oneTimeCategory.style.display = oneTimeHasItems ? 'block' : 'none';
+        if (dailyCategory) dailyCategory.style.display = dailyHasItems ? 'block' : 'none';
     } else if (currentTaskFilter === 'one-time') {
-        oneTimeCategory.style.display = 'block';
-        dailyCategory.style.display = 'none';
+        if (oneTimeCategory) oneTimeCategory.style.display = 'block';
+        if (dailyCategory) dailyCategory.style.display = 'none';
     } else if (currentTaskFilter === 'daily') {
-        oneTimeCategory.style.display = 'none';
-        dailyCategory.style.display = 'block';
+        if (oneTimeCategory) oneTimeCategory.style.display = 'none';
+        if (dailyCategory) dailyCategory.style.display = 'block';
     }
 }
 
 // Show Edit Task Modal
-function showEditTaskModal(taskId) {
-    const task = dataManager.getTaskById(taskId);
+async function showEditTaskModal(taskId) {
+    const task = await dataManager.getTaskById(taskId);
     if (!task) {
         alert('❌ Task not found!');
         return;
@@ -1041,7 +1059,7 @@ function showEditTaskModal(taskId) {
     handleEditTaskTypeChange();
     
     // Load student checkboxes for edit form
-    loadEditStudentCheckboxes(task.assignedTo);
+    await loadEditStudentCheckboxes(task.assignedTo);
     
     // Show modal
     document.getElementById('editTaskModal').style.display = 'block';
@@ -1054,8 +1072,8 @@ function closeEditTaskModal() {
 }
 
 // Load Student Checkboxes for Edit Form
-function loadEditStudentCheckboxes(assignedStudentIds) {
-    const students = dataManager.getStudents();
+async function loadEditStudentCheckboxes(assignedStudentIds) {
+    const students = await dataManager.getStudents();
     const container = document.getElementById('editStudentCheckboxes');
     
     container.innerHTML = students.map(student => {
@@ -1100,7 +1118,7 @@ function handleEditAssignToAllChange() {
 }
 
 // Handle Update Task
-function handleUpdateTask(e) {
+async function handleUpdateTask(e) {
     e.preventDefault();
     
     const taskId = document.getElementById('editTaskId').value;
@@ -1127,31 +1145,31 @@ function handleUpdateTask(e) {
         deadline: deadline
     };
     
-    const result = dataManager.updateTask(taskId, updatedTask);
+    const result = await dataManager.updateTask(taskId, updatedTask);
     
     if (result) {
         alert('✅ Task updated successfully!');
         closeEditTaskModal();
-        loadAllTasks();
-        updateDashboard();
+        await loadAllTasks();
+        await updateDashboard();
     } else {
         alert('❌ Failed to update task!');
     }
 }
 
 // Handle Delete Task
-function handleDeleteTask(taskId) {
-    const task = dataManager.getTaskById(taskId);
+async function handleDeleteTask(taskId) {
+    const task = await dataManager.getTaskById(taskId);
     if (!task) return;
     
     const studentCount = task.assignedTo.length;
     const confirmMsg = `⚠️ Are you sure you want to delete "${task.title}"?\n\nThis will remove the task from ${studentCount} student${studentCount > 1 ? 's' : ''}.\n\nThis action cannot be undone.`;
     
     if (confirm(confirmMsg)) {
-        dataManager.deleteTask(taskId);
+        await dataManager.deleteTask(taskId);
         alert('✅ Task deleted successfully!');
-        loadAllTasks();
-        updateDashboard();
+        await loadAllTasks();
+        await updateDashboard();
     }
 }
 
