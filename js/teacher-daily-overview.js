@@ -3,9 +3,19 @@
 let selectedDate = new Date();
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     initializeDailyOverview();
     setupMobileMenu();
-});
+}
 
 // Initialize Daily Overview Page
 function initializeDailyOverview() {
@@ -14,30 +24,30 @@ function initializeDailyOverview() {
 }
 
 // Select Today
-function selectToday() {
+async function selectToday() {
     selectedDate = new Date();
     updateDateDisplay();
     updateActiveButton('todayBtn');
-    loadOverviewData();
+    await loadOverviewData();
 }
 
 // Select Yesterday
-function selectYesterday() {
+async function selectYesterday() {
     selectedDate = new Date();
     selectedDate.setDate(selectedDate.getDate() - 1);
     updateDateDisplay();
     updateActiveButton('yesterdayBtn');
-    loadOverviewData();
+    await loadOverviewData();
 }
 
 // Select Custom Date
-function selectCustomDate() {
+async function selectCustomDate() {
     const dateInput = document.getElementById('customDate');
     if (dateInput.value) {
         selectedDate = new Date(dateInput.value);
         updateDateDisplay();
         updateActiveButton(null);
-        loadOverviewData();
+        await loadOverviewData();
     }
 }
 
@@ -46,11 +56,11 @@ function updateDateDisplay() {
     const displayElement = document.getElementById('selectedDateDisplay');
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const formattedDate = selectedDate.toLocaleDateString('en-US', options);
-    
+
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (isSameDay(selectedDate, today)) {
         displayElement.textContent = `Today - ${formattedDate}`;
     } else if (isSameDay(selectedDate, yesterday)) {
@@ -65,81 +75,84 @@ function updateActiveButton(buttonId) {
     document.querySelectorAll('.date-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     if (buttonId) {
         document.getElementById(buttonId).classList.add('active');
     }
 }
 
 // Load Overview Data
-function loadOverviewData() {
-    const students = dataManager.getStudents();
-    const dailyTasks = dataManager.getDailyTasks();
-    
+async function loadOverviewData() {
+    const students = await dataManager.getStudents();
+    const dailyTasks = await getDailyTasks();
+
     if (students.length === 0 || dailyTasks.length === 0) {
-        showEmptyState();
+        await showEmptyState();
         return;
     }
-    
+
     // Calculate student performance
-    const studentPerformance = students.map(student => {
-        const completedCount = dailyTasks.filter(task => {
-            return dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateString(selectedDate));
-        }).length;
-        
+    const studentPerformance = [];
+    for (const student of students) {
+        let completedCount = 0;
+        for (const task of dailyTasks) {
+            const isCompleted = await isDailyTaskCompletedForDate(task.id, student.id, getDateString(selectedDate));
+            if (isCompleted) completedCount++;
+        }
+
         const percentage = dailyTasks.length > 0 ? Math.round((completedCount / dailyTasks.length) * 100) : 0;
-        
-        return {
+
+        studentPerformance.push({
             student: student,
             completed: completedCount,
             total: dailyTasks.length,
             percentage: percentage
-        };
-    });
-    
+        });
+    }
+
     // Update statistics
     updateStatistics(students.length, dailyTasks.length, studentPerformance);
-    
+
     // Display best performing students
     displayBestStudents(studentPerformance);
-    
+
     // Build and display table
-    buildOverviewTable(studentPerformance, dailyTasks);
+    await buildOverviewTable(studentPerformance, dailyTasks);
 }
 
 // Update Statistics
 function updateStatistics(studentCount, taskCount, studentPerformance) {
     document.getElementById('totalStudents').textContent = studentCount;
     document.getElementById('totalTasks').textContent = taskCount;
-    
+
     // Calculate overall completion
     const totalPossible = studentCount * taskCount;
     const totalCompleted = studentPerformance.reduce((sum, sp) => sum + sp.completed, 0);
     const overallPercentage = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
-    
+
     document.getElementById('overallCompletion').textContent = overallPercentage + '%';
 }
 
 // Display Best Performing Students
 function displayBestStudents(studentPerformance) {
     const container = document.getElementById('bestStudentsGrid');
-    
+
     // Sort by percentage (descending) and take top 3
     const topStudents = studentPerformance
         .filter(sp => sp.percentage > 0)
         .sort((a, b) => b.percentage - a.percentage)
         .slice(0, 3);
-    
+
     if (topStudents.length === 0) {
         container.innerHTML = '<div class="no-best-students">No completed tasks yet for this date.</div>';
         return;
     }
-    
+
     container.innerHTML = topStudents.map((sp, index) => {
         const rank = index + 1;
         const rankClass = `rank-${rank}`;
         const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉';
-        
+
         return `
             <div class="best-student-card ${rankClass}">
                 <div class="best-student-rank">${medal}</div>
@@ -154,16 +167,16 @@ function displayBestStudents(studentPerformance) {
 }
 
 // Build Overview Table
-function buildOverviewTable(studentPerformance, dailyTasks) {
+async function buildOverviewTable(studentPerformance, dailyTasks) {
     const table = document.getElementById('overviewTable');
     const thead = table.querySelector('thead tr');
     const tbody = document.getElementById('overviewTableBody');
-    
+
     // Clear existing task columns (keep first 2 and last column)
     while (thead.children.length > 3) {
         thead.removeChild(thead.children[2]);
     }
-    
+
     // Add task columns
     dailyTasks.forEach(task => {
         const th = document.createElement('th');
@@ -171,31 +184,33 @@ function buildOverviewTable(studentPerformance, dailyTasks) {
         th.title = task.title; // Full title on hover
         thead.insertBefore(th, thead.lastElementChild);
     });
-    
+
     // Build rows
-    tbody.innerHTML = studentPerformance.map(sp => {
+    const rows = [];
+    for (const sp of studentPerformance) {
         const student = sp.student;
         const initial = student.name.charAt(0).toUpperCase();
         const isTopPerformer = sp.percentage >= 80;
-        
+
         // Determine completion color class
         let completionClass = 'poor';
         if (sp.percentage >= 80) completionClass = 'excellent';
         else if (sp.percentage >= 60) completionClass = 'good';
         else if (sp.percentage >= 40) completionClass = 'average';
-        
+
         // Build task status cells
-        const taskCells = dailyTasks.map(task => {
-            const isCompleted = dataManager.isDailyTaskCompletedForDate(task.id, student.id, getDateString(selectedDate));
+        const taskCells = [];
+        for (const task of dailyTasks) {
+            const isCompleted = await isDailyTaskCompletedForDate(task.id, student.id, getDateString(selectedDate));
             const statusIcon = isCompleted ? '✅' : '❌';
             const statusClass = isCompleted ? 'completed' : 'pending';
-            
-            return `<td><span class="task-status ${statusClass}">${statusIcon}</span></td>`;
-        }).join('');
-        
+
+            taskCells.push(`<td><span class="task-status ${statusClass}">${statusIcon}</span></td>`);
+        }
+
         const trophyIcon = isTopPerformer ? '<span class="completion-trophy">🏆</span>' : '';
-        
-        return `
+
+        rows.push(`
             <tr class="${isTopPerformer ? 'top-performer' : ''}">
                 <td class="sticky-col student-col">
                     <div class="student-cell">
@@ -212,30 +227,32 @@ function buildOverviewTable(studentPerformance, dailyTasks) {
                         <span class="info-badge">Section ${student.section || 'N/A'}</span>
                     </div>
                 </td>
-                ${taskCells}
+                ${taskCells.join('')}
                 <td class="sticky-col completion-col">
                     <span class="completion-cell ${completionClass}">
                         ${sp.percentage}%${trophyIcon}
                     </span>
                 </td>
             </tr>
-        `;
-    }).join('');
+        `);
+    }
+
+    tbody.innerHTML = rows.join('');
 }
 
 // Show Empty State
-function showEmptyState() {
+async function showEmptyState() {
     const tbody = document.getElementById('overviewTableBody');
-    const dailyTasks = dataManager.getDailyTasks();
-    const students = dataManager.getStudents();
-    
+    const dailyTasks = await getDailyTasks();
+    const students = await dataManager.getStudents();
+
     let message = '';
     if (students.length === 0) {
         message = '<i class="fas fa-users-slash"></i><h3>No Students Found</h3><p>Please add students first to see the overview.</p>';
     } else if (dailyTasks.length === 0) {
         message = '<i class="fas fa-tasks"></i><h3>No Daily Tasks Found</h3><p>Please create daily routine tasks to track completion.</p>';
     }
-    
+
     tbody.innerHTML = `
         <tr>
             <td colspan="100">
@@ -245,7 +262,7 @@ function showEmptyState() {
             </td>
         </tr>
     `;
-    
+
     document.getElementById('bestStudentsGrid').innerHTML = '<div class="no-best-students">No data available.</div>';
     document.getElementById('totalStudents').textContent = students.length;
     document.getElementById('totalTasks').textContent = dailyTasks.length;
@@ -253,19 +270,19 @@ function showEmptyState() {
 }
 
 // Helper: Get Daily Tasks
-dataManager.getDailyTasks = function() {
-    const tasks = this.getTasks();
+async function getDailyTasks() {
+    const tasks = await dataManager.getTasks();
     return tasks.filter(task => task.type === 'daily');
-};
+}
 
 // Helper: Check if daily task is completed for specific date
-dataManager.isDailyTaskCompletedForDate = function(taskId, studentId, dateString) {
-    const task = this.getTaskById(taskId);
+async function isDailyTaskCompletedForDate(taskId, studentId, dateString) {
+    const task = await dataManager.getTaskById(taskId);
     if (!task || !task.dailyCompletions) return false;
-    
+
     const studentCompletions = task.dailyCompletions[studentId] || [];
     return studentCompletions.includes(dateString);
-};
+}
 
 // Helper: Get date string in YYYY-MM-DD format
 function getDateString(date) {
@@ -292,11 +309,10 @@ function truncateText(text, maxLength) {
 function setupMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
-    
+
     if (menuToggle) {
         menuToggle.addEventListener('click', function() {
             sidebar.classList.toggle('active');
         });
     }
 }
-

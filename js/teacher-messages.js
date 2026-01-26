@@ -1,12 +1,22 @@
 // Teacher Messages List JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     loadChatsList();
     setupMobileMenu();
-    
+
     // Auto refresh every 5 seconds to check for new messages
     setInterval(() => loadChatsList(), 5000);
-});
+}
 
 // Load Chats List
 async function loadChatsList() {

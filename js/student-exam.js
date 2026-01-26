@@ -8,26 +8,36 @@ let timeRemaining = 0; // in seconds
 let startTime = null;
 
 // Initialize
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+async function initializePage() {
     const urlParams = new URLSearchParams(window.location.search);
     const quizId = urlParams.get('quizId');
     const studentId = getStudentId();
-    
+
     if (!quizId || !studentId) {
         alert('❌ Invalid quiz or student!');
         window.location.href = 'student-dashboard.html';
         return;
     }
-    
+
     // Check if student already took this quiz
     if (await dataManager.hasStudentTakenQuiz(quizId, studentId)) {
         alert('⚠️ You have already taken this quiz!');
         window.location.href = 'student-dashboard.html';
         return;
     }
-    
+
     await loadQuiz(quizId);
-});
+}
 
 // Get student ID from session
 function getStudentId() {

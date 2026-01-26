@@ -3,9 +3,19 @@
 let currentStudent = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     initializeStudentDetail();
     setupMobileMenu();
-});
+}
 
 // Initialize Student Detail Page
 async function initializeStudentDetail() {

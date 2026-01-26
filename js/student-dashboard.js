@@ -3,13 +3,23 @@
 let currentStudent = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     initializeStudentDashboard();
     setupMobileMenu();
     updateUnreadBadge();
-    
+
     // Update unread badge every 5 seconds
     setInterval(() => updateUnreadBadge(), 5000);
-});
+}
 
 // Update Unread Badge
 async function updateUnreadBadge() {

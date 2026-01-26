@@ -3,15 +3,25 @@
 let currentStudentId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    initializeChat();
-    setupMessageForm();
-    
-    // Auto refresh messages every 3 seconds
-    setInterval(loadMessages, 3000);
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
 });
 
+// Initialize page after dataManager is ready
+function initializePage() {
+    initializeChat();
+    setupMessageForm();
+
+    // Auto refresh messages every 3 seconds
+    setInterval(() => loadMessages(), 3000);
+}
+
 // Initialize Chat
-function initializeChat() {
+async function initializeChat() {
     currentStudentId = sessionStorage.getItem('currentStudentId');
 
     if (!currentStudentId) {
@@ -20,14 +30,14 @@ function initializeChat() {
         return;
     }
 
-    loadMessages();
-    markAsRead();
+    await loadMessages();
+    await markAsRead();
 }
 
 // Load Messages
-function loadMessages() {
+async function loadMessages() {
     const messagesArea = document.getElementById('messagesArea');
-    const messages = dataManager.getMessagesForStudent(currentStudentId);
+    const messages = await dataManager.getMessagesForStudent(currentStudentId);
 
     if (messages.length === 0) {
         messagesArea.innerHTML = `
@@ -44,7 +54,7 @@ function loadMessages() {
 
     messages.forEach(message => {
         const messageDate = new Date(message.timestamp).toLocaleDateString();
-        
+
         // Add date separator if date changed
         if (messageDate !== lastDate) {
             messagesHTML += `<div class="date-separator">${formatDate(message.timestamp)}</div>`;
@@ -53,10 +63,10 @@ function loadMessages() {
 
         const isSent = message.sender === 'student';
         const messageClass = isSent ? 'message-sent' : 'message-received';
-        const time = new Date(message.timestamp).toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
+        const time = new Date(message.timestamp).toLocaleTimeString('en-US', {
+            hour: '2-digit',
             minute: '2-digit',
-            hour12: true 
+            hour12: true
         });
 
         messagesHTML += `
@@ -68,7 +78,7 @@ function loadMessages() {
     });
 
     messagesArea.innerHTML = messagesHTML;
-    
+
     // Scroll to bottom
     scrollToBottom();
 }
@@ -78,20 +88,20 @@ function setupMessageForm() {
     const form = document.getElementById('messageForm');
     const input = document.getElementById('messageInput');
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const message = input.value.trim();
         if (!message) return;
 
         // Send message
-        dataManager.sendMessage(currentStudentId, message, 'student');
+        await dataManager.sendMessage(currentStudentId, message, 'student');
 
         // Clear input
         input.value = '';
 
         // Reload messages
-        loadMessages();
+        await loadMessages();
     });
 
     // Focus input
@@ -99,8 +109,8 @@ function setupMessageForm() {
 }
 
 // Mark Messages as Read
-function markAsRead() {
-    dataManager.markMessagesAsRead(currentStudentId, 'student');
+async function markAsRead() {
+    await dataManager.markMessagesAsRead(currentStudentId, 'student');
 }
 
 // Scroll to Bottom
@@ -141,4 +151,3 @@ function goBack() {
 function goToDashboard() {
     window.location.href = 'student-dashboard.html';
 }
-

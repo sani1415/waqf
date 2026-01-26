@@ -4,28 +4,44 @@ let questionCounter = 0;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     loadQuizStudentCheckboxes();
     loadAllQuizzes();
     loadQuizResultsSelector();
     updatePendingCount();
-    
+
     // Add first question by default
     addQuestion();
-    
+
     // Setup form submission
     document.getElementById('createQuizForm').addEventListener('submit', handleCreateQuiz);
-});
+}
 
 /* ===================================
    TAB SWITCHING
    =================================== */
 
-function switchQuizTab(tabName) {
+function switchQuizTab(tabName, clickedElement) {
     // Update tab buttons
     document.querySelectorAll('.quiz-tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    // Use the passed element or find by tabName
+    if (clickedElement) {
+        clickedElement.classList.add('active');
+    } else {
+        const tabBtn = document.querySelector(`.quiz-tab-btn[onclick*="${tabName}"]`);
+        if (tabBtn) tabBtn.classList.add('active');
+    }
     
     // Hide all tab contents
     document.querySelectorAll('.quiz-tab-content').forEach(content => {

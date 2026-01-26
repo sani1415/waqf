@@ -1,9 +1,19 @@
 // Student List Page JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before loading data
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     loadStudentList();
     setupSearch();
-});
+}
 
 // Load Student List
 async function loadStudentList() {

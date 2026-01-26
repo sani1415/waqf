@@ -3,9 +3,19 @@
 // Some functions may still need async/await additions
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     initializeTeacherDashboard();
     setupEventListeners();
-});
+}
 
 // Initialize Dashboard
 async function initializeTeacherDashboard() {
@@ -46,7 +56,7 @@ function setupEventListeners() {
                 e.preventDefault();
                 const section = this.getAttribute('data-section');
                 if (section) {
-                    switchSection(section);
+                    switchSection(section, this);
                 }
             }
         });
@@ -105,12 +115,18 @@ function toggleOverlay(show = true) {
 }
 
 // Switch Between Sections
-async function switchSection(sectionName) {
+async function switchSection(sectionName, clickedElement) {
     // Update nav items
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    event.target.closest('.nav-item').classList.add('active');
+    // Use the passed element or find by data-section attribute
+    if (clickedElement) {
+        clickedElement.closest('.nav-item').classList.add('active');
+    } else {
+        const navItem = document.querySelector(`.nav-item[data-section="${sectionName}"]`);
+        if (navItem) navItem.classList.add('active');
+    }
 
     // Update sections
     document.querySelectorAll('.content-section').forEach(section => {
@@ -581,22 +597,22 @@ async function selectTodayOverview() {
 }
 
 // Select Yesterday for Overview
-function selectYesterdayOverview() {
+async function selectYesterdayOverview() {
     selectedDateOverview = new Date();
     selectedDateOverview.setDate(selectedDateOverview.getDate() - 1);
     updateDateDisplayOverview();
     updateActiveButtonOverview('yesterdayBtn');
-    loadOverviewDataDashboard();
+    await loadOverviewDataDashboard();
 }
 
 // Select Custom Date for Overview
-function selectCustomDateOverview() {
+async function selectCustomDateOverview() {
     const dateInput = document.getElementById('customDate');
     if (dateInput && dateInput.value) {
         selectedDateOverview = new Date(dateInput.value);
         updateDateDisplayOverview();
         updateActiveButtonOverview(null);
-        loadOverviewDataDashboard();
+        await loadOverviewDataDashboard();
     }
 }
 
@@ -875,11 +891,17 @@ function truncateTextOverview(text, maxLength) {
 }
 
 // Reset Sample Data
-function resetSampleData() {
+async function resetSampleData() {
     if (confirm('⚠️ This will clear all current data and reload fresh sample data. Continue?')) {
-        localStorage.clear();
-        alert('✅ Sample data reset! Page will reload now.');
-        location.reload();
+        try {
+            // Clear data using the storage adapter (works for both localStorage and Firebase)
+            await dataManager.storage.clear();
+            alert('✅ Sample data reset! Page will reload now.');
+            location.reload();
+        } catch (error) {
+            console.error('Error resetting data:', error);
+            alert('❌ Error resetting data. Please try again.');
+        }
     }
 }
 

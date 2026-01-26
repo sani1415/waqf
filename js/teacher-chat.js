@@ -4,12 +4,22 @@ let currentStudent = null;
 let currentStudentId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait for dataManager to be ready before initializing
+    if (typeof dataManager !== 'undefined' && dataManager.initialized) {
+        initializePage();
+    } else {
+        window.addEventListener('dataManagerReady', initializePage);
+    }
+});
+
+// Initialize page after dataManager is ready
+function initializePage() {
     initializeChat();
     setupMessageForm();
-    
+
     // Auto refresh messages every 3 seconds
     setInterval(() => loadMessages(), 3000);
-});
+}
 
 // Initialize Chat
 async function initializeChat() {
@@ -98,20 +108,20 @@ function setupMessageForm() {
     const form = document.getElementById('messageForm');
     const input = document.getElementById('messageInput');
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const message = input.value.trim();
         if (!message) return;
 
         // Send message
-        dataManager.sendMessage(currentStudentId, message, 'teacher');
+        await dataManager.sendMessage(currentStudentId, message, 'teacher');
 
         // Clear input
         input.value = '';
 
         // Reload messages
-        loadMessages();
+        await loadMessages();
     });
 
     // Focus input
