@@ -11,5 +11,8 @@
   },
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated"
+  },
+  "devDependencies": {
+    "firebase": "^12.8.0"
   }
 }

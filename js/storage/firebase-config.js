@@ -16,13 +16,13 @@
  *    - Start in "Test mode" for now (we'll secure it later)
  */
 
-// LIVE CONFIG - akhbaarulmadinah project with Firestore
+// LIVE CONFIG - waqful-madinah project with Firestore
 const firebaseConfig = {
-    apiKey: "AIzaSyCDa1_V3HUafIXWbc5afD60xopujPFHu7c",
-    authDomain: "akhbaarulmadinah.firebaseapp.com",
-    projectId: "akhbaarulmadinah",
-    storageBucket: "akhbaarulmadinah.firebasestorage.app",
-    messagingSenderId: "980144439407",
-    appId: "1:980144439407:web:8219d6fe22cf380be98d9a"
+    apiKey: "AIzaSyDdyV02qnRbrE_5aAfNcQ3auT2GRL1nZ60",
+    authDomain: "waqful-madinah.firebaseapp.com",
+    projectId: "waqful-madinah",
+    storageBucket: "waqful-madinah.firebasestorage.app",
+    messagingSenderId: "523390821312",
+    appId: "1:523390821312:web:c5b382cd80cd11ba9b5e25"
 };
 
