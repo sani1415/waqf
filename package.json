@@ -5,7 +5,11 @@
   "description": "Waqf task manager",
   "scripts": {
     "serve": "python -m http.server 8000",
-    "serve:8080": "python -m http.server 8080"
+    "serve:8080": "python -m http.server 8080",
+    "copy-public": "node scripts/copy-to-public.js",
+    "deploy": "npm run copy-public && firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated"
   }
 }
-

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+
+# Firebase & config
+firebase.json
+.firebaserc
+.firebase
+firestore.rules
+firestore.indexes.json
+storage.rules
+database.rules.json
+remoteconfig.template.json
+
+# Functions (not needed for hosting)
+functions
+
+# Data Connect
+dataconnect
+src
+
+# Git & CI
+.git
+.github
+
+# Documentation
+*.md
+docs
+
+# Scripts & dev files
+kill-dev-ports.ps1
+package.json
+package-lock.json
+
+# Prototypes & extras
+design-prototypes
+prototype.html
+APPLICATION_*.md
+IMPLEMENTATION_*.md
+QUICK_START.md
