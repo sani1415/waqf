@@ -224,3 +224,62 @@ python -m http.server 8000
 
 Then open: http://localhost:8000
 ```
+
+---
+
+## 🔥 Firebase CLI Commands
+
+All commands assume you're in the project root (`d:\programming\Running\waqf` or `./waqf`).
+
+### Deploy
+
+| Command | What it does |
+|---------|--------------|
+| `firebase deploy --only hosting` | Deploy web app to Firebase Hosting (runs `copy-public` first) |
+| `firebase deploy --only firestore` | Deploy Firestore rules and indexes |
+| `firebase deploy` | Deploy everything (hosting, firestore, etc.) — use if database/realtime-db not configured |
+
+### Project
+
+| Command | What it does |
+|---------|--------------|
+| `firebase use` | Show current project |
+| `firebase use waqful-madinah` | Switch to project `waqful-madinah` |
+| `firebase use --add` | Add a project and set it as default |
+| `firebase projects:list` | List all Firebase projects |
+
+### Apps
+
+| Command | What it does |
+|---------|--------------|
+| `firebase apps:list` | List apps in current project |
+| `firebase apps:create WEB waqf-web` | Create a new web app |
+| `firebase apps:sdkconfig WEB <appId>` | Print web app SDK config (for `firebase-config.js`) |
+
+### Emulators (local testing)
+
+| Command | What it does |
+|---------|--------------|
+| `firebase emulators:start --only hosting` | Run Hosting emulator locally |
+| `firebase emulators:start --only firestore` | Run Firestore emulator locally |
+
+### Scripts (package.json)
+
+| Command | What it does |
+|---------|--------------|
+| `npm run copy-public` | Copy app files to `public/` for deploy |
+| `npm run deploy` | Same as `npm run copy-public && firebase deploy --only hosting` |
+| `npm run serve` | Run local server on port 8000 |
+
+### Migrate to another project
+
+```bash
+firebase use <new-project-id>    # Switch project
+# Update js/storage/firebase-config.js with new project config
+node scripts/migrate-firestore.js   # Copy Firestore data (if needed)
+firebase deploy --only hosting      # Deploy
+```
+
+### Hosting URL
+
+- **Current project (waqful-madinah):** https://waqful-madinah.web.app

@@ -222,6 +222,24 @@ For issues or questions about this prototype, please refer to the code comments 
 
 ---
 
+## 🔥 Firebase CLI Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+| `firebase deploy --only hosting` | Deploy web app |
+| `firebase deploy --only firestore` | Deploy Firestore rules |
+| `firebase use` | Show current project |
+| `firebase use waqful-madinah` | Switch project |
+| `firebase projects:list` | List projects |
+| `npm run copy-public` | Copy files to `public/` before deploy |
+| `npm run deploy` | Copy + deploy hosting |
+
+**Live URL:** https://waqful-madinah.web.app  
+
+Full Firebase CLI reference: see **QUICK_START.md** (bottom section).
+
+---
+
 **Bismillah** - Built with care for educational purposes 📚✨
 
 Enjoy using the Task Management System!
