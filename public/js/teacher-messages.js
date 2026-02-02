@@ -13,9 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePage() {
     loadChatsList();
     setupMobileMenu();
-
-    // Auto refresh every 5 seconds to check for new messages
-    setInterval(() => loadChatsList(), 5000);
+    // No auto-refresh: list loads on open; when user returns to page they get latest
 }
 
 // Load Chats List

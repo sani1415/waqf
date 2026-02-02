@@ -13,10 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePage() {
     loadChatsList();
     setupMobileMenu();
-
-    // Auto refresh every 5 seconds to check for new messages
-    setInterval(() => loadChatsList(), 5000);
+    // No auto-refresh: list loads on open; when user returns to page they get latest
 }
+
+// Prevent blink: only re-render when chat list data actually changed
+let lastChatsSignature = null;
 
 // Load Chats List
 async function loadChatsList() {
@@ -35,8 +36,18 @@ async function loadChatsList() {
     if (!chats || chats.length === 0) {
         container.style.display = 'none';
         noChats.style.display = 'block';
+        lastChatsSignature = 'empty';
         return;
     }
+
+    // Skip DOM update if data unchanged (stops blink from Firestore real-time / repeated calls)
+    const signature = chats.map(c =>
+        `${c.student.id}|${c.lastMessage?.timestamp ?? ''}|${c.unreadCount}`
+    ).join(';');
+    if (lastChatsSignature === signature) {
+        return;
+    }
+    lastChatsSignature = signature;
 
     container.style.display = 'block';
     noChats.style.display = 'none';

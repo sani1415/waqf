@@ -494,6 +494,24 @@
     .chat-item-time {
         font-size: 0.75rem !important;
     }
+    
+    /* Profile / Tasks / Chat buttons - compact single row on small screens */
+    .chat-item-actions {
+        gap: 0.35rem;
+        margin-top: 0.35rem;
+        flex-wrap: nowrap;
+    }
+    
+    .chat-action-btn {
+        flex: 1;
+        min-width: 0;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .chat-action-btn i {
+        font-size: 0.7rem;
+    }
 }
 
 /* Scrollbar for messages area */

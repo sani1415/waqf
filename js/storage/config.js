@@ -28,55 +28,9 @@ const FIREBASE_ONLY = true;
 // ============================================
 const DEFAULT_STORAGE_TYPE = 'firebase';  // Options: 'localStorage', 'firebase'
 
-// Simple connection status icon (replaces banner)
+// Connection status icon removed per design (no longer shown on any page)
 function showConnectionIcon(status) {
-    try {
-        if (typeof document === 'undefined') return;
-
-        const id = 'db-connection-icon';
-        let icon = document.getElementById(id);
-        
-        if (!icon) {
-            icon = document.createElement('div');
-            icon.id = id;
-            icon.style.cssText = [
-                'position:fixed',
-                'top:12px',
-                'right:12px',
-                'z-index:99999',
-                'width:32px',
-                'height:32px',
-                'border-radius:50%',
-                'display:flex',
-                'align-items:center',
-                'justify-content:center',
-                'font-size:16px',
-                'cursor:pointer',
-                'transition:all 0.2s ease',
-                'box-shadow:0 2px 8px rgba(0,0,0,0.15)'
-            ].join(';');
-            document.body.appendChild(icon);
-        }
-
-        if (status === 'connected') {
-            icon.style.background = '#10b981';
-            icon.style.color = '#fff';
-            icon.innerHTML = '<i class="fas fa-cloud" style="font-size:16px;"></i>';
-            icon.title = 'Connected to Firebase';
-        } else if (status === 'failed') {
-            icon.style.background = '#ef4444';
-            icon.style.color = '#fff';
-            icon.innerHTML = '<i class="fas fa-cloud-slash" style="font-size:16px;"></i>';
-            icon.title = 'Firebase connection failed';
-        } else {
-            icon.style.background = '#6b7280';
-            icon.style.color = '#fff';
-            icon.innerHTML = '<i class="fas fa-cloud" style="font-size:16px; opacity:0.6;"></i>';
-            icon.title = 'Connecting...';
-        }
-    } catch (e) {
-        // ignore
-    }
+    // No-op: icon removed from UI on all pages
 }
 
 // Legacy function for compatibility (now just shows icon)

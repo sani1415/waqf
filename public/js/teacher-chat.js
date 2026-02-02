@@ -17,8 +17,7 @@ function initializePage() {
     initializeChat();
     setupMessageForm();
 
-    // Auto refresh messages every 3 seconds
-    setInterval(() => loadMessages(), 3000);
+    // No auto-refresh while viewing: messages load on open; when user returns they get latest
 }
 
 // Initialize Chat

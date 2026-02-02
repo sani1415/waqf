@@ -120,6 +120,21 @@ waqf - 1/
 └── README.md                    # This file
 ```
 
+## 📂 Source of truth & public folder
+
+**Edit only in the root.** The app has a single source of truth:
+
+- **Where you edit:** `css/`, `js/`, `pages/`, `index.html`, `404.html` (root folder)
+- **Do not edit:** The `public/` folder is **generated** by `npm run copy-public` for Firebase Hosting
+
+**Workflow:**
+
+1. **Development** – Change files only in the root (`css/`, `js/`, `pages/`, etc.). Never edit files inside `public/` manually.
+2. **Before deploy** – Run `npm run copy-public` to refresh `public/` from the root. (Or run `firebase deploy`; it runs this step automatically via `predeploy`.)
+3. **Local testing** – Prefer serving from the root (e.g. `npm run serve`). If you serve from `public/`, run `npm run copy-public` after changes so you don’t test stale files.
+
+The `public/` folder is in `.gitignore`, so only the root is committed. Everyone works from the same source; `public/` is always recreated by the copy script.
+
 ## 💾 Data Storage
 
 The application uses browser **localStorage** to store all data:

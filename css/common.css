@@ -284,10 +284,14 @@ button, .btn-primary, .btn-secondary { min-height: 44px; }
         padding: 0.45rem 0.65rem !important;
         font-size: 0.88rem !important;
     }
-    /* Compact modal */
+    /* Compact modal - scrollable on mobile so bottom area is reachable */
     .modal-content {
         padding: 1rem !important;
         width: 95% !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        margin: 1rem auto !important;
     }
     .modal-content h2 {
         font-size: 1rem !important;
