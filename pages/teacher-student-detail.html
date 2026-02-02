@@ -7,6 +7,7 @@
     <script src="../js/i18n.js"></script>
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/teacher.css">
+    <link rel="stylesheet" href="../css/messaging.css">
     <link rel="stylesheet" href="../css/teacher-student-detail.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -72,9 +73,9 @@
                 <div class="lang-switcher lang-switcher-compact" aria-label="Language">
                     <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')" title="English">EN</button>
                     <button type="button" class="lang-btn" data-lang="bn" onclick="setLang('bn')" title="বাংলা">বাং</button>
-                </div>
-                <div class="user-info">
-                    <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
                     <span data-i18n="teacher">Teacher</span>
                 </div>
             </div>
@@ -103,12 +104,50 @@
                 </div>
             </div>
 
-            <!-- Student Profile Info Section -->
-            <div class="student-profile-info-section">
-                <h3 class="profile-section-title">
-                    <i class="fas fa-user-circle"></i> <span data-i18n="student_information">Student Information</span>
-                </h3>
-                <div class="profile-info-grid">
+            <!-- Tabbed Interface for Student Details -->
+            <div class="tab-wrap-student-detail">
+                <!-- Tab Radio Inputs (hidden) -->
+                <input type="radio" name="student-tab" id="tab-profile" checked>
+                <input type="radio" name="student-tab" id="tab-tasks">
+                <input type="radio" name="student-tab" id="tab-exams">
+                <input type="radio" name="student-tab" id="tab-notes">
+                <input type="radio" name="student-tab" id="tab-message">
+
+                <!-- Tab Labels -->
+                <div class="tab-labels-student-detail">
+                    <label for="tab-profile">
+                        <i class="fas fa-user"></i>
+                        <span data-i18n="profile">Profile</span>
+                    </label>
+                    <label for="tab-tasks">
+                        <i class="fas fa-tasks"></i>
+                        <span data-i18n="tasks">Tasks</span>
+                    </label>
+                    <label for="tab-exams">
+                        <i class="fas fa-file-alt"></i>
+                        <span data-i18n="nav_exams">Exams</span>
+                    </label>
+                    <label for="tab-notes">
+                        <i class="fas fa-clipboard"></i>
+                        <span data-i18n="notes">Notes</span>
+                    </label>
+                    <label for="tab-message">
+                        <i class="fas fa-comments"></i>
+                        <span data-i18n="messages">Messages</span>
+                    </label>
+                </div>
+
+                <!-- Tab Panels -->
+                <div class="panels-student-detail">
+                    
+                    <!-- PROFILE TAB -->
+                    <div class="panel-student-detail panel-profile">
+                        <!-- Student Profile Info Section -->
+                        <div class="student-profile-info-section">
+                            <h3 class="profile-section-title">
+                                <i class="fas fa-user-circle"></i> <span data-i18n="student_information">Student Information</span>
+                            </h3>
+                            <div class="profile-info-grid">
                     <!-- Basic Information -->
                     <div class="info-card">
                         <h4><i class="fas fa-id-card"></i> <span data-i18n="basic_details">Basic Details</span></h4>
@@ -172,11 +211,11 @@
                             <span class="info-value" id="profileMemberSince">-</span>
                         </div>
                     </div>
-                </div>
-            </div>
+                            </div>
+                        </div>
 
-            <!-- Compact Dual Progress Section -->
-            <div class="compact-progress-section">
+                        <!-- Compact Dual Progress Section -->
+                        <div class="compact-progress-section">
                 <!-- Daily Progress -->
                 <div class="compact-progress-card daily-card">
                     <div class="compact-progress-header">
@@ -223,71 +262,95 @@
                         <span><i class="fas fa-trophy"></i> <strong id="quizPassedCompact">0</strong>/<span id="quizTotalCompact">0</span></span>
                         <span class="stat-label" data-i18n="passed_quizzes">Passed quizzes</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Compact Tab Navigation -->
-            <div class="compact-tab-navigation">
-                <button class="compact-tab-btn active" id="todayTabTeacher" onclick="switchTabTeacher('today')">
-                    <i class="fas fa-calendar-day"></i> <span data-i18n="todays_daily_tasks">Today's Daily Tasks</span>
-                </button>
-                <button class="compact-tab-btn" id="allTasksTabTeacher" onclick="switchTabTeacher('allTasks')">
-                    <i class="fas fa-clipboard-list"></i> <span data-i18n="all_onetime_tasks">All One-time Tasks</span>
-                </button>
-            </div>
-
-            <!-- Tasks Sections -->
-            <div class="tasks-detailed-view">
-                <!-- Today Tab - Daily Tasks -->
-                <div class="tab-content-teacher active" id="todayTabContentTeacher">
-                    <div class="task-section-detailed">
-                        <div class="section-header-detailed">
-                            <h2>
-                                <i class="fas fa-calendar-day"></i>
-                                <span data-i18n="todays_daily_tasks">Today's Daily Tasks</span>
-                            </h2>
-                            <span class="task-count" id="dailyTasksCountBadge">0 <span data-i18n="tasks_count">tasks</span></span>
                         </div>
-                        <div id="dailyTasksList" class="tasks-grid-detailed">
-                            <!-- Daily tasks will be loaded here -->
                         </div>
                     </div>
-                </div>
+                    <!-- END PROFILE TAB -->
 
-                <!-- All Tasks Tab - One-time Tasks -->
-                <div class="tab-content-teacher" id="allTasksTabContentTeacher">
-                    <!-- Pending Tasks -->
-                    <div class="task-section-detailed">
-                        <div class="section-header-detailed">
-                            <h2>
-                                <i class="fas fa-clipboard-list"></i>
-                                <span data-i18n="stat_pending_tasks">Pending Tasks</span>
-                            </h2>
-                            <span class="task-count" id="pendingCountBadge">0 <span data-i18n="tasks_count">tasks</span></span>
+                    <!-- TASKS TAB -->
+                    <div class="panel-student-detail panel-tasks">
+                        <!-- Date Picker Header -->
+                        <div class="task-date-header">
+                            <label for="date-picker-open" class="task-date-picker">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span class="date-display" id="currentDateDisplay">Loading...</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </label>
+                            <button class="btn-primary" onclick="assignNewTask()">
+                                <i class="fas fa-plus"></i> <span data-i18n="assign_task">Assign Task</span>
+                            </button>
                         </div>
-                        <div id="pendingTasksList" class="tasks-grid-detailed">
-                            <!-- Pending tasks will be loaded here -->
+
+                        <!-- Daily Tasks Excel Grid -->
+                        <h3 class="task-section-title">
+                            <i class="fas fa-sync-alt"></i>
+                            <span data-i18n="daily_tasks_completion">Daily Tasks Completion</span>
+                        </h3>
+                        <div class="task-grid-wrap">
+                            <table class="task-grid" id="dailyTasksGrid">
+                                <thead id="dailyTasksGridHead">
+                                    <tr>
+                                        <th class="task-col" data-i18n="daily_task">Daily Task</th>
+                                        <!-- Date columns will be populated by JS -->
+                                    </tr>
+                                </thead>
+                                <tbody id="dailyTasksGridBody">
+                                    <!-- Rows will be populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- One-Time Tasks Excel Grid -->
+                        <h3 class="task-section-title">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span data-i18n="onetime_tasks_progress">One-Time Tasks Progress</span>
+                        </h3>
+                        <div class="task-grid-wrap">
+                            <table class="task-grid" id="onetimeTasksGrid">
+                                <thead>
+                                    <tr>
+                                        <th class="task-col" data-i18n="onetime_task">One-Time Task</th>
+                                        <th data-i18n="assigned">Assigned</th>
+                                        <th data-i18n="due_date">Due Date</th>
+                                        <th data-i18n="status">Status</th>
+                                        <th data-i18n="completed">Completed</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="onetimeTasksGridBody">
+                                    <!-- Rows will be populated by JS -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+                    <!-- END TASKS TAB -->
 
-                    <!-- Completed Tasks -->
-                    <div class="task-section-detailed" style="margin-top: 2rem;">
-                        <div class="section-header-detailed">
-                            <h2>
-                                <i class="fas fa-check-double"></i>
-                                <span data-i18n="stat_completed_tasks">Completed Tasks</span>
-                            </h2>
-                            <span class="task-count success" id="completedCountBadge">0 <span data-i18n="tasks_count">tasks</span></span>
+                    <!-- EXAMS TAB -->
+                    <div class="panel-student-detail panel-exams">
+                        <div class="exams-header">
+                            <h4>
+                                <i class="fas fa-chart-line"></i>
+                                <span data-i18n="exam_results_student">Exam Results for this Student</span>
+                            </h4>
+                            <button class="btn-primary" onclick="createExamForStudent()">
+                                <i class="fas fa-plus"></i>
+                                <span data-i18n="create_exam">Create Exam</span>
+                            </button>
                         </div>
-                        <div id="completedTasksList" class="tasks-grid-detailed">
-                            <!-- Completed tasks will be loaded here -->
+                        <p class="exams-summary" data-i18n="click_exam_detail">Click any exam name to view questions, student answers, and detailed scoring.</p>
+                        <div id="examResultsList">
+                            <!-- Exam results will be populated by JS -->
                         </div>
+
+                        <!-- Exam Detail Modals (will be generated dynamically by JS, but here's a template) -->
+                        <!-- These will be created dynamically when exams are loaded -->
                     </div>
-                </div>
-            </div>
+                    <!-- END EXAMS TAB -->
 
-            <!-- Teacher Notes Section -->
-            <div class="teacher-notes-section">
+                    <!-- NOTES TAB -->
+                    <div class="panel-student-detail panel-notes">
+                        <!-- Existing Notes Section (moved here) -->
+                        <!-- Teacher Notes Section (existing) -->
+                        <div class="teacher-notes-section">
                 <div class="notes-header">
                     <h3 class="notes-title">
                         <i class="fas fa-clipboard"></i> <span data-i18n="teacher_notes_analysis">Teacher Notes & Analysis</span>
@@ -298,8 +361,61 @@
                 </div>
                 <div id="notesList" class="notes-container">
                     <!-- Notes will be dynamically loaded here -->
+                        </div>
+                    </div>
+                    </div>
+                    <!-- END NOTES TAB -->
+
+                    <!-- MESSAGE TAB -->
+                    <div class="panel-student-detail panel-message">
+                        <div class="message-area" id="messagesArea">
+                            <!-- Messages will be loaded by JS -->
+                        </div>
+                        <div class="message-input-wrap">
+                            <input type="text" id="messageInput" placeholder="Type a message..." data-i18n-placeholder="type_message">
+                            <button type="button" id="messageSendBtn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span data-i18n="send">Send</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- END MESSAGE TAB -->
+
                 </div>
+                <!-- END TAB PANELS -->
+
+                <!-- Date Picker Modal (moved here so it works regardless of tab) -->
+                <input type="checkbox" id="date-picker-open" class="modal-toggle">
+                <label for="date-picker-open" class="modal-backdrop" id="date-picker-backdrop"></label>
+                <div class="modal checkbox-modal" id="datePickerModal">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-calendar-alt"></i> <span data-i18n="select_date">Select Date</span></h3>
+                        <label for="date-picker-open" class="modal-close" data-i18n="close">Close</label>
+                    </div>
+                    <div class="modal-body date-picker-calendar">
+                        <p class="date-picker-month" id="datePickerMonth">...</p>
+                        <div class="date-picker-grid" id="datePickerGrid">
+                            <!-- Calendar grid will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Detail Sheet (hidden for now - can be enabled later) -->
+                <!-- 
+                <input type="checkbox" id="date-detail-open" class="modal-toggle">
+                <label for="date-detail-open" class="modal-backdrop" id="date-detail-backdrop"></label>
+                <div class="sheet checkbox-sheet" id="dateDetailSheet">
+                    <div class="sheet-handle"></div>
+                    <div class="sheet-header">
+                        <h3><i class="fas fa-calendar-day"></i> <span id="sheetDateTitle">...</span> <span data-i18n="daily_situation">— Daily Situation</span></h3>
+                        <label for="date-detail-open" class="sheet-close" data-i18n="close">Close</label>
+                    </div>
+                    <div class="sheet-body" id="sheetBody">
+                    </div>
+                </div>
+                -->
             </div>
+            <!-- END TAB WRAP -->
         </div>
     </div>
 

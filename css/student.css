@@ -1163,3 +1163,500 @@
     box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
+/* ===================================
+   STAT CARDS ROW
+   =================================== */
+
+.stat-cards-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--primary-soft);
+}
+
+.stat-card-daily {
+    border-left-color: #7B9EBD;
+}
+
+.stat-card-onetime {
+    border-left-color: #B8A5D6;
+}
+
+.stat-card-exam {
+    border-left-color: #88B68D;
+}
+
+.stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card-header i {
+    font-size: 0.9rem;
+}
+
+.stat-card-daily .stat-card-header i { color: #7B9EBD; }
+.stat-card-onetime .stat-card-header i { color: #B8A5D6; }
+.stat-card-exam .stat-card-header i { color: #88B68D; }
+
+.stat-card-percentage {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card-progress {
+    height: 6px;
+    background: var(--bg-primary);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.stat-card-progress-fill.daily-fill { background: linear-gradient(90deg, #7B9EBD, #A8C5E3); }
+.stat-card-progress-fill.onetime-fill { background: linear-gradient(90deg, #B8A5D6, #D4C6E8); }
+.stat-card-progress-fill.exam-fill { background: linear-gradient(90deg, #88B68D, #A8D4AD); }
+
+.stat-card-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.stat-card-detail i {
+    font-size: 0.75rem;
+    color: var(--success-soft);
+}
+
+.stat-card-detail .stat-label {
+    margin-left: auto;
+    font-size: 0.75rem;
+}
+
+/* ===================================
+   CSS-ONLY TABBED INTERFACE
+   =================================== */
+
+.tab-wrap-student {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+/* Hide radio inputs */
+.tab-wrap-student input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Tab labels row */
+.tab-labels-student {
+    display: flex;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.25rem;
+    gap: 0.25rem;
+    overflow-x: auto;
+}
+
+.tab-labels-student label {
+    flex: 1;
+    min-width: fit-content;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+}
+
+.tab-labels-student label:hover {
+    color: var(--primary-soft);
+    background: rgba(123, 158, 189, 0.1);
+}
+
+/* Active tab styling */
+.tab-wrap-student input#tab-today:checked ~ .tab-labels-student label[for="tab-today"],
+.tab-wrap-student input#tab-tasks:checked ~ .tab-labels-student label[for="tab-tasks"],
+.tab-wrap-student input#tab-exams:checked ~ .tab-labels-student label[for="tab-exams"],
+.tab-wrap-student input#tab-messages:checked ~ .tab-labels-student label[for="tab-messages"] {
+    background: var(--bg-secondary);
+    color: var(--primary-soft);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Tab panels */
+.panels-student {
+    padding: 1.5rem;
+    min-height: 400px;
+}
+
+.panel-student {
+    display: none;
+}
+
+/* Show active panel */
+.tab-wrap-student input#tab-today:checked ~ .panels-student .panel-today,
+.tab-wrap-student input#tab-tasks:checked ~ .panels-student .panel-tasks,
+.tab-wrap-student input#tab-exams:checked ~ .panels-student .panel-exams,
+.tab-wrap-student input#tab-messages:checked ~ .panels-student .panel-messages {
+    display: block;
+    animation: fadeInPanel 0.3s ease;
+}
+
+@keyframes fadeInPanel {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Unread dot in tab */
+.tab-unread-dot {
+    width: 8px;
+    height: 8px;
+    background: #E53E3E;
+    border-radius: 50%;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+/* ===================================
+   MESSAGES TAB STYLING
+   =================================== */
+
+.messages-tab-area {
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.messages-tab-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.messages-tab-input input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.messages-tab-input input:focus {
+    outline: none;
+    border-color: var(--primary-soft);
+}
+
+.messages-tab-input button {
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-soft);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s ease;
+}
+
+.messages-tab-input button:hover {
+    background: #6B8CAD;
+}
+
+/* Message bubbles */
+.msg-bubble {
+    max-width: 80%;
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.msg-bubble.sent {
+    margin-left: auto;
+    background: var(--primary-soft);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.msg-bubble.received {
+    margin-right: auto;
+    background: white;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+}
+
+.msg-time {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.msg-date-sep {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0.75rem 0;
+}
+
+.no-messages-placeholder {
+    text-align: center;
+    color: var(--text-light);
+    padding: 2rem;
+}
+
+.no-messages-placeholder i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* ===================================
+   RESPONSIVE ADJUSTMENTS FOR STUDENT DASHBOARD
+   =================================== */
+
+/* Hide sidebar completely on mobile */
+@media (max-width: 1024px) {
+    .student-sidebar {
+        display: none !important;
+    }
+    
+    .student-main-content {
+        margin-left: 0 !important;
+        padding: 1rem !important;
+    }
+    
+    .student-header {
+        padding: 0.75rem 0;
+        margin-bottom: 1rem;
+    }
+    
+    .student-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .student-header-actions .btn-secondary span {
+        display: none;
+    }
+    
+    .student-header-actions .btn-secondary {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .student-main-content {
+        padding: 0.75rem !important;
+    }
+    
+    .student-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .student-header h1 {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .student-header-actions {
+        gap: 0.5rem !important;
+    }
+    
+    .lang-switcher-compact {
+        gap: 0.25rem;
+    }
+    
+    .lang-switcher-compact .lang-btn {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Stat cards - horizontal scroll on mobile */
+    .stat-cards-row {
+        display: flex;
+        overflow-x: auto;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .stat-cards-row::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .stat-card {
+        flex: 0 0 auto;
+        min-width: 140px;
+        padding: 0.75rem;
+    }
+    
+    .stat-card-header {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-card-percentage {
+        font-size: 1.35rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-card-progress {
+        height: 4px;
+        margin-bottom: 0.35rem;
+    }
+    
+    .stat-card-detail {
+        font-size: 0.7rem;
+    }
+    
+    .stat-card-detail .stat-label {
+        display: none;
+    }
+    
+    /* Tabs - icons only, compact */
+    .tab-wrap-student {
+        border-radius: var(--radius-md);
+    }
+    
+    .tab-labels-student {
+        padding: 0.15rem;
+        gap: 0.15rem;
+    }
+    
+    .tab-labels-student label {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+    
+    .tab-labels-student label span {
+        display: none;
+    }
+    
+    .tab-labels-student label i {
+        font-size: 1rem;
+    }
+    
+    .tab-unread-dot {
+        width: 6px;
+        height: 6px;
+        top: 6px;
+        right: 6px;
+    }
+    
+    .panels-student {
+        padding: 0.75rem;
+        min-height: 300px;
+    }
+    
+    /* Task sections */
+    .section-title {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .today-date {
+        font-size: 0.75rem;
+    }
+    
+    /* Messages area */
+    .messages-tab-area {
+        min-height: 200px;
+        max-height: 280px;
+        padding: 0.75rem;
+    }
+    
+    .messages-tab-input {
+        gap: 0.35rem;
+    }
+    
+    .messages-tab-input input {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .messages-tab-input button {
+        padding: 0.6rem 0.75rem;
+    }
+    
+    .messages-tab-input button span {
+        display: none;
+    }
+    
+    .msg-bubble {
+        max-width: 85%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+    .student-main-content {
+        padding: 0.5rem !important;
+    }
+    
+    .stat-card {
+        min-width: 120px;
+        padding: 0.6rem;
+    }
+    
+    .stat-card-percentage {
+        font-size: 1.2rem;
+    }
+    
+    .panels-student {
+        padding: 0.5rem;
+    }
+}
+

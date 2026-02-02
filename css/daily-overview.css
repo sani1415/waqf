@@ -256,6 +256,7 @@
 /* Main Table */
 .overview-table {
     width: 100%;
+    min-width: 600px; /* Prevent columns from collapsing too much */
     border-collapse: collapse;
     background: white;
     font-size: 0.9rem;
@@ -315,26 +316,48 @@
 /* Sticky Columns */
 .sticky-col {
     position: sticky;
-    background: inherit;
     z-index: 5;
 }
 
+/* Student column - leftmost sticky */
 .student-col {
     left: 0;
     min-width: 150px;
+    max-width: 180px;
     text-align: left !important;
+    background: white;
+    z-index: 8;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
+/* Info column - second sticky from left */
 .info-col {
     left: 150px;
-    min-width: 120px;
+    min-width: 100px;
+    max-width: 120px;
     text-align: left !important;
+    background: white;
+    z-index: 7;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
+/* Completion column - rightmost sticky */
 .completion-col {
     right: 0;
-    min-width: 100px;
+    min-width: 80px;
+    max-width: 100px;
     font-weight: 600;
+    background: white;
+    z-index: 6;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Header sticky columns need the header background */
+.overview-table thead .student-col,
+.overview-table thead .info-col,
+.overview-table thead .completion-col {
+    background: linear-gradient(135deg, #7B9EBD 0%, #6B8CAD 100%);
+    z-index: 12;
 }
 
 /* Student Cell */
@@ -574,6 +597,19 @@
     
     .overview-table thead {
         display: none;
+    }
+    
+    /* Reset sticky positioning on mobile */
+    .sticky-col,
+    .student-col,
+    .info-col,
+    .completion-col {
+        position: static;
+        left: auto;
+        right: auto;
+        box-shadow: none;
+        min-width: auto;
+        max-width: none;
     }
     
     .overview-table tbody tr {

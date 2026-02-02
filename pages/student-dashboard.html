@@ -7,96 +7,17 @@
     <script src="../js/i18n.js"></script>
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/student.css">
+    <link rel="stylesheet" href="../css/messaging.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="student-dashboard-container">
-        <!-- Sidebar -->
+        <!-- Compact Sidebar (hidden on mobile, shown on desktop) -->
         <div class="student-sidebar" id="studentSidebar">
             <div class="student-profile">
-                <div class="student-profile-avatar">A</div>
+                <div class="student-profile-avatar" id="studentAvatar">A</div>
                 <h2 id="studentNameSidebar">Student Name</h2>
                 <p id="studentRole" data-i18n="student">Student</p>
-            </div>
-
-            <!-- Daily Tasks Progress -->
-            <div class="daily-progress-section">
-                <h3><i class="fas fa-calendar-day"></i> <span data-i18n="daily_tasks_progress">Daily Tasks Progress</span></h3>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill daily-progress-fill" id="dailyProgressBar" style="width: 0%"></div>
-                </div>
-                <div class="progress-percentage daily-percentage" id="dailyProgressPercent">0%</div>
-                <p class="progress-label" data-i18n="todays_completion">Today's Completion</p>
-                <div class="progress-stats">
-                    <div class="stat-row">
-                        <span><i class="fas fa-clipboard-list"></i> <span data-i18n="daily_total">Daily Total</span></span>
-                        <span id="dailyTotalStat">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span><i class="fas fa-check-circle"></i> <span data-i18n="completed_today">Completed Today</span></span>
-                        <span id="dailyCompletedStat">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span><i class="fas fa-clock"></i> <span data-i18n="pending_today">Pending Today</span></span>
-                        <span id="dailyPendingStat">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- One-time Tasks Progress -->
-            <div class="onetime-progress-section">
-                <h3><i class="fas fa-tasks"></i> <span data-i18n="onetime_tasks_progress">One-time Tasks Progress</span></h3>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill onetime-progress-fill" id="onetimeProgressBar" style="width: 0%"></div>
-                </div>
-                <div class="progress-percentage onetime-percentage" id="onetimeProgressPercent">0%</div>
-                <p class="progress-label" data-i18n="overall_completion">Overall Completion</p>
-                <div class="progress-stats">
-                    <div class="stat-row">
-                        <span><i class="fas fa-list"></i> <span data-i18n="stat_total_tasks">Total Tasks</span></span>
-                        <span id="onetimeTotalStat">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span><i class="fas fa-check-double"></i> <span data-i18n="legend_completed">Completed</span></span>
-                        <span id="onetimeCompletedStat">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span><i class="fas fa-hourglass-half"></i> <span data-i18n="stat_pending">Pending</span></span>
-                        <span id="onetimePendingStat">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Exam Progress Section -->
-            <div class="quiz-progress-section">
-                <div class="progress-header">
-                    <i class="fas fa-graduation-cap"></i>
-                    <h3 data-i18n="exam_performance">Exam Performance</h3>
-                </div>
-                <div class="progress-percentage quiz-percentage" id="quizProgressPercent">0%</div>
-                <p class="progress-label" data-i18n="average_score">Average Score</p>
-                <div class="progress-stats">
-                    <div class="stat-row">
-                        <span><i class="fas fa-clipboard-check"></i> <span data-i18n="exams_taken">Exams Taken</span></span>
-                        <span id="quizTakenStat">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span><i class="fas fa-trophy"></i> <span data-i18n="passed">Passed</span></span>
-                        <span id="quizPassedStat">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span><i class="fas fa-hourglass-half"></i> <span data-i18n="stat_pending">Pending</span></span>
-                        <span id="quizPendingStat">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="quick-actions">
-                <a href="/pages/student-chat.html" class="action-btn-sidebar chat-btn">
-                    <i class="fas fa-comments"></i>
-                    <span data-i18n="chat_with_teacher">Chat with Teacher</span>
-                    <span id="unreadBadge" class="unread-dot" style="display: none;"></span>
-                </a>
             </div>
 
             <div class="sidebar-footer">
@@ -126,94 +47,182 @@
                 </div>
             </div>
 
-            <!-- Tab Navigation -->
-            <div class="tab-navigation">
-                <button class="tab-btn active" id="todayTab" onclick="switchTab('today')">
-                    <i class="fas fa-calendar-day"></i>
-                    <span data-i18n="today">Today</span>
-                </button>
-                <button class="tab-btn" id="allTasksTab" onclick="switchTab('allTasks')">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span data-i18n="all_tasks">All Tasks</span>
-                </button>
-                <button class="tab-btn" id="quizzesTab" onclick="switchTab('quizzes')">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span data-i18n="nav_exams">Exams</span>
-                </button>
-            </div>
-
-            <!-- Today Tab Content -->
-            <div class="tab-content active" id="todayTabContent">
-                <!-- Daily Tasks Section -->
-                <div class="tasks-section daily-tasks-section">
-                    <div class="section-title">
+            <!-- Stat Cards Row -->
+            <div class="stat-cards-row">
+                <!-- Daily Tasks Card -->
+                <div class="stat-card stat-card-daily">
+                    <div class="stat-card-header">
                         <i class="fas fa-calendar-day"></i>
-                        <span data-i18n="todays_daily_tasks">Today's Daily Tasks</span>
-                        <span class="today-date" id="todayDate"></span>
+                        <span data-i18n="tab_daily">Daily Tasks</span>
                     </div>
-                    <div id="dailyTasksList" class="tasks-list daily-tasks-list">
-                        <!-- Daily tasks will be dynamically added here -->
+                    <div class="stat-card-percentage" id="dailyPercentageCard">0%</div>
+                    <div class="stat-card-progress">
+                        <div class="stat-card-progress-fill daily-fill" id="dailyProgressCard" style="width: 0%"></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- All Tasks Tab Content -->
-            <div class="tab-content" id="allTasksTabContent">
-                <!-- Pending Tasks Section -->
-                <div class="tasks-section" style="margin-bottom: 2rem;">
-                    <div class="section-title">
-                        <i class="fas fa-clipboard-list"></i>
-                        <span data-i18n="pending_tasks">Pending Tasks</span>
-                    </div>
-                    <div id="pendingTasksList" class="tasks-list">
-                        <!-- Pending tasks will be dynamically added here -->
+                    <div class="stat-card-detail">
+                        <i class="fas fa-check"></i>
+                        <span><strong id="dailyCompletedCard">0</strong>/<span id="dailyTotalCard">0</span></span>
+                        <span class="stat-label" data-i18n="todays_completion">Today's completion</span>
                     </div>
                 </div>
 
-                <!-- Completed Tasks Section -->
-                <div class="tasks-section">
-                    <div class="section-title">
-                        <i class="fas fa-check-circle"></i>
-                        <span data-i18n="completed_tasks">Completed Tasks</span>
+                <!-- One-time Tasks Card -->
+                <div class="stat-card stat-card-onetime">
+                    <div class="stat-card-header">
+                        <i class="fas fa-tasks"></i>
+                        <span data-i18n="category_onetime">One-time Tasks</span>
                     </div>
-                    <div id="completedTasksList" class="tasks-list">
-                        <!-- Completed tasks will be dynamically added here -->
+                    <div class="stat-card-percentage" id="onetimePercentageCard">0%</div>
+                    <div class="stat-card-progress">
+                        <div class="stat-card-progress-fill onetime-fill" id="onetimeProgressCard" style="width: 0%"></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Quizzes Tab Content -->
-            <div class="tab-content" id="quizzesTabContent">
-                <!-- Available Quizzes Section -->
-                <div class="tasks-section" style="margin-bottom: 2rem;">
-                    <div class="section-title">
-                        <i class="fas fa-clipboard-check"></i>
-                        <span data-i18n="available_quizzes">Available Quizzes</span>
-                    </div>
-                    <div id="availableQuizzesList" class="quizzes-grid-student">
-                        <!-- Available quizzes will be dynamically added here -->
+                    <div class="stat-card-detail">
+                        <i class="fas fa-check-double"></i>
+                        <span><strong id="onetimeCompletedCard">0</strong>/<span id="onetimeTotalCard">0</span></span>
+                        <span class="stat-label" data-i18n="overall_completion">Overall completion</span>
                     </div>
                 </div>
 
-                <!-- Completed Quizzes Section -->
-                <div class="tasks-section">
-                    <div class="section-title">
+                <!-- Exams Card -->
+                <div class="stat-card stat-card-exam">
+                    <div class="stat-card-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span data-i18n="nav_exams">Exams</span>
+                    </div>
+                    <div class="stat-card-percentage" id="examPercentageCard">0%</div>
+                    <div class="stat-card-progress">
+                        <div class="stat-card-progress-fill exam-fill" id="examProgressCard" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-card-detail">
                         <i class="fas fa-trophy"></i>
-                        <span data-i18n="completed_quizzes">Completed Quizzes</span>
+                        <span><strong id="examPassedCard">0</strong>/<span id="examTotalCard">0</span></span>
+                        <span class="stat-label" data-i18n="passed_quizzes">Passed quizzes</span>
                     </div>
-                    <div id="completedQuizzesList" class="quizzes-grid-student">
-                        <!-- Completed quizzes will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- CSS-only Tabbed Interface -->
+            <div class="tab-wrap-student">
+                <!-- Tab Radio Inputs (hidden) -->
+                <input type="radio" name="student-tab" id="tab-today" checked>
+                <input type="radio" name="student-tab" id="tab-tasks">
+                <input type="radio" name="student-tab" id="tab-exams">
+                <input type="radio" name="student-tab" id="tab-messages">
+
+                <!-- Tab Labels -->
+                <div class="tab-labels-student">
+                    <label for="tab-today">
+                        <i class="fas fa-calendar-day"></i>
+                        <span data-i18n="today">Today</span>
+                    </label>
+                    <label for="tab-tasks">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span data-i18n="tasks">Tasks</span>
+                    </label>
+                    <label for="tab-exams">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span data-i18n="nav_exams">Exams</span>
+                    </label>
+                    <label for="tab-messages">
+                        <i class="fas fa-comments"></i>
+                        <span data-i18n="messages">Messages</span>
+                        <span id="msgUnreadDot" class="tab-unread-dot" style="display: none;"></span>
+                    </label>
+                </div>
+
+                <!-- Tab Panels -->
+                <div class="panels-student">
+                    <!-- TODAY TAB -->
+                    <div class="panel-student panel-today">
+                        <div class="tasks-section daily-tasks-section">
+                            <div class="section-title">
+                                <i class="fas fa-calendar-day"></i>
+                                <span data-i18n="todays_daily_tasks">Today's Daily Tasks</span>
+                                <span class="today-date" id="todayDate"></span>
+                            </div>
+                            <div id="dailyTasksList" class="tasks-list daily-tasks-list">
+                                <!-- Daily tasks will be dynamically added here -->
+                            </div>
+                        </div>
                     </div>
+                    <!-- END TODAY TAB -->
+
+                    <!-- TASKS TAB -->
+                    <div class="panel-student panel-tasks">
+                        <!-- Pending Tasks Section -->
+                        <div class="tasks-section" style="margin-bottom: 2rem;">
+                            <div class="section-title">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span data-i18n="pending_tasks">Pending Tasks</span>
+                            </div>
+                            <div id="pendingTasksList" class="tasks-list">
+                                <!-- Pending tasks will be dynamically added here -->
+                            </div>
+                        </div>
+
+                        <!-- Completed Tasks Section -->
+                        <div class="tasks-section">
+                            <div class="section-title">
+                                <i class="fas fa-check-circle"></i>
+                                <span data-i18n="completed_tasks">Completed Tasks</span>
+                            </div>
+                            <div id="completedTasksList" class="tasks-list">
+                                <!-- Completed tasks will be dynamically added here -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END TASKS TAB -->
+
+                    <!-- EXAMS TAB -->
+                    <div class="panel-student panel-exams">
+                        <!-- Available Quizzes Section -->
+                        <div class="tasks-section" style="margin-bottom: 2rem;">
+                            <div class="section-title">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span data-i18n="available_quizzes">Available Quizzes</span>
+                            </div>
+                            <div id="availableQuizzesList" class="quizzes-grid-student">
+                                <!-- Available quizzes will be dynamically added here -->
+                            </div>
+                        </div>
+
+                        <!-- Completed Quizzes Section -->
+                        <div class="tasks-section">
+                            <div class="section-title">
+                                <i class="fas fa-trophy"></i>
+                                <span data-i18n="completed_quizzes">Completed Quizzes</span>
+                            </div>
+                            <div id="completedQuizzesList" class="quizzes-grid-student">
+                                <!-- Completed quizzes will be dynamically added here -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END EXAMS TAB -->
+
+                    <!-- MESSAGES TAB -->
+                    <div class="panel-student panel-messages">
+                        <div class="messages-tab-area" id="messagesTabArea">
+                            <!-- Messages will be loaded by JS -->
+                        </div>
+                        <div class="messages-tab-input">
+                            <input type="text" id="messageInputTab" placeholder="Type a message..." data-i18n-placeholder="type_message">
+                            <button type="button" id="messageSendBtnTab">
+                                <i class="fas fa-paper-plane"></i>
+                                <span data-i18n="send">Send</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- END MESSAGES TAB -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK (Uncomment when using Firebase) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Storage Adapters (in separate folder) -->
+    <!-- Storage Adapters -->
     <script src="../js/storage/adapter.js"></script>
     <script src="../js/storage/localStorage.js"></script>
     <script src="../js/storage/firebase.js"></script>
@@ -225,4 +234,3 @@
     <script src="../js/student-dashboard.js"></script>
 </body>
 </html>
-

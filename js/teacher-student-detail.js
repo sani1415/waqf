@@ -48,9 +48,19 @@ async function initializeStudentDetail() {
     displayStudentNotes();
     
     // Setup form handlers
-    document.getElementById('editStudentForm').addEventListener('submit', handleUpdateStudent);
-    document.getElementById('addNoteForm').addEventListener('submit', handleAddNote);
-    document.getElementById('editNoteForm').addEventListener('submit', handleEditNote);
+    const editForm = document.getElementById('editStudentForm');
+    if (editForm) editForm.addEventListener('submit', handleUpdateStudent);
+    const addNoteForm = document.getElementById('addNoteForm');
+    if (addNoteForm) addNoteForm.addEventListener('submit', handleAddNote);
+    const editNoteFormEl = document.getElementById('editNoteForm');
+    if (editNoteFormEl) editNoteFormEl.addEventListener('submit', handleEditNote);
+    
+    // Initialize new tabbed interface
+    await initializeTasksTab();
+    await loadStudentExams();
+    await loadMessagesTab();
+    setupMessageFormTab();
+    console.log('✅ New tabbed interface initialized');
 }
 
 // Load Student Profile
@@ -123,13 +133,22 @@ function showEditStudentModal() {
     document.getElementById('editParentEmail').value = currentStudent.parentEmail || '';
     document.getElementById('editEnrollmentDate').value = currentStudent.enrollmentDate || '';
     
-    // Show modal
-    document.getElementById('editStudentModal').style.display = 'block';
+    // Show modal (override checkbox-modal CSS)
+    const el = document.getElementById('editStudentModal');
+    if (el) {
+        el.style.display = 'block';
+        el.style.opacity = '1';
+        el.style.pointerEvents = 'auto';
+    }
 }
 
 // Close Edit Student Modal
 function closeEditStudentModal() {
-    document.getElementById('editStudentModal').style.display = 'none';
+    const el = document.getElementById('editStudentModal');
+    if (!el) return;
+    el.style.display = 'none';
+    el.style.opacity = '';
+    el.style.pointerEvents = '';
 }
 
 // Handle Update Student
@@ -232,13 +251,17 @@ async function loadStudentStats() {
         }, 100);
     }
 
-    // Update task count badges
-    document.getElementById('pendingCountBadge').textContent = 
-        stats.pending + (stats.pending === 1 ? ' task' : ' tasks');
-    document.getElementById('completedCountBadge').textContent = 
-        stats.completed + (stats.completed === 1 ? ' task' : ' tasks');
+    // Update task count badges (if they exist - old structure)
+    const pendingBadge = document.getElementById('pendingCountBadge');
+    if (pendingBadge) {
+        pendingBadge.textContent = stats.pending + (stats.pending === 1 ? ' task' : ' tasks');
+    }
+    const completedBadge = document.getElementById('completedCountBadge');
+    if (completedBadge) {
+        completedBadge.textContent = stats.completed + (stats.completed === 1 ? ' task' : ' tasks');
+    }
     
-    // Update daily tasks badge
+    // Update daily tasks badge (if exists - old structure)
     const dailyBadge = document.getElementById('dailyTasksCountBadge');
     if (dailyBadge) {
         dailyBadge.textContent = dailyTotal + (dailyTotal === 1 ? ' task' : ' tasks');
@@ -283,6 +306,9 @@ async function loadStudentTasks() {
 // Load Task Section
 function loadTaskSection(containerId, tasks, isCompleted) {
     const container = document.getElementById(containerId);
+    
+    // Skip if container doesn't exist (new tabbed layout)
+    if (!container) return;
 
     if (tasks.length === 0) {
         const message = isCompleted ? 
@@ -353,6 +379,9 @@ function loadTaskSection(containerId, tasks, isCompleted) {
 // Load Daily Task Section
 function loadDailyTaskSection(containerId, tasks) {
     const container = document.getElementById(containerId);
+    
+    // Skip if container doesn't exist (new tabbed layout)
+    if (!container) return;
 
     if (tasks.length === 0) {
         container.innerHTML = '<div class="empty-state-detailed"><i class="fas fa-calendar-check"></i><h3>No daily tasks assigned</h3><p>This student has no daily routine tasks yet.</p></div>';
@@ -400,19 +429,23 @@ function loadDailyTaskSection(containerId, tasks) {
     }).join('');
 }
 
-// Switch Tabs for Teacher
+// Switch Tabs for Teacher (legacy function - kept for compatibility)
 function switchTabTeacher(tabName) {
     // Remove active class from all tabs
     document.querySelectorAll('.compact-tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content-teacher').forEach(content => content.classList.remove('active'));
     
-    // Add active class to selected tab
+    // Add active class to selected tab (with null checks)
     if (tabName === 'today') {
-        document.getElementById('todayTabTeacher').classList.add('active');
-        document.getElementById('todayTabContentTeacher').classList.add('active');
+        const todayTab = document.getElementById('todayTabTeacher');
+        const todayContent = document.getElementById('todayTabContentTeacher');
+        if (todayTab) todayTab.classList.add('active');
+        if (todayContent) todayContent.classList.add('active');
     } else if (tabName === 'allTasks') {
-        document.getElementById('allTasksTabTeacher').classList.add('active');
-        document.getElementById('allTasksTabContentTeacher').classList.add('active');
+        const allTasksTab = document.getElementById('allTasksTabTeacher');
+        const allTasksContent = document.getElementById('allTasksTabContentTeacher');
+        if (allTasksTab) allTasksTab.classList.add('active');
+        if (allTasksContent) allTasksContent.classList.add('active');
     }
 }
 
@@ -580,13 +613,22 @@ function displayStudentNotes() {
 
 // Show Add Note Modal
 function showAddNoteModal() {
-    document.getElementById('addNoteModal').style.display = 'block';
+    const el = document.getElementById('addNoteModal');
+    if (!el) return;
+    el.style.display = 'block';
+    el.style.opacity = '1';
+    el.style.pointerEvents = 'auto';
 }
 
 // Close Add Note Modal
 function closeAddNoteModal() {
-    document.getElementById('addNoteModal').style.display = 'none';
-    document.getElementById('addNoteForm').reset();
+    const el = document.getElementById('addNoteModal');
+    if (!el) return;
+    el.style.display = 'none';
+    el.style.opacity = '';
+    el.style.pointerEvents = '';
+    const form = document.getElementById('addNoteForm');
+    if (form) form.reset();
 }
 
 // Handle Add Note
@@ -636,14 +678,24 @@ function openEditNoteModal(noteId) {
     document.getElementById('editNoteCategory').value = note.category;
     document.getElementById('editNoteText').value = note.note;
     
-    // Show modal
-    document.getElementById('editNoteModal').style.display = 'block';
+    // Show modal (override checkbox-modal CSS)
+    const el = document.getElementById('editNoteModal');
+    if (el) {
+        el.style.display = 'block';
+        el.style.opacity = '1';
+        el.style.pointerEvents = 'auto';
+    }
 }
 
 // Close Edit Note Modal
 function closeEditNoteModal() {
-    document.getElementById('editNoteModal').style.display = 'none';
-    document.getElementById('editNoteForm').reset();
+    const el = document.getElementById('editNoteModal');
+    if (!el) return;
+    el.style.display = 'none';
+    el.style.opacity = '';
+    el.style.pointerEvents = '';
+    const form = document.getElementById('editNoteForm');
+    if (form) form.reset();
 }
 
 // Handle Edit Note
@@ -708,3 +760,403 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+
+// ===================================
+// NEW TABBED INTERFACE FUNCTIONS
+// ===================================
+
+// Initialize date display and populate calendar
+async function initializeTasksTab() {
+    console.log('📋 Initializing Tasks Tab...');
+    updateCurrentDateDisplay();
+    populateDatePicker();
+    await populateDailyTasksGrid();
+    await populateOnetimeTasksGrid();
+}
+
+// Store the currently selected date for the tasks tab
+let selectedTasksDate = new Date();
+
+// Update current date display
+function updateCurrentDateDisplay() {
+    const dateStr = selectedTasksDate.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+    });
+    const elem = document.getElementById('currentDateDisplay');
+    if (elem) {
+        const today = new Date();
+        const isToday = selectedTasksDate.toDateString() === today.toDateString();
+        elem.textContent = dateStr + (isToday ? ' (Today)' : '');
+    }
+}
+
+// Handle date selection from the date picker
+function selectDateFromPicker(dateValue) {
+    selectedTasksDate = new Date(dateValue + 'T00:00:00');
+    updateCurrentDateDisplay();
+    // Refresh the grids with the new date
+    populateDailyTasksGrid();
+    populateOnetimeTasksGrid();
+    console.log('📅 Date changed to:', dateValue);
+}
+
+// Populate Date Picker Calendar
+function populateDatePicker() {
+    console.log('📅 Populating date picker...');
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    const monthElem = document.getElementById('datePickerMonth');
+    if (monthElem) {
+        monthElem.textContent = monthNames[month] + ' ' + year;
+    }
+    
+    const gridElem = document.getElementById('datePickerGrid');
+    if (!gridElem) {
+        console.log('⚠️ datePickerGrid element not found');
+        return;
+    }
+    console.log('📅 Found datePickerGrid, populating...');
+    
+    // Day headers
+    const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    let html = '';
+    dayHeaders.forEach(day => {
+        html += '<span class="day-head">' + day + '</span>';
+    });
+    
+    // Get first day of month and days in month
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonthDays = new Date(year, month, 0).getDate();
+    
+    // Previous month days
+    for (let i = firstDay - 1; i >= 0; i--) {
+        html += '<span class="day other">' + (prevMonthDays - i) + '</span>';
+    }
+    
+    // Current month days
+    for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = (d === today.getDate());
+        const className = 'day' + (isToday ? ' today' : '');
+        const dateValue = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        html += '<label for="date-picker-open" class="' + className + '" data-date="' + dateValue + '" onclick="selectDateFromPicker(\'' + dateValue + '\')">' + d + '</label>';
+    }
+    
+    // Next month days
+    const totalCells = firstDay + daysInMonth;
+    const remainingCells = 7 - (totalCells % 7);
+    if (remainingCells < 7) {
+        for (let d = 1; d <= remainingCells; d++) {
+            html += '<span class="day other">' + d + '</span>';
+        }
+    }
+    
+    gridElem.innerHTML = html;
+}
+
+// Populate Daily Tasks Grid (7-day view)
+async function populateDailyTasksGrid() {
+    const tbody = document.getElementById('dailyTasksGridBody');
+    if (!tbody) {
+        console.log('⚠️ dailyTasksGridBody not found');
+        return;
+    }
+    
+    // Get daily tasks for current student
+    const dailyTasks = await dataManager.getDailyTasksForStudent(currentStudent.id);
+    console.log('📋 Daily tasks loaded:', dailyTasks.length);
+    
+    if (!dailyTasks || dailyTasks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No daily tasks assigned yet.</td></tr>';
+        return;
+    }
+    
+    // Get 7 days ending on the selected date (oldest to newest, left to right)
+    const days = [];
+    const endDate = new Date(selectedTasksDate);
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(endDate);
+        date.setDate(endDate.getDate() - i);
+        days.push(date);
+    }
+    
+    // Build and update header row
+    const thead = document.querySelector('#dailyTasksGrid thead tr');
+    if (thead) {
+        // Keep only the first th (task-col), remove others
+        const existingThs = thead.querySelectorAll('th:not(.task-col)');
+        existingThs.forEach(th => th.remove());
+        
+        // Add new date columns
+        days.forEach(date => {
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayNum = date.getDate();
+            const isToday = date.toDateString() === today.toDateString();
+            const th = document.createElement('th');
+            th.className = isToday ? 'day-today' : '';
+            th.textContent = dayName + ' ' + dayNum;
+            thead.appendChild(th);
+        });
+    }
+    
+    // Build rows
+    let html = '';
+    const studentIdStr = currentStudent.id.toString();
+    
+    dailyTasks.forEach(task => {
+        html += '<tr><td class="task-col">' + task.title + '</td>';
+        
+        // Get completion dates for this student
+        const completions = task.dailyCompletions && task.dailyCompletions[studentIdStr] 
+            ? task.dailyCompletions[studentIdStr] 
+            : [];
+        
+        days.forEach(date => {
+            const dateStr = date.toISOString().split('T')[0];
+            const isDone = completions.includes(dateStr);
+            const isToday = date.toDateString() === today.toDateString();
+            const cellClass = isDone ? 'cell-done' : 'cell-miss';
+            const dayClass = isToday ? ' day-today' : '';
+            html += '<td class="' + cellClass + dayClass + '">' + (isDone ? '✓' : '—') + '</td>';
+        });
+        html += '</tr>';
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Populate One-Time Tasks Grid
+async function populateOnetimeTasksGrid() {
+    const tbody = document.getElementById('onetimeTasksGridBody');
+    if (!tbody) {
+        console.log('⚠️ onetimeTasksGridBody not found');
+        return;
+    }
+    
+    // Get one-time tasks for current student
+    const oneTimeTasks = await dataManager.getRegularTasksForStudent(currentStudent.id);
+    console.log('📋 One-time tasks loaded:', oneTimeTasks.length);
+    
+    if (!oneTimeTasks || oneTimeTasks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No one-time tasks assigned yet.</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    oneTimeTasks.forEach(task => {
+        const assignedDate = task.createdAt ? new Date(task.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-';
+        const dueDate = task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-';
+        
+        // Check if this student completed the task
+        const isCompleted = task.completedBy && task.completedBy.includes(currentStudent.id);
+        const statusColor = isCompleted ? 'var(--success-soft)' : 'var(--text-light)';
+        const statusText = isCompleted ? 'Completed' : 'Pending';
+        
+        // Get completion date if available
+        let completedText = '—';
+        if (isCompleted && task.completionDates && task.completionDates[currentStudent.id]) {
+            completedText = '✓ ' + new Date(task.completionDates[currentStudent.id]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else if (isCompleted) {
+            completedText = '✓';
+        }
+        
+        const cellClass = isCompleted ? 'cell-done' : 'cell-miss';
+        
+        html += '<tr>';
+        html += '<td class="task-col">' + task.title + '</td>';
+        html += '<td>' + assignedDate + '</td>';
+        html += '<td>' + dueDate + '</td>';
+        html += '<td><span style="color: ' + statusColor + ';">' + statusText + '</span></td>';
+        html += '<td class="' + cellClass + '">' + completedText + '</td>';
+        html += '</tr>';
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// Load exams for this student
+async function loadStudentExams() {
+    const container = document.getElementById('examResultsList');
+    if (!container) {
+        console.log('⚠️ examResultsList not found');
+        return;
+    }
+    
+    // Get quiz results for this student
+    const quizResults = await dataManager.getResultsForStudent(currentStudent.id);
+    console.log('📋 Quiz results loaded:', quizResults ? quizResults.length : 0);
+    
+    if (!quizResults || quizResults.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No exam attempts yet.</p>';
+        return;
+    }
+    
+    let html = '';
+    for (let index = 0; index < quizResults.length; index++) {
+        const result = quizResults[index];
+        // Get the quiz details
+        const quiz = await dataManager.getQuizById(result.quizId) || {};
+        const passed = result.passed;
+        const score = result.percentage || 0;
+        const totalQuestions = quiz.questions ? quiz.questions.length : 0;
+        const attemptDate = result.submittedAt ? new Date(result.submittedAt).toLocaleDateString('en-US', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        }) : '-';
+        const duration = quiz.duration || 0;
+        
+        const scoreClass = passed ? 'passed' : 'failed';
+        const badgeClass = passed ? 'badge passed' : 'badge failed';
+        const badgeText = passed ? 'Passed' : 'Failed';
+        
+        html += '<div class="exam-result-card">';
+        html += '<div>';
+        html += '<label for="exam-modal-' + index + '" class="exam-name">' + (quiz.title || 'Unnamed Quiz') + '</label>';
+        html += '<div class="exam-meta">Attempted ' + attemptDate + ' • ' + totalQuestions + ' questions • ' + duration + ' minutes</div>';
+        html += '</div>';
+        html += '<div style="display: flex; align-items: center; gap: 0.5rem;">';
+        html += '<span class="score ' + scoreClass + '">' + Math.round(score) + '%</span>';
+        html += '<span class="' + badgeClass + '">' + badgeText + '</span>';
+        html += '</div>';
+        html += '</div>';
+        
+        // Add modal for this exam
+        html += createExamDetailModal(result, quiz, index);
+    }
+    
+    container.innerHTML = html;
+}
+
+// Create exam detail modal HTML
+function createExamDetailModal(result, quiz, index) {
+    const score = result.percentage || 0;
+    const passed = result.passed;
+    const attemptDate = result.submittedAt ? new Date(result.submittedAt).toLocaleDateString('en-US', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    }) : '-';
+    const questions = quiz.questions || [];
+    const answers = Array.isArray(result.answers) ? result.answers : [];
+    
+    let html = '<input type="checkbox" id="exam-modal-' + index + '" class="modal-toggle">';
+    html += '<label for="exam-modal-' + index + '" class="modal-backdrop"></label>';
+    html += '<div class="modal" style="max-width: 680px;">';
+    html += '<div class="modal-header">';
+    html += '<h3><i class="fas fa-file-alt"></i> ' + (quiz.title || 'Quiz') + ' — Exam Details</h3>';
+    html += '<label for="exam-modal-' + index + '" class="modal-close">Close</label>';
+    html += '</div>';
+    html += '<div class="modal-body">';
+    
+    // Summary
+    html += '<div class="exam-detail-section">';
+    html += '<h4>Summary</h4>';
+    html += '<div class="row"><span class="l">Student</span><span>' + currentStudent.name + '</span></div>';
+    const correctCount = answers.filter(a => a && a.isCorrect).length;
+    html += '<div class="row"><span class="l">Score</span><span style="color: ' + (passed ? 'var(--success-soft)' : '#c53030') + '; font-weight: 600;">' + Math.round(score) + '% (' + correctCount + '/' + questions.length + ' correct)</span></div>';
+    html += '<div class="row"><span class="l">Attempted</span><span>' + attemptDate + '</span></div>';
+    html += '</div>';
+    
+    // Questions
+    if (questions.length > 0 && answers.length > 0) {
+        html += '<div class="exam-detail-section">';
+        html += '<h4>Questions & Answers</h4>';
+        
+        questions.slice(0, 5).forEach((q, qIdx) => {
+            const answerObj = answers[qIdx] || {};
+            const userAnswer = answerObj.studentAnswer || '';
+            const correctAnswer = answerObj.correctAnswer || q.correctAnswer || '';
+            const isCorrect = answerObj.isCorrect;
+            const qClass = isCorrect ? 'correct' : 'incorrect';
+            const answerClass = isCorrect ? 'correct' : 'incorrect';
+            
+            html += '<div class="exam-question ' + qClass + '">';
+            html += '<div class="q-text">' + (qIdx + 1) + '. ' + q.question + '</div>';
+            html += '<div class="q-answer ' + answerClass + '"><strong>Student answer:</strong> ' + (userAnswer || '(No answer)') + ' ' + (isCorrect ? '✓ Correct' : '✗ Incorrect' + (correctAnswer ? ' (Correct: ' + correctAnswer + ')' : '')) + '</div>';
+            html += '</div>';
+        });
+        
+        if (questions.length > 5) {
+            html += '<p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">+ ' + (questions.length - 5) + ' more questions</p>';
+        }
+        html += '</div>';
+    }
+    
+    html += '</div></div>';
+    return html;
+}
+
+// Create Exam for Student
+function createExamForStudent() {
+    // Store student ID for exam creation
+    sessionStorage.setItem('createExamForStudent', currentStudent.id);
+    // Redirect to exams page
+    window.location.href = '/pages/teacher-exams.html';
+}
+
+// Load Messages Tab (Messages with this student)
+async function loadMessagesTab() {
+    const messagesArea = document.getElementById('messagesArea');
+    if (!messagesArea) return;
+    
+    const messages = await dataManager.getMessagesForStudent(currentStudent.id);
+    
+    if (!messages || messages.length === 0) {
+        const noMsg = (typeof window.t === 'function') ? window.t('no_messages_yet') : 'No messages yet. Start the conversation!';
+        const hint = (typeof window.t === 'function') ? window.t('messages_appear_here') : 'Messages with this student will appear here. Use the input below to send a message.';
+        messagesArea.innerHTML = '<p style="color: var(--text-light); margin-bottom: 0.5rem;">' + noMsg + '</p><p style="font-size: 0.85rem;">' + hint + '</p>';
+        return;
+    }
+    
+    let lastDate = '';
+    let messagesHTML = '';
+    messages.forEach(function(msg) {
+        const messageDate = new Date(msg.timestamp).toLocaleDateString();
+        if (messageDate !== lastDate) {
+            const sep = (messageDate === new Date().toLocaleDateString()) ? ((typeof window.t === 'function') ? window.t('today') : 'Today') : (messageDate === new Date(Date.now() - 86400000).toLocaleDateString() ? ((typeof window.t === 'function') ? window.t('yesterday') : 'Yesterday') : new Date(msg.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+            messagesHTML += '<div class="date-separator" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.5rem 0;">' + sep + '</div>';
+            lastDate = messageDate;
+        }
+        const isSent = msg.sender === 'teacher';
+        const msgClass = isSent ? 'message-sent' : 'message-received';
+        const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const escaped = String(msg.message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        messagesHTML += '<div class="message-bubble ' + msgClass + '" style="max-width: 80%; ' + (isSent ? 'margin-left: auto; background: var(--primary-soft); color: white;' : 'margin-right: auto; background: var(--bg-primary);') + ' padding: 0.5rem 0.75rem; border-radius: 12px; margin-bottom: 0.25rem;"><div class="message-text">' + escaped + '</div><div class="message-time" style="font-size: 0.7rem; opacity: 0.9;">' + time + '</div></div>';
+    });
+    messagesArea.innerHTML = messagesHTML;
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+// Setup Message Form (Send button) in Messages tab
+function setupMessageFormTab() {
+    const input = document.getElementById('messageInput');
+    const btn = document.getElementById('messageSendBtn');
+    if (!input || !btn) return;
+    
+    function sendMsg() {
+        const text = input.value.trim();
+        if (!text) return;
+        dataManager.sendMessage(currentStudent.id, text, 'teacher').then(function() {
+            input.value = '';
+            loadMessagesTab();
+        });
+    }
+    btn.addEventListener('click', sendMsg);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); sendMsg(); }
+    });
+}
+
+// Note: Tab initialization is now integrated directly in initializeStudentDetail()

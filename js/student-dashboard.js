@@ -15,25 +15,49 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePage() {
     initializeStudentDashboard();
     setupMobileMenu();
+    setupTabListeners();
     updateUnreadBadge();
 
     // Update unread badge every 5 seconds
     setInterval(() => updateUnreadBadge(), 5000);
 }
 
-// Update Unread Badge
+// Setup Tab Listeners for lazy loading
+function setupTabListeners() {
+    // Listen for exams tab activation to load quizzes
+    const examsTab = document.getElementById('tab-exams');
+    if (examsTab) {
+        examsTab.addEventListener('change', function() {
+            if (this.checked) {
+                loadStudentQuizzes();
+            }
+        });
+    }
+    
+    // Listen for messages tab activation to load messages
+    const messagesTab = document.getElementById('tab-messages');
+    if (messagesTab) {
+        messagesTab.addEventListener('change', function() {
+            if (this.checked) {
+                loadMessagesTab();
+                markMessagesAsRead();
+            }
+        });
+    }
+    
+    // Setup message send functionality
+    setupMessageSendTab();
+}
+
+// Update Unread Badge (only on messages tab dot now)
 async function updateUnreadBadge() {
     if (!currentStudent) return;
     
     const unreadCount = await dataManager.getUnreadCount(currentStudent.id, 'student');
-    const badge = document.getElementById('unreadBadge');
+    const tabDot = document.getElementById('msgUnreadDot');
     
-    if (badge) {
-        if (unreadCount > 0) {
-            badge.style.display = 'block';
-        } else {
-            badge.style.display = 'none';
-        }
+    if (tabDot) {
+        tabDot.style.display = unreadCount > 0 ? 'block' : 'none';
     }
 }
 
@@ -60,6 +84,8 @@ async function initializeStudentDashboard() {
     loadStudentProfile();
     await loadStudentStats();
     await loadStudentTasks();
+    
+    console.log('✅ Student dashboard initialized');
 }
 
 // Load Student Profile
@@ -67,7 +93,9 @@ function loadStudentProfile() {
     const initial = currentStudent.name.charAt(0).toUpperCase();
     
     // Update profile in sidebar
-    document.querySelector('.student-profile-avatar').textContent = initial;
+    const avatar = document.getElementById('studentAvatar');
+    if (avatar) avatar.textContent = initial;
+    
     const sidebarName = document.getElementById('studentNameSidebar');
     const sidebarRole = document.getElementById('studentRole');
     const headerName = document.getElementById('studentNameHeader');
@@ -81,76 +109,75 @@ function loadStudentProfile() {
 async function loadStudentStats() {
     const stats = await dataManager.getStudentStats(currentStudent.id);
 
-    // Update daily progress bar
-    updateDailyProgressBar(stats);
+    // Update daily progress stat card
+    updateDailyStatCard(stats);
     
-    // Update one-time progress bar
-    updateOneTimeProgressBar(stats);
+    // Update one-time progress stat card
+    updateOnetimeStatCard(stats);
     
-    // Update quiz stats
-    await updateQuizStats(currentStudent.id);
+    // Update exam stats card
+    await updateExamStatCard(currentStudent.id);
 }
 
-// Update Daily Progress Bar
-function updateDailyProgressBar(stats) {
+// Update Daily Stat Card
+function updateDailyStatCard(stats) {
     const dailyTotal = stats.dailyTotal || 0;
     const dailyCompleted = stats.dailyCompletedToday || 0;
-    const dailyPending = stats.dailyPendingToday || 0;
     const dailyPercentage = dailyTotal > 0 ? Math.round((dailyCompleted / dailyTotal) * 100) : 0;
     
-    // Update progress bar
-    const progressBar = document.getElementById('dailyProgressBar');
-    if (progressBar) {
-        setTimeout(() => {
-            progressBar.style.width = dailyPercentage + '%';
-        }, 100);
+    const percentEl = document.getElementById('dailyPercentageCard');
+    const progressEl = document.getElementById('dailyProgressCard');
+    const completedEl = document.getElementById('dailyCompletedCard');
+    const totalEl = document.getElementById('dailyTotalCard');
+    
+    if (percentEl) percentEl.textContent = dailyPercentage + '%';
+    if (progressEl) {
+        setTimeout(() => { progressEl.style.width = dailyPercentage + '%'; }, 100);
     }
-    
-    // Update percentage text
-    const percentText = document.getElementById('dailyProgressPercent');
-    if (percentText) {
-        percentText.textContent = dailyPercentage + '%';
-    }
-    
-    // Update stats
-    const totalStat = document.getElementById('dailyTotalStat');
-    const completedStat = document.getElementById('dailyCompletedStat');
-    const pendingStat = document.getElementById('dailyPendingStat');
-    
-    if (totalStat) totalStat.textContent = dailyTotal;
-    if (completedStat) completedStat.textContent = dailyCompleted;
-    if (pendingStat) pendingStat.textContent = dailyPending;
+    if (completedEl) completedEl.textContent = dailyCompleted;
+    if (totalEl) totalEl.textContent = dailyTotal;
 }
 
-// Update One-time Progress Bar
-function updateOneTimeProgressBar(stats) {
+// Update One-time Stat Card
+function updateOnetimeStatCard(stats) {
     const total = stats.total || 0;
     const completed = stats.completed || 0;
-    const pending = stats.pending || 0;
     const percentage = stats.percentage || 0;
     
-    // Update progress bar
-    const progressBar = document.getElementById('onetimeProgressBar');
-    if (progressBar) {
-        setTimeout(() => {
-            progressBar.style.width = percentage + '%';
-        }, 100);
+    const percentEl = document.getElementById('onetimePercentageCard');
+    const progressEl = document.getElementById('onetimeProgressCard');
+    const completedEl = document.getElementById('onetimeCompletedCard');
+    const totalEl = document.getElementById('onetimeTotalCard');
+    
+    if (percentEl) percentEl.textContent = percentage + '%';
+    if (progressEl) {
+        setTimeout(() => { progressEl.style.width = percentage + '%'; }, 100);
     }
+    if (completedEl) completedEl.textContent = completed;
+    if (totalEl) totalEl.textContent = total;
+}
+
+// Update Exam Stat Card
+async function updateExamStatCard(studentId) {
+    const stats = await dataManager.getStudentQuizStats(studentId);
+    const quizzes = await dataManager.getQuizzesForStudent(studentId);
+    const taken = stats.totalQuizzes || 0;
+    const passed = stats.passedCount || 0;
+    const total = quizzes.length || 0;
+    const percentage = stats.averagePercentage || 0;
     
-    // Update percentage text
-    const percentText = document.getElementById('onetimeProgressPercent');
-    if (percentText) {
-        percentText.textContent = percentage + '%';
+    const percentEl = document.getElementById('examPercentageCard');
+    const progressEl = document.getElementById('examProgressCard');
+    const passedEl = document.getElementById('examPassedCard');
+    const totalEl = document.getElementById('examTotalCard');
+    
+    if (percentEl) percentEl.textContent = percentage + '%';
+    if (progressEl) {
+        const progressPercent = total > 0 ? Math.round((passed / total) * 100) : 0;
+        setTimeout(() => { progressEl.style.width = progressPercent + '%'; }, 100);
     }
-    
-    // Update stats
-    const totalStat = document.getElementById('onetimeTotalStat');
-    const completedStat = document.getElementById('onetimeCompletedStat');
-    const pendingStat = document.getElementById('onetimePendingStat');
-    
-    if (totalStat) totalStat.textContent = total;
-    if (completedStat) completedStat.textContent = completed;
-    if (pendingStat) pendingStat.textContent = pending;
+    if (passedEl) passedEl.textContent = passed;
+    if (totalEl) totalEl.textContent = taken;
 }
 
 // Load Student Tasks
@@ -198,6 +225,7 @@ async function loadStudentTasks() {
 // Load Task Section
 function loadTaskSection(containerId, tasks, isCompleted) {
     const container = document.getElementById(containerId);
+    if (!container) return;
 
     if (tasks.length === 0) {
         const message = isCompleted ? 
@@ -255,6 +283,7 @@ function loadTaskSection(containerId, tasks, isCompleted) {
 // Load Daily Task Section
 async function loadDailyTaskSection(containerId, tasks) {
     const container = document.getElementById(containerId);
+    if (!container) return;
 
     if (tasks.length === 0) {
         container.innerHTML = `
@@ -353,51 +382,10 @@ function getDaysLeftText(days) {
     }
 }
 
-// Setup Mobile Menu
+// Setup Mobile Menu (sidebar is hidden on mobile, no toggle needed)
 function setupMobileMenu() {
-    const backBtn = document.querySelector('.back-btn');
-    const sidebar = document.querySelector('.student-sidebar');
-
-    if (window.innerWidth <= 1024) {
-        // Add menu toggle button for mobile
-        const menuToggle = document.createElement('button');
-        menuToggle.className = 'menu-toggle';
-        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-        menuToggle.style.cssText = 'position: fixed; top: 1rem; left: 1rem; z-index: 101; background: white; border: none; padding: 0.75rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; font-size: 1.25rem; color: var(--text-primary);';
-        
-        document.body.appendChild(menuToggle);
-
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-        });
-
-        // Close sidebar when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
-        });
-    }
-}
-
-// Switch Tabs
-function switchTab(tabName) {
-    // Remove active class from all tabs and tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
-    // Add active class to selected tab and content
-    if (tabName === 'today') {
-        document.getElementById('todayTab').classList.add('active');
-        document.getElementById('todayTabContent').classList.add('active');
-    } else if (tabName === 'allTasks') {
-        document.getElementById('allTasksTab').classList.add('active');
-        document.getElementById('allTasksTabContent').classList.add('active');
-    } else if (tabName === 'quizzes') {
-        document.getElementById('quizzesTab').classList.add('active');
-        document.getElementById('quizzesTabContent').classList.add('active');
-        loadStudentQuizzes(); // Load quizzes when tab is activated
-    }
+    // Sidebar is now hidden completely on mobile via CSS
+    // No menu toggle needed
 }
 
 // Helper: Get current student ID from session
@@ -410,6 +398,96 @@ function getStudentId() {
 function goBackToList() {
     sessionStorage.removeItem('currentStudentId');
     window.location.href = '/pages/student-list.html';
+}
+
+/* ===================================
+   MESSAGES TAB FUNCTIONS
+   =================================== */
+
+// Load Messages Tab
+async function loadMessagesTab() {
+    const area = document.getElementById('messagesTabArea');
+    if (!area || !currentStudent) return;
+    
+    const messages = await dataManager.getMessagesForStudent(currentStudent.id);
+    
+    if (!messages || messages.length === 0) {
+        area.innerHTML = `
+            <div class="no-messages-placeholder">
+                <i class="fas fa-comments"></i>
+                <p>No messages yet. Start a conversation with your teacher!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let lastDate = '';
+    let html = '';
+    
+    messages.forEach(function(msg) {
+        const messageDate = new Date(msg.timestamp).toLocaleDateString();
+        
+        // Date separator
+        if (messageDate !== lastDate) {
+            const today = new Date().toLocaleDateString();
+            const yesterday = new Date(Date.now() - 86400000).toLocaleDateString();
+            let dateLabel = messageDate;
+            if (messageDate === today) dateLabel = 'Today';
+            else if (messageDate === yesterday) dateLabel = 'Yesterday';
+            
+            html += '<div class="msg-date-sep">' + dateLabel + '</div>';
+            lastDate = messageDate;
+        }
+        
+        const isSent = msg.sender === 'student';
+        const msgClass = isSent ? 'sent' : 'received';
+        const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true 
+        });
+        const escaped = String(msg.message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        html += '<div class="msg-bubble ' + msgClass + '">';
+        html += '<div class="msg-text">' + escaped + '</div>';
+        html += '<div class="msg-time">' + time + '</div>';
+        html += '</div>';
+    });
+    
+    area.innerHTML = html;
+    area.scrollTop = area.scrollHeight;
+}
+
+// Setup Message Send for Tab
+function setupMessageSendTab() {
+    const input = document.getElementById('messageInputTab');
+    const btn = document.getElementById('messageSendBtnTab');
+    if (!input || !btn) return;
+    
+    function sendMsg() {
+        const text = input.value.trim();
+        if (!text || !currentStudent) return;
+        
+        dataManager.sendMessage(currentStudent.id, text, 'student').then(function() {
+            input.value = '';
+            loadMessagesTab();
+        });
+    }
+    
+    btn.addEventListener('click', sendMsg);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMsg();
+        }
+    });
+}
+
+// Mark Messages as Read
+async function markMessagesAsRead() {
+    if (!currentStudent) return;
+    await dataManager.markMessagesAsRead(currentStudent.id, 'student');
+    updateUnreadBadge();
 }
 
 /* ===================================
@@ -432,12 +510,13 @@ async function loadStudentQuizzes() {
     
     loadAvailableQuizzes(availableQuizzes);
     await loadCompletedQuizzes(completedQuizzes, studentId);
-    await updateQuizStats(studentId);
+    await updateExamStatCard(studentId);
 }
 
 // Load available quizzes
 function loadAvailableQuizzes(quizzes) {
     const container = document.getElementById('availableQuizzesList');
+    if (!container) return;
     
     if (quizzes.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No quizzes available at the moment.</p>';
@@ -496,6 +575,7 @@ function loadAvailableQuizzes(quizzes) {
 // Load completed quizzes
 async function loadCompletedQuizzes(quizzes, studentId) {
     const container = document.getElementById('completedQuizzesList');
+    if (!container) return;
     
     if (quizzes.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">You haven\'t completed any quizzes yet.</p>';
@@ -570,7 +650,7 @@ async function loadCompletedQuizzes(quizzes, studentId) {
                         ` : ''}
                     </div>
                     
-                    ${result.answers.some(a => a.teacherFeedback) ? `
+                    ${result.answers && result.answers.some(a => a.teacherFeedback) ? `
                         <div style="background: #E0F2FE; border-left: 4px solid #0284C7; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
                             <div style="font-weight: 600; color: #075985; margin-bottom: 0.5rem;">
                                 <i class="fas fa-comment-dots"></i> Teacher Feedback:
@@ -589,17 +669,3 @@ async function loadCompletedQuizzes(quizzes, studentId) {
     }
     container.innerHTML = items.join('');
 }
-
-// Update quiz statistics in sidebar
-async function updateQuizStats(studentId) {
-    const stats = await dataManager.getStudentQuizStats(studentId);
-    const quizzes = await dataManager.getQuizzesForStudent(studentId);
-    const pending = quizzes.length - stats.totalQuizzes;
-    
-    document.getElementById('quizProgressPercent').textContent = 
-        stats.averagePercentage ? `${stats.averagePercentage}%` : '0%';
-    document.getElementById('quizTakenStat').textContent = stats.totalQuizzes;
-    document.getElementById('quizPassedStat').textContent = stats.passedCount;
-    document.getElementById('quizPendingStat').textContent = pending;
-}
-

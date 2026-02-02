@@ -280,7 +280,9 @@ async function isDailyTaskCompletedForDate(taskId, studentId, dateString) {
     const task = await dataManager.getTaskById(taskId);
     if (!task || !task.dailyCompletions) return false;
 
-    const studentCompletions = task.dailyCompletions[studentId] || [];
+    // Convert studentId to string as Firestore stores keys as strings
+    const studentIdStr = studentId.toString();
+    const studentCompletions = task.dailyCompletions[studentIdStr] || [];
     return studentCompletions.includes(dateString);
 }
 
