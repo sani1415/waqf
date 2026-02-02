@@ -14,6 +14,7 @@ const TO_COPY = [
   '404.html',
   'css',
   'js',
+  'locales',
   'pages'
 ];
 

@@ -149,6 +149,12 @@ body {
     color: var(--text-primary);
 }
 
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .user-info {
     display: flex;
     align-items: center;

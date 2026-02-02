@@ -56,6 +56,54 @@ body.teacher-dashboard {
     overflow-x: hidden;
 }
 
+/* Language switcher - matches app (soft primary accent, card-like pill) */
+.lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 0.25rem;
+    box-shadow: var(--shadow-sm);
+}
+.lang-btn {
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: calc(var(--radius-xl) - 3px);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: transparent;
+    transition: all 0.25s ease;
+}
+.lang-btn:hover {
+    color: var(--primary-soft);
+    background: linear-gradient(90deg, rgba(123, 158, 189, 0.1) 0%, transparent 100%);
+}
+.lang-btn.active {
+    color: var(--primary-soft);
+    background: linear-gradient(90deg, rgba(123, 158, 189, 0.14) 0%, rgba(168, 197, 227, 0.06) 100%);
+    box-shadow: var(--shadow-sm);
+}
+.lang-btn:focus-visible {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 2px;
+}
+.lang-switcher.lang-switcher-compact .lang-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+}
+.lang-switcher.lang-switcher-compact {
+    padding: 0.2rem;
+    background: rgba(248, 250, 252, 0.95);
+    border-color: var(--border-color);
+}
+.lang-switcher.lang-switcher-compact .lang-btn.active {
+    background: linear-gradient(90deg, rgba(123, 158, 189, 0.16) 0%, rgba(168, 197, 227, 0.08) 100%);
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 8px;
