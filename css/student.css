@@ -6,6 +6,7 @@
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    overflow-x: hidden;
 }
 
 .header-section {
@@ -159,6 +160,8 @@
 .student-dashboard-container {
     display: flex;
     min-height: 100vh;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 .student-sidebar {
@@ -441,9 +444,11 @@
 
 .student-main-content {
     flex: 1;
+    min-width: 0; /* Allow flex shrink, prevent overflow */
     margin-left: 280px;
     padding: 2rem;
     background: var(--bg-primary);
+    overflow-x: hidden;
 }
 
 .student-header {
@@ -455,11 +460,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
 }
 
 .student-header h1 {
     font-size: 2rem;
     color: var(--text-primary);
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 /* Tab Navigation */
@@ -560,6 +570,8 @@
     border-radius: var(--radius-lg);
     padding: 2rem;
     box-shadow: var(--shadow-sm);
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .section-title {
@@ -569,6 +581,9 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .section-title i {
@@ -627,6 +642,8 @@
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .task-item.completed .task-title {
@@ -968,8 +985,9 @@
 
 .quizzes-grid-student {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 1.5rem;
+    min-width: 0;
 }
 
 .quiz-card-student {
@@ -980,6 +998,7 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    min-width: 0; /* Prevent grid blowout */
 }
 
 .quiz-card-student::before {
@@ -1047,6 +1066,9 @@
     gap: 0.5rem;
     font-size: 0.85rem;
     color: var(--text-secondary);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .quiz-info-item i {
@@ -1264,6 +1286,7 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    max-width: 100%;
 }
 
 /* Hide radio inputs */
@@ -1281,11 +1304,16 @@
     padding: 0.25rem;
     gap: 0.25rem;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.tab-labels-student::-webkit-scrollbar {
+    display: none;
 }
 
 .tab-labels-student label {
-    flex: 1;
-    min-width: fit-content;
+    flex: 1 1 auto;
+    min-width: 0; /* Allow shrink */
     padding: 0.75rem 1rem;
     text-align: center;
     font-size: 0.9rem;
@@ -1321,6 +1349,8 @@
 .panels-student {
     padding: 1.5rem;
     min-height: 400px;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .panel-student {
@@ -1518,72 +1548,82 @@
         font-size: 0.75rem;
     }
     
-    /* Stat cards - horizontal scroll on mobile */
+    /* Stat cards - 3 equal columns, fit without horizontal scroll */
     .stat-cards-row {
-        display: flex;
-        overflow-x: auto;
-        gap: 0.75rem;
-        padding-bottom: 0.5rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
         margin-bottom: 1rem;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-    
-    .stat-cards-row::-webkit-scrollbar {
-        display: none;
     }
     
     .stat-card {
-        flex: 0 0 auto;
-        min-width: 140px;
-        padding: 0.75rem;
+        min-width: 0;
+        padding: 0.5rem 0.4rem;
     }
     
     .stat-card-header {
-        font-size: 0.75rem;
-        margin-bottom: 0.25rem;
+        font-size: 0.65rem;
+        margin-bottom: 0.2rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     
     .stat-card-percentage {
-        font-size: 1.35rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
     }
     
     .stat-card-progress {
         height: 4px;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.25rem;
     }
     
     .stat-card-detail {
-        font-size: 0.7rem;
+        font-size: 0.6rem;
     }
     
     .stat-card-detail .stat-label {
         display: none;
     }
     
-    /* Tabs - icons only, compact */
+    /* Quiz grid - single column on mobile to prevent overflow */
+    .quizzes-grid-student {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Tabs - icon + name visible, scrollable on small screens */
     .tab-wrap-student {
         border-radius: var(--radius-md);
     }
     
     .tab-labels-student {
-        padding: 0.15rem;
-        gap: 0.15rem;
+        padding: 0.25rem;
+        gap: 0.25rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .tab-labels-student::-webkit-scrollbar {
+        display: none;
     }
     
     .tab-labels-student label {
-        padding: 0.6rem 0.5rem;
-        font-size: 0.8rem;
+        flex: 1 1 auto;
+        min-width: 60px;
+        padding: 0.5rem 0.5rem;
+        font-size: 0.72rem;
         border-radius: 6px;
     }
     
     .tab-labels-student label span {
-        display: none;
+        display: inline;
     }
     
     .tab-labels-student label i {
-        font-size: 1rem;
+        font-size: 0.85rem;
+        margin-right: 0.15rem;
     }
     
     .tab-unread-dot {
@@ -1647,8 +1687,15 @@
     }
     
     .stat-card {
-        min-width: 120px;
-        padding: 0.6rem;
+        padding: 0.4rem 0.3rem;
+    }
+    
+    .stat-card-header {
+        font-size: 0.6rem;
+    }
+    
+    .stat-card-percentage {
+        font-size: 1rem;
     }
     
     .stat-card-percentage {
@@ -1657,6 +1704,12 @@
     
     .panels-student {
         padding: 0.5rem;
+    }
+    
+    /* Tabs - ensure names stay visible */
+    .tab-labels-student label {
+        min-width: 65px;
+        font-size: 0.7rem;
     }
 }
 

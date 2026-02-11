@@ -38,7 +38,7 @@ async function initializeStudentDetail() {
         return;
     }
 
-    currentStudent = await dataManager.getStudentById(parseInt(studentId));
+    currentStudent = await dataManager.getStudentById(studentId);
 
     if (!currentStudent) {
         alert(_t('student_not_found'));
@@ -685,7 +685,7 @@ function handleAddNote(e) {
 
 // Open Edit Note Modal
 function openEditNoteModal(noteId) {
-    const note = currentStudent.notes.find(n => n.id === noteId);
+    const note = currentStudent.notes.find(n => String(n.id) === String(noteId));
     
     if (!note) {
         alert('❌ ' + _t('alert_note_not_found'));
@@ -721,7 +721,7 @@ function closeEditNoteModal() {
 function handleEditNote(e) {
     e.preventDefault();
     
-    const noteId = parseInt(document.getElementById('editNoteId').value);
+    const noteId = document.getElementById('editNoteId').value;
     const category = document.getElementById('editNoteCategory').value;
     const noteText = document.getElementById('editNoteText').value.trim();
     

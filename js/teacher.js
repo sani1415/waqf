@@ -390,12 +390,12 @@ async function loadStudentsProgress() {
             const { student } = item;
             const cells = [];
             for (const task of allTasks) {
-                const isAssigned = task.assignedTo && task.assignedTo.includes(parseInt(student.id));
+                const isAssigned = task.assignedTo && task.assignedTo.some(sid => String(sid) === String(student.id));
                 let icon = '<span class="cross">✗</span>';
                 if (isAssigned) {
                     const completed = task.type === 'daily'
                         ? await dataManager.isDailyTaskCompletedForDate(task.id, student.id, today)
-                        : (task.completedBy && task.completedBy.includes(parseInt(student.id)));
+                        : (task.completedBy && task.completedBy.some(sid => String(sid) === String(student.id)));
                     icon = completed ? '<span class="tick">✓</span>' : '<span class="cross">✗</span>';
                 } else {
                     icon = '<span style="color:#94A3B8;">—</span>';
@@ -461,7 +461,7 @@ async function loadStudentCheckboxes() {
             ? sessionStorage.getItem('assignTaskStudentId')
             : null;
         if (fromUrl || fromSession) {
-            targetId = parseInt(fromUrl || fromSession);
+            targetId = fromUrl || fromSession;
         }
     } catch (e) {
         // ignore
@@ -469,7 +469,7 @@ async function loadStudentCheckboxes() {
 
     let foundTarget = false;
     container.innerHTML = students.map(student => {
-        const isTarget = targetId && student.id === targetId;
+        const isTarget = targetId && String(student.id) === String(targetId);
         if (isTarget) foundTarget = true;
         return `
             <label class="checkbox-item">
@@ -548,7 +548,7 @@ async function handleCreateTask(e) {
     // Get selected students
     const selectedStudents = Array.from(
         document.querySelectorAll('input[name="assignedStudents"]:checked')
-    ).map(cb => parseInt(cb.value));
+    ).map(cb => cb.value);
 
     if (selectedStudents.length === 0) {
         alert('❌ ' + _t('alert_select_one_student_task'));
@@ -1438,7 +1438,7 @@ async function loadEditStudentCheckboxes(assignedStudentIds) {
     const container = document.getElementById('editStudentCheckboxes');
     
     container.innerHTML = students.map(student => {
-        const isChecked = assignedStudentIds.includes(student.id);
+        const isChecked = assignedStudentIds.some(sid => String(sid) === String(student.id));
         return `
             <label class="checkbox-item">
                 <input type="checkbox" name="editAssignedStudents" value="${student.id}" ${isChecked ? 'checked' : ''}>
@@ -1491,7 +1491,7 @@ async function handleUpdateTask(e) {
     // Get selected students
     const selectedStudents = Array.from(
         document.querySelectorAll('input[name="editAssignedStudents"]:checked')
-    ).map(cb => parseInt(cb.value));
+    ).map(cb => cb.value);
     
     if (selectedStudents.length === 0) {
         alert('❌ ' + _t('alert_select_one_student_task'));

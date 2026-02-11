@@ -30,7 +30,7 @@ async function initializeChat() {
         return;
     }
 
-    currentStudent = await dataManager.getStudentById(parseInt(currentStudentId));
+    currentStudent = await dataManager.getStudentById(currentStudentId);
 
     if (!currentStudent) {
         alert(typeof window.t === 'function' ? window.t('student_not_found') : 'Student not found!');

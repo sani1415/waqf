@@ -367,7 +367,7 @@ async function handleCreateQuiz(e) {
     // Get assigned students
     const selectedStudents = Array.from(
         document.querySelectorAll('input[name="quizAssignedStudents"]:checked')
-    ).map(cb => parseInt(cb.value));
+    ).map(cb => cb.value);
     
     if (selectedStudents.length === 0) {
         alert('❌ ' + _t('alert_select_one_student'));
@@ -649,9 +649,9 @@ async function loadQuizResults(quizId) {
     const displayContainer = document.getElementById('quizResultsDisplay');
     if (displayContainer) displayContainer.innerHTML = getLoadingSpinnerHtml();
     
-    const quiz = await dataManager.getQuizById(parseInt(quizId));
-    const stats = await dataManager.getQuizStatistics(parseInt(quizId));
-    const results = await dataManager.getResultsForQuiz(parseInt(quizId));
+    const quiz = await dataManager.getQuizById(quizId);
+    const stats = await dataManager.getQuizStatistics(quizId);
+    const results = await dataManager.getResultsForQuiz(quizId);
     const students = await dataManager.getStudents();
     
     const displayContainer = document.getElementById('quizResultsDisplay');
@@ -710,7 +710,7 @@ async function loadQuizResults(quizId) {
                     </thead>
                     <tbody>
                         ${results.map(result => {
-                            const student = students.find(s => s.id === result.studentId);
+                            const student = students.find(s => String(s.id) === String(result.studentId));
                             const minutes = Math.floor(result.timeTaken / 60);
                             const seconds = result.timeTaken % 60;
                             
@@ -805,7 +805,7 @@ async function loadPendingReviews() {
     
     for (const studentId of Object.keys(groupedByStudent)) {
         const results = groupedByStudent[studentId];
-        const student = await dataManager.getStudentById(parseInt(studentId));
+        const student = await dataManager.getStudentById(studentId);
         const studentName = student ? student.name : 'Unknown Student';
         for (const result of results) {
             const quiz = await dataManager.getQuizById(result.quizId);
@@ -869,7 +869,7 @@ async function loadPendingReviews() {
 
 // Show grading modal
 async function showGradingModal(resultId, questionIndex) {
-    const result = (await dataManager.getQuizResults()).find(r => r.id === resultId);
+    const result = (await dataManager.getQuizResults()).find(r => String(r.id) === String(resultId));
     if (!result) return;
     
     const quiz = await dataManager.getQuizById(result.quizId);

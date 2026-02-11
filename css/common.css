@@ -50,9 +50,12 @@ body {
     min-height: 100vh;
 }
 
-/* Prevent horizontal page expansion on teacher pages (mobile) */
+/* Prevent horizontal page expansion (mobile) */
 body.teacher-page,
-body.teacher-dashboard {
+body.teacher-dashboard,
+body:has(.student-dashboard-container),
+body:has(.student-list-container),
+body:has(.chat-container) {
     overflow-x: hidden;
 }
 

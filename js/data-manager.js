@@ -7,6 +7,11 @@ class DataManager {
         this.initialized = false;
     }
 
+    /** Normalize ID for comparison - works with numeric, string, or future Firestore IDs */
+    _eqId(a, b) {
+        return String(a) === String(b);
+    }
+
     // Initialize data manager and storage
     async initialize() {
         if (this.initialized) return;
@@ -509,13 +514,13 @@ class DataManager {
 
     async getStudentById(id) {
         const students = await this.getStudents();
-        return students.find(s => s.id === parseInt(id));
+        return students.find(s => this._eqId(s.id, id));
     }
 
     async addStudent(student) {
         const students = await this.getStudents();
         const newStudent = {
-            id: Date.now(),
+            id: String(Date.now()),
             ...student,
             notes: student.notes || [],
             createdAt: new Date().toISOString(),
@@ -528,7 +533,7 @@ class DataManager {
 
     async updateStudentProfile(studentId, updatedData) {
         const students = await this.getStudents();
-        const studentIndex = students.findIndex(s => s.id === parseInt(studentId));
+        const studentIndex = students.findIndex(s => this._eqId(s.id, studentId));
         
         if (studentIndex !== -1) {
             students[studentIndex] = {
@@ -548,7 +553,7 @@ class DataManager {
     // Student Notes Management
     async addStudentNote(studentId, noteData) {
         const students = await this.getStudents();
-        const student = students.find(s => s.id === parseInt(studentId));
+        const student = students.find(s => this._eqId(s.id, studentId));
         
         if (student) {
             if (!student.notes) {
@@ -556,7 +561,7 @@ class DataManager {
             }
             
             const newNote = {
-                id: Date.now(),
+                id: String(Date.now()),
                 date: new Date().toISOString(),
                 category: noteData.category || 'General',
                 note: noteData.note,
@@ -573,10 +578,10 @@ class DataManager {
 
     async updateStudentNote(studentId, noteId, updatedNote) {
         const students = await this.getStudents();
-        const student = students.find(s => s.id === parseInt(studentId));
+        const student = students.find(s => this._eqId(s.id, studentId));
         
         if (student && student.notes) {
-            const noteIndex = student.notes.findIndex(n => n.id === parseInt(noteId));
+            const noteIndex = student.notes.findIndex(n => this._eqId(n.id, noteId));
             if (noteIndex !== -1) {
                 student.notes[noteIndex] = {
                     ...student.notes[noteIndex],
@@ -595,10 +600,10 @@ class DataManager {
 
     async deleteStudentNote(studentId, noteId) {
         const students = await this.getStudents();
-        const student = students.find(s => s.id === parseInt(studentId));
+        const student = students.find(s => this._eqId(s.id, studentId));
         
         if (student && student.notes) {
-            student.notes = student.notes.filter(n => n.id !== parseInt(noteId));
+            student.notes = student.notes.filter(n => !this._eqId(n.id, noteId));
             student.updatedAt = new Date().toISOString();
             await this.storage.set('students', students);
             return true;
@@ -607,16 +612,17 @@ class DataManager {
     }
 
     async deleteStudent(id) {
+        const idStr = String(id);
         let students = await this.getStudents();
-        students = students.filter(s => s.id !== parseInt(id));
+        students = students.filter(s => !this._eqId(s.id, idStr));
         await this.storage.set('students', students);
         
         // Also remove student from all tasks
         let tasks = await this.getTasks();
         tasks = tasks.map(task => ({
             ...task,
-            assignedTo: task.assignedTo.filter(sid => sid !== parseInt(id)),
-            completedBy: task.completedBy ? task.completedBy.filter(sid => sid !== parseInt(id)) : []
+            assignedTo: (task.assignedTo || []).filter(sid => !this._eqId(sid, idStr)),
+            completedBy: (task.completedBy || []).filter(sid => !this._eqId(sid, idStr))
         }));
         await this.storage.set('tasks', tasks);
     }
@@ -628,21 +634,23 @@ class DataManager {
 
     async getTaskById(id) {
         const tasks = await this.getTasks();
-        return tasks.find(t => t.id === parseInt(id));
+        return tasks.find(t => this._eqId(t.id, id));
     }
 
     async getTasksForStudent(studentId) {
         const tasks = await this.getTasks();
         return tasks.filter(task => 
-            task.assignedTo.includes(parseInt(studentId))
+            (task.assignedTo || []).some(sid => this._eqId(sid, studentId))
         );
     }
 
     async addTask(task) {
         const tasks = await this.getTasks();
+        const assignedTo = (task.assignedTo || []).map(id => String(id));
         const newTask = {
-            id: Date.now(),
+            id: String(Date.now()),
             ...task,
+            assignedTo,
             completedBy: task.type === 'daily' ? undefined : [],
             dailyCompletions: task.type === 'daily' ? {} : undefined,
             createdAt: new Date().toISOString()
@@ -654,28 +662,30 @@ class DataManager {
 
     async updateTask(taskId, updatedData) {
         const tasks = await this.getTasks();
-        const taskIndex = tasks.findIndex(t => t.id === parseInt(taskId));
+        const taskIndex = tasks.findIndex(t => this._eqId(t.id, taskId));
         
         if (taskIndex !== -1) {
             const existingTask = tasks[taskIndex];
+            const normalized = { ...updatedData };
+            if (normalized.assignedTo) normalized.assignedTo = normalized.assignedTo.map(id => String(id));
             
-            if (updatedData.type && updatedData.type !== existingTask.type) {
-                if (updatedData.type === 'daily') {
-                    updatedData.completedBy = undefined;
-                    updatedData.dailyCompletions = {};
-                    updatedData.deadline = undefined;
+            if (normalized.type && normalized.type !== existingTask.type) {
+                if (normalized.type === 'daily') {
+                    normalized.completedBy = undefined;
+                    normalized.dailyCompletions = {};
+                    normalized.deadline = undefined;
                 } else {
-                    updatedData.completedBy = [];
-                    updatedData.dailyCompletions = undefined;
+                    normalized.completedBy = [];
+                    normalized.dailyCompletions = undefined;
                 }
             } else {
-                updatedData.completedBy = existingTask.completedBy;
-                updatedData.dailyCompletions = existingTask.dailyCompletions;
+                normalized.completedBy = existingTask.completedBy;
+                normalized.dailyCompletions = existingTask.dailyCompletions;
             }
             
             tasks[taskIndex] = {
                 ...existingTask,
-                ...updatedData,
+                ...normalized,
                 id: existingTask.id,
                 createdAt: existingTask.createdAt,
                 updatedAt: new Date().toISOString()
@@ -689,22 +699,22 @@ class DataManager {
 
     async deleteTask(id) {
         let tasks = await this.getTasks();
-        tasks = tasks.filter(t => t.id !== parseInt(id));
+        tasks = tasks.filter(t => !this._eqId(t.id, id));
         await this.storage.set('tasks', tasks);
     }
 
     async toggleTaskCompletion(taskId, studentId) {
         const tasks = await this.getTasks();
-        const task = tasks.find(t => t.id === parseInt(taskId));
+        const task = tasks.find(t => this._eqId(t.id, taskId));
         
         if (task) {
-            const studentIdNum = parseInt(studentId);
-            const index = task.completedBy.indexOf(studentIdNum);
+            const completedBy = task.completedBy || [];
+            const index = completedBy.findIndex(sid => this._eqId(sid, studentId));
             
             if (index > -1) {
-                task.completedBy.splice(index, 1);
+                completedBy.splice(index, 1);
             } else {
-                task.completedBy.push(studentIdNum);
+                completedBy.push(String(studentId));
             }
             
             await this.storage.set('tasks', tasks);
@@ -715,7 +725,7 @@ class DataManager {
 
     async isTaskCompletedByStudent(taskId, studentId) {
         const task = await this.getTaskById(taskId);
-        return task ? task.completedBy.includes(parseInt(studentId)) : false;
+        return task ? (task.completedBy || []).some(sid => this._eqId(sid, studentId)) : false;
     }
 
     // Daily Tasks Management
@@ -727,14 +737,14 @@ class DataManager {
     async getDailyTasksForStudent(studentId) {
         const tasks = await this.getTasks();
         return tasks.filter(task => 
-            task.type === 'daily' && task.assignedTo.includes(parseInt(studentId))
+            task.type === 'daily' && (task.assignedTo || []).some(sid => this._eqId(sid, studentId))
         );
     }
 
     async getRegularTasksForStudent(studentId) {
         const tasks = await this.getTasks();
         return tasks.filter(task => 
-            task.type !== 'daily' && task.assignedTo.includes(parseInt(studentId))
+            task.type !== 'daily' && (task.assignedTo || []).some(sid => this._eqId(sid, studentId))
         );
     }
 
@@ -753,7 +763,7 @@ class DataManager {
 
     async toggleDailyTaskCompletion(taskId, studentId) {
         const tasks = await this.getTasks();
-        const task = tasks.find(t => t.id === parseInt(taskId));
+        const task = tasks.find(t => this._eqId(t.id, taskId));
         
         if (task && task.type === 'daily') {
             const today = this.getTodayDateString();
@@ -836,7 +846,7 @@ class DataManager {
         const dailyTasks = await this.getDailyTasksForStudent(studentId);
         
         const regularCompleted = regularTasks.filter(task => 
-            task.completedBy && task.completedBy.includes(parseInt(studentId))
+            (task.completedBy || []).some(sid => this._eqId(sid, studentId))
         ).length;
         
         let dailyCompletedToday = 0;
@@ -907,15 +917,15 @@ class DataManager {
 
     async getMessagesForStudent(studentId) {
         const messages = await this.getMessages();
-        return messages.filter(msg => msg.studentId === parseInt(studentId))
+        return messages.filter(msg => this._eqId(msg.studentId, studentId))
             .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     }
 
     async sendMessage(studentId, message, sender) {
         const messages = await this.getMessages();
         const newMessage = {
-            id: Date.now(),
-            studentId: parseInt(studentId),
+            id: String(Date.now()),
+            studentId: String(studentId),
             message: message,
             sender: sender,
             timestamp: new Date().toISOString(),
@@ -930,7 +940,7 @@ class DataManager {
         const messages = await this.getMessages();
         const readBy = sender === 'teacher' ? 'student' : 'teacher';
         messages.forEach(msg => {
-            if (msg.studentId === parseInt(studentId) && msg.sender === readBy) {
+            if (this._eqId(msg.studentId, studentId) && msg.sender === readBy) {
                 msg.read = true;
             }
         });
@@ -940,7 +950,7 @@ class DataManager {
     async getUnreadCount(studentId, forUser) {
         const messages = await this.getMessages();
         return messages.filter(msg => 
-            msg.studentId === parseInt(studentId) && 
+            this._eqId(msg.studentId, studentId) && 
             msg.sender !== forUser && 
             !msg.read
         ).length;
@@ -958,7 +968,7 @@ class DataManager {
         ]);
         
         const chats = students.map(student => {
-            const studentMessages = messages.filter(msg => msg.studentId === parseInt(student.id))
+            const studentMessages = messages.filter(msg => this._eqId(msg.studentId, student.id))
                 .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             const lastMessage = studentMessages.length > 0 ? studentMessages[studentMessages.length - 1] : null;
             const unreadCount = studentMessages.filter(msg => 
@@ -988,21 +998,23 @@ class DataManager {
 
     async getQuizById(quizId) {
         const quizzes = await this.getQuizzes();
-        return quizzes.find(q => q.id === parseInt(quizId));
+        return quizzes.find(q => this._eqId(q.id, quizId));
     }
 
     async getQuizzesForStudent(studentId) {
         const quizzes = await this.getQuizzes();
         return quizzes.filter(quiz => 
-            quiz.assignedTo.includes(parseInt(studentId))
+            (quiz.assignedTo || []).some(sid => this._eqId(sid, studentId))
         );
     }
 
     async addQuiz(quiz) {
         const quizzes = await this.getQuizzes();
+        const assignedTo = (quiz.assignedTo || []).map(id => String(id));
         const newQuiz = {
-            id: Date.now(),
+            id: String(Date.now()),
             ...quiz,
+            assignedTo,
             createdAt: new Date().toISOString(),
             createdBy: 'teacher'
         };
@@ -1013,12 +1025,14 @@ class DataManager {
 
     async updateQuiz(quizId, updatedData) {
         const quizzes = await this.getQuizzes();
-        const quizIndex = quizzes.findIndex(q => q.id === parseInt(quizId));
+        const quizIndex = quizzes.findIndex(q => this._eqId(q.id, quizId));
         
         if (quizIndex !== -1) {
+            const normalized = { ...updatedData };
+            if (normalized.assignedTo) normalized.assignedTo = normalized.assignedTo.map(id => String(id));
             quizzes[quizIndex] = {
                 ...quizzes[quizIndex],
-                ...updatedData,
+                ...normalized,
                 updatedAt: new Date().toISOString()
             };
             await this.storage.set('quizzes', quizzes);
@@ -1029,11 +1043,11 @@ class DataManager {
 
     async deleteQuiz(quizId) {
         let quizzes = await this.getQuizzes();
-        quizzes = quizzes.filter(q => q.id !== parseInt(quizId));
+        quizzes = quizzes.filter(q => !this._eqId(q.id, quizId));
         await this.storage.set('quizzes', quizzes);
         
         let results = await this.getQuizResults();
-        results = results.filter(r => r.quizId !== parseInt(quizId));
+        results = results.filter(r => !this._eqId(r.quizId, quizId));
         await this.storage.set('quizResults', results);
     }
 
@@ -1047,19 +1061,19 @@ class DataManager {
 
     async getResultsForQuiz(quizId) {
         const results = await this.getQuizResults();
-        return results.filter(r => r.quizId === parseInt(quizId));
+        return results.filter(r => this._eqId(r.quizId, quizId));
     }
 
     async getResultsForStudent(studentId) {
         const results = await this.getQuizResults();
-        return results.filter(r => r.studentId === parseInt(studentId));
+        return results.filter(r => this._eqId(r.studentId, studentId));
     }
 
     async getQuizResult(quizId, studentId) {
         const results = await this.getQuizResults();
         return results.find(r => 
-            r.quizId === parseInt(quizId) && 
-            r.studentId === parseInt(studentId)
+            this._eqId(r.quizId, quizId) && 
+            this._eqId(r.studentId, studentId)
         );
     }
 
@@ -1133,9 +1147,9 @@ class DataManager {
         }
 
         const result = {
-            id: Date.now(),
-            quizId: parseInt(quizId),
-            studentId: parseInt(studentId),
+            id: String(Date.now()),
+            quizId: String(quizId),
+            studentId: String(studentId),
             answers: gradedAnswers,
             autoGradedScore: autoGradedScore,
             manualGradedScore: hasManualGrading ? null : 0,
@@ -1243,7 +1257,7 @@ class DataManager {
 
     async gradeAnswer(resultId, questionIndex, marks, feedback) {
         const results = await this.getQuizResults();
-        const resultIndex = results.findIndex(r => r.id === parseInt(resultId));
+        const resultIndex = results.findIndex(r => this._eqId(r.id, resultId));
         
         if (resultIndex === -1) return null;
         
@@ -1292,7 +1306,7 @@ class DataManager {
 
     async getUngradedAnswers(resultId) {
         const results = await this.getQuizResults();
-        const result = results.find(r => r.id === parseInt(resultId));
+        const result = results.find(r => this._eqId(r.id, resultId));
         
         if (!result) return [];
         

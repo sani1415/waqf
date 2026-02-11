@@ -44,12 +44,12 @@ async function initializePage() {
 
 // Get student ID from session
 function getStudentId() {
-    return parseInt(sessionStorage.getItem('currentStudentId'));
+    return sessionStorage.getItem('currentStudentId');
 }
 
 // Load quiz
 async function loadQuiz(quizId) {
-    currentQuiz = await dataManager.getQuizById(parseInt(quizId));
+    currentQuiz = await dataManager.getQuizById(quizId);
     
     if (!currentQuiz) {
         alert('❌ ' + _t('alert_quiz_not_found'));

@@ -72,7 +72,7 @@ async function initializeStudentDashboard() {
         return;
     }
 
-    currentStudent = await dataManager.getStudentById(parseInt(studentId));
+    currentStudent = await dataManager.getStudentById(studentId);
 
     if (!currentStudent) {
         alert(typeof window.t === 'function' ? window.t('student_not_found') : 'Student not found!');
@@ -390,8 +390,7 @@ function setupMobileMenu() {
 
 // Helper: Get current student ID from session
 function getStudentId() {
-    const id = sessionStorage.getItem('currentStudentId');
-    return id ? parseInt(id) : null;
+    return sessionStorage.getItem('currentStudentId');
 }
 
 // Logout / Go Back
