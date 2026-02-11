@@ -2,6 +2,10 @@
 // NOTE: This file is being updated to work with async storage adapters
 // Some functions may still need async/await additions
 
+function _t(key, params) {
+    return typeof window.t === 'function' ? window.t(key, params) : key;
+}
+
 // Initialize task filter at the top level to avoid temporal dead zone issues
 let currentTaskFilter = 'all';
 
@@ -547,7 +551,7 @@ async function handleCreateTask(e) {
     ).map(cb => parseInt(cb.value));
 
     if (selectedStudents.length === 0) {
-        alert('Please select at least one student!');
+        alert('❌ ' + _t('alert_select_one_student_task'));
         return;
     }
 
@@ -565,7 +569,7 @@ async function handleCreateTask(e) {
     e.target.reset();
     
     // Show success message
-    alert('✅ Task created successfully!');
+    alert('✅ ' + _t('alert_task_created'));
     
     // Update dashboard and task list
     await updateDashboard();
@@ -705,66 +709,66 @@ async function handleAddStudent(e) {
     
     // Validation
     if (!studentData.name) {
-        alert('❌ Student name is required!');
+        alert('❌ ' + _t('alert_student_name_required'));
         return;
     }
     
     if (!studentData.studentId) {
-        alert('❌ Student ID is required!');
+        alert('❌ ' + _t('alert_student_id_required'));
         return;
     }
     
     if (!studentData.dateOfBirth) {
-        alert('❌ Date of birth is required!');
+        alert('❌ ' + _t('alert_dob_required'));
         return;
     }
     
     if (!studentData.grade) {
-        alert('❌ Grade is required!');
+        alert('❌ ' + _t('alert_grade_required'));
         return;
     }
     
     if (!studentData.section) {
-        alert('❌ Section is required!');
+        alert('❌ ' + _t('alert_section_required'));
         return;
     }
     
     if (!studentData.parentName) {
-        alert('❌ Parent/Guardian name is required!');
+        alert('❌ ' + _t('alert_parent_name_required'));
         return;
     }
     
     if (!studentData.parentPhone) {
-        alert('❌ Parent phone is required!');
+        alert('❌ ' + _t('alert_parent_phone_required'));
         return;
     }
     
     if (!studentData.enrollmentDate) {
-        alert('❌ Enrollment date is required!');
+        alert('❌ ' + _t('alert_enrollment_date_required'));
         return;
     }
 
     // Phone validation (basic)
     const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
     if (studentData.phone && !phoneRegex.test(studentData.phone)) {
-        alert('❌ Invalid student phone format!');
+        alert('❌ ' + _t('alert_invalid_student_phone'));
         return;
     }
     
     if (!phoneRegex.test(studentData.parentPhone)) {
-        alert('❌ Invalid parent phone format!');
+        alert('❌ ' + _t('alert_invalid_parent_phone'));
         return;
     }
 
     // Email validation (if provided)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (studentData.email && !emailRegex.test(studentData.email)) {
-        alert('❌ Invalid student email format!');
+        alert('❌ ' + _t('alert_invalid_student_email'));
         return;
     }
     
     if (studentData.parentEmail && !emailRegex.test(studentData.parentEmail)) {
-        alert('❌ Invalid parent email format!');
+        alert('❌ ' + _t('alert_invalid_parent_email'));
         return;
     }
 
@@ -774,7 +778,7 @@ async function handleAddStudent(e) {
     const age = today.getFullYear() - birthDate.getFullYear();
     
     if (age < 5 || age > 20) {
-        if (!confirm(`⚠️ Student age appears to be ${age} years. Are you sure this is correct?`)) {
+        if (!confirm('⚠️ ' + _t('confirm_student_age', { age: age }))) {
             return;
         }
     }
@@ -799,12 +803,12 @@ async function handleAddStudent(e) {
     await loadStudentCheckboxes();
     await updateDashboard();
     
-    alert('✅ Student added successfully!');
+    alert('✅ ' + _t('alert_student_added'));
 }
 
 // Delete Student
 async function deleteStudent(id) {
-    if (confirm('Are you sure you want to remove this student? This action cannot be undone.')) {
+    if (confirm('⚠️ ' + _t('confirm_remove_student'))) {
         await dataManager.deleteStudent(id);
         await loadStudentsList();
         await loadStudentCheckboxes();
@@ -814,6 +818,12 @@ async function deleteStudent(id) {
 
 // Update Analytics
 async function updateAnalytics() {
+    const loader = document.getElementById('analyticsLoader');
+    const content = document.getElementById('analyticsContent');
+    if (loader && content) {
+        loader.style.display = 'flex';
+        content.style.opacity = '0.5';
+    }
     const stats = await dataManager.getOverallStats();
     const tasks = await dataManager.getTasks();
     const oneTimeTasksCount = tasks.filter(t => t.type === 'one-time').length;
@@ -830,6 +840,10 @@ async function updateAnalytics() {
     const dailyCountElement = document.getElementById('dailyCount');
     if (dailyCountElement) {
         dailyCountElement.textContent = dailyTasksCount;
+    }
+    if (loader && content) {
+        loader.style.display = 'none';
+        content.style.opacity = '1';
     }
 }
 
@@ -932,14 +946,21 @@ function updateActiveButtonOverview(buttonId) {
 
 // Load Overview Data for Dashboard
 async function loadOverviewDataDashboard() {
+    const bestGrid = document.querySelector('#daily-overview-section #bestStudentsGrid');
+    const tableBody = document.querySelector('#daily-overview-section #overviewTableBody');
+    const loadingText = typeof window.t === 'function' ? window.t('loading') : 'Loading...';
+    const spinnerHtml = `<div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+    if (bestGrid) bestGrid.innerHTML = `<div class="loading-spinner" style="grid-column: 1 / -1;"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+    if (tableBody) tableBody.innerHTML = `<tr><td colspan="20" style="text-align:center;padding:2rem;">${spinnerHtml}</td></tr>`;
+
     const students = await dataManager.getStudents();
     const dailyTasks = await dataManager.getDailyTasks();
-    
+
     if (students.length === 0 || dailyTasks.length === 0) {
         showEmptyStateOverview();
         return;
     }
-    
+
     // Calculate student performance
     const studentPerformance = [];
     for (const student of students) {
@@ -1067,6 +1088,7 @@ async function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
         
         const trophyIcon = isTopPerformer ? '<span class="completion-trophy">🏆</span>' : '';
         
+        const gradeSec = `${student.grade || 'N/A'} • ${student.section || 'N/A'}`;
         rows.push(`
             <tr class="${isTopPerformer ? 'top-performer' : ''}">
                 <td class="sticky-col student-col">
@@ -1074,7 +1096,8 @@ async function buildOverviewTableDashboard(studentPerformance, dailyTasks) {
                         <div class="student-avatar-small">${initial}</div>
                         <div class="student-name-info">
                             <h4>${student.name}</h4>
-                            <p>${student.studentId || 'N/A'}</p>
+                            <p class="desktop-only">${student.studentId || 'N/A'}</p>
+                            <p class="mobile-student-meta">${gradeSec}<br><strong class="completion-cell ${completionClass}">${sp.percentage}%${trophyIcon}</strong></p>
                         </div>
                     </div>
                 </td>
@@ -1181,15 +1204,15 @@ function truncateTextOverview(text, maxLength) {
 
 // Reset Sample Data
 async function resetSampleData() {
-    if (confirm('⚠️ This will clear all current data and reload fresh sample data. Continue?')) {
+    if (confirm('⚠️ ' + _t('confirm_reset_sample_data'))) {
         try {
             // Clear data using the storage adapter (works for both localStorage and Firebase)
             await dataManager.storage.clear();
-            alert('✅ Sample data reset! Page will reload now.');
+            alert('✅ ' + _t('alert_sample_data_reset'));
             location.reload();
         } catch (error) {
             console.error('Error resetting data:', error);
-            alert('❌ Error resetting data. Please try again.');
+            alert('❌ ' + _t('alert_error_resetting_data'));
         }
     }
 }
@@ -1382,7 +1405,7 @@ function applyTaskFilter() {
 async function showEditTaskModal(taskId) {
     const task = await dataManager.getTaskById(taskId);
     if (!task) {
-        alert('❌ Task not found!');
+        alert('❌ ' + _t('alert_task_not_found'));
         return;
     }
     
@@ -1471,7 +1494,7 @@ async function handleUpdateTask(e) {
     ).map(cb => parseInt(cb.value));
     
     if (selectedStudents.length === 0) {
-        alert('❌ Please select at least one student!');
+        alert('❌ ' + _t('alert_select_one_student_task'));
         return;
     }
     
@@ -1486,12 +1509,12 @@ async function handleUpdateTask(e) {
     const result = await dataManager.updateTask(taskId, updatedTask);
     
     if (result) {
-        alert('✅ Task updated successfully!');
+        alert('✅ ' + _t('alert_task_updated'));
         closeEditTaskModal();
         await loadAllTasks();
         await updateDashboard();
     } else {
-        alert('❌ Failed to update task!');
+        alert('❌ ' + _t('alert_task_update_failed'));
     }
 }
 
@@ -1500,12 +1523,11 @@ async function handleDeleteTask(taskId) {
     const task = await dataManager.getTaskById(taskId);
     if (!task) return;
     
-    const studentCount = task.assignedTo.length;
-    const confirmMsg = `⚠️ Are you sure you want to delete "${task.title}"?\n\nThis will remove the task from ${studentCount} student${studentCount > 1 ? 's' : ''}.\n\nThis action cannot be undone.`;
+    const confirmMsg = '⚠️ ' + _t('confirm_delete_task', { title: task.title, count: task.assignedTo.length });
     
     if (confirm(confirmMsg)) {
         await dataManager.deleteTask(taskId);
-        alert('✅ Task deleted successfully!');
+        alert('✅ ' + _t('alert_task_deleted'));
         await loadAllTasks();
         await updateDashboard();
     }

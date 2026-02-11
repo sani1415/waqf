@@ -103,7 +103,7 @@
                     <h3><i class="fas fa-trophy"></i> <span data-i18n="best_performing_students">Best Performing Students</span></h3>
                 </div>
                 <div class="best-students-grid" id="bestStudentsGrid">
-                    <!-- Best students will be loaded here -->
+                    <div class="loading-spinner" style="grid-column: 1 / -1;"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="loading">Loading...</span></div>
                 </div>
             </div>
 
@@ -144,7 +144,7 @@
                             </tr>
                         </thead>
                         <tbody id="overviewTableBody">
-                            <!-- Table rows will be loaded here -->
+                            <tr><td colspan="20" style="text-align:center;padding:2rem;"><div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="loading">Loading...</span></div></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -165,29 +165,41 @@
         </div>
     </div>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
-        <a href="/pages/teacher-dashboard.html" class="bottom-nav-item" title="Dashboard">
-            <i class="fas fa-home"></i>
-            <span data-i18n="nav_dashboard">Dashboard</span>
-        </a>
-        <a href="/pages/teacher-dashboard.html#manage-tasks" class="bottom-nav-item" title="Tasks">
-            <i class="fas fa-tasks"></i>
-            <span data-i18n="stat_tasks">Tasks</span>
-        </a>
-        <a href="/pages/teacher-dashboard.html#students" class="bottom-nav-item" title="Students">
-            <i class="fas fa-users"></i>
-            <span data-i18n="nav_students">Students</span>
-        </a>
-        <a href="/pages/teacher-daily-overview.html" class="bottom-nav-item active" title="Daily Overview">
-            <i class="fas fa-table"></i>
-            <span data-i18n="nav_overview">Overview</span>
-        </a>
-        <a href="/pages/teacher-messages.html" class="bottom-nav-item" title="Messages">
-            <i class="fas fa-comments"></i>
-            <span data-i18n="nav_messages">Messages</span>
-        </a>
-    </nav>
+    <!-- Mobile Bottom Navigation (scrollable) -->
+    <div class="bottom-nav-wrapper">
+        <div class="bottom-nav-fade bottom-nav-fade-left" id="bottomNavFadeLeft" aria-hidden="true"><i class="fas fa-chevron-left"></i></div>
+        <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
+            <a href="/pages/teacher-dashboard.html" class="bottom-nav-item" title="Dashboard">
+                <i class="fas fa-home"></i>
+                <span data-i18n="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="/pages/teacher-dashboard.html#manage-tasks" class="bottom-nav-item" title="Tasks">
+                <i class="fas fa-tasks"></i>
+                <span data-i18n="stat_tasks">Tasks</span>
+            </a>
+            <a href="/pages/teacher-dashboard.html#students" class="bottom-nav-item" title="Students">
+                <i class="fas fa-users"></i>
+                <span data-i18n="nav_students">Students</span>
+            </a>
+            <a href="/pages/teacher-messages.html" class="bottom-nav-item" title="Messages">
+                <i class="fas fa-comments"></i>
+                <span data-i18n="nav_messages">Messages</span>
+            </a>
+            <a href="/pages/teacher-daily-overview.html" class="bottom-nav-item active" title="Daily Overview">
+                <i class="fas fa-table"></i>
+                <span data-i18n="nav_overview">Overview</span>
+            </a>
+            <a href="/pages/teacher-exams.html" class="bottom-nav-item" title="Exams">
+                <i class="fas fa-graduation-cap"></i>
+                <span data-i18n="nav_exams">Exams</span>
+            </a>
+            <a href="#" class="bottom-nav-item bottom-nav-menu" id="bottomNavMenu" title="Menu">
+                <i class="fas fa-ellipsis-v"></i>
+                <span data-i18n="nav_menu">Menu</span>
+            </a>
+        </nav>
+        <div class="bottom-nav-fade bottom-nav-fade-right" id="bottomNavFadeRight" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+    </div>
 
     <!-- Firebase SDK (Uncomment when using Firebase) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -202,6 +214,7 @@
     
     <!-- Data Manager & App Logic -->
     <script src="../js/data-manager.js"></script>
+    <script src="../js/bottom-nav-scroll.js"></script>
     <script src="../js/teacher-daily-overview.js"></script>
 </body>
 </html>

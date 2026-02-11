@@ -1070,28 +1070,80 @@ body {
 }
 
 /* ===================================
-   MOBILE BOTTOM NAVIGATION
+   MOBILE BOTTOM NAVIGATION (Scrollable)
    =================================== */
-.bottom-nav {
+.bottom-nav-wrapper {
     display: none;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    min-height: 56px;
-    padding: 0.35rem 0;
-    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    z-index: 900;
     background: white;
     box-shadow: 0 -2px 12px rgba(123, 158, 189, 0.15);
-    z-index: 900;
-    justify-content: space-around;
-    align-items: center;
+    overflow: hidden; /* Constrain nav so overflow triggers scroll */
 }
 
 @media (max-width: 768px) {
-    .bottom-nav {
-        display: flex;
+    .bottom-nav-wrapper {
+        display: block;
     }
+}
+
+/* Scroll indicators - chevron arrows show "more this way" */
+.bottom-nav-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 36px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 2;
+}
+.bottom-nav-fade-left {
+    left: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.6) 60%, transparent);
+    justify-content: flex-start;
+    padding-left: 6px;
+}
+.bottom-nav-fade-right {
+    right: 0;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.6) 60%, transparent);
+    justify-content: flex-end;
+    padding-right: 6px;
+}
+.bottom-nav-fade.visible {
+    opacity: 1;
+}
+.bottom-nav-fade i {
+    font-size: 1.25rem;
+    color: var(--primary-soft);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+}
+
+/* Scrollable nav container - must not expand beyond viewport */
+.bottom-nav {
+    display: flex;
+    width: 100%;
+    min-width: 0; /* Allow shrinking so overflow works */
+    min-height: 56px;
+    padding: 0.35rem 0;
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 0;
+}
+.bottom-nav::-webkit-scrollbar {
+    display: none;
 }
 
 .bottom-nav-item {
@@ -1100,16 +1152,19 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.15rem;
-    padding: 0.35rem 0.5rem;
+    padding: 0.35rem 0.6rem;
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.65rem;
     font-weight: 500;
-    flex: 1;
+    flex: 0 0 auto;
+    min-width: 80px; /* Wider so 7 items need scroll on most phones */
     max-width: 80px;
     min-height: 64px;
     transition: all 0.2s ease;
     -webkit-tap-highlight-color: transparent;
+    scroll-snap-align: start;
+    white-space: nowrap;
 }
 
 .bottom-nav-item i {

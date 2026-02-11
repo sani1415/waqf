@@ -3,6 +3,11 @@ function _t(key, params) {
     return typeof window.t === 'function' ? window.t(key, params) : key;
 }
 
+function getLoadingSpinnerHtml() {
+    const loadingText = _t('loading');
+    return `<div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+}
+
 let questionCounter = 0;
 
 // Initialize on page load
@@ -33,6 +38,7 @@ function initializePage() {
 // Setup mobile sidebar menu and overlay
 function setupMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
+    const bottomNavMenu = document.getElementById('bottomNavMenu');
     const sidebar = document.getElementById('sidebar');
     if (!menuToggle || !sidebar) return;
 
@@ -40,6 +46,13 @@ function setupMobileMenu() {
         sidebar.classList.toggle('active');
         toggleOverlay(sidebar.classList.contains('active'));
     });
+    if (bottomNavMenu) {
+        bottomNavMenu.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.add('active');
+            toggleOverlay(true);
+        });
+    }
 
     let overlay = document.getElementById('sidebarOverlay');
     if (!overlay) {
@@ -475,12 +488,15 @@ function resetQuizForm() {
    =================================== */
 
 async function loadAllQuizzes() {
-    const quizzes = await dataManager.getQuizzes();
     const container = document.getElementById('quizzesList');
-    const countBadge = document.getElementById('quizCountBadge');
     const noQuizzesMessage = document.getElementById('noQuizzesMessage');
+    if (container) container.innerHTML = getLoadingSpinnerHtml();
+    if (noQuizzesMessage) noQuizzesMessage.style.display = 'none';
+
+    const quizzes = await dataManager.getQuizzes();
+    const countBadge = document.getElementById('quizCountBadge');
     
-    countBadge.textContent = quizzes.length;
+    if (countBadge) countBadge.textContent = quizzes.length;
     
     if (quizzes.length === 0) {
         container.innerHTML = '';
@@ -598,8 +614,12 @@ async function deleteQuiz(quizId) {
    =================================== */
 
 async function loadQuizResultsSelector() {
-    const quizzes = await dataManager.getQuizzes();
     const container = document.getElementById('resultsContent');
+    const noResultsMessage = document.getElementById('noResultsMessage');
+    if (container) container.innerHTML = getLoadingSpinnerHtml();
+    if (noResultsMessage) noResultsMessage.style.display = 'none';
+
+    const quizzes = await dataManager.getQuizzes();
     
     if (quizzes.length === 0) {
         container.innerHTML = '';
@@ -625,6 +645,9 @@ async function loadQuizResultsSelector() {
 
 async function loadQuizResults(quizId) {
     if (!quizId) return;
+    
+    const displayContainer = document.getElementById('quizResultsDisplay');
+    if (displayContainer) displayContainer.innerHTML = getLoadingSpinnerHtml();
     
     const quiz = await dataManager.getQuizById(parseInt(quizId));
     const stats = await dataManager.getQuizStatistics(parseInt(quizId));
@@ -755,6 +778,9 @@ async function updatePendingCount() {
 async function loadPendingReviews() {
     const container = document.getElementById('pendingReviewsContainer');
     const emptyMessage = document.getElementById('noPendingMessage');
+    if (container) container.innerHTML = getLoadingSpinnerHtml();
+    if (emptyMessage) emptyMessage.style.display = 'none';
+
     const pendingResults = await dataManager.getPendingGradingResults();
     
     if (pendingResults.length === 0) {
@@ -963,7 +989,7 @@ async function submitGrade(event, resultId, questionIndex) {
     const updatedResult = await dataManager.gradeAnswer(resultId, questionIndex, marks, feedback);
     
     if (!updatedResult) {
-        alert('❌ Error grading answer. Please try again.');
+        alert('❌ ' + _t('alert_error_grading'));
         return;
     }
     
@@ -971,9 +997,9 @@ async function submitGrade(event, resultId, questionIndex) {
     
     // Check if all questions are now graded
     if (updatedResult.status === 'graded') {
-        alert(`✅ All questions graded! Final score: ${updatedResult.score}/${updatedResult.totalMarks} (${updatedResult.percentage}%)`);
+        alert('✅ ' + _t('alert_all_graded', { score: updatedResult.score, total: updatedResult.totalMarks, pct: updatedResult.percentage }));
     } else {
-        alert('✅ Grade submitted successfully!');
+        alert('✅ ' + _t('alert_grade_submitted'));
     }
     
     // Reload pending reviews

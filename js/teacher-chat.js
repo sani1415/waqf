@@ -55,6 +55,9 @@ function loadStudentInfo() {
 // Load Messages
 async function loadMessages() {
     const messagesArea = document.getElementById('messagesArea');
+    const loadingText = typeof window.t === 'function' ? window.t('loading') : 'Loading...';
+    if (messagesArea) messagesArea.innerHTML = `<div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+
     const messages = await dataManager.getMessagesForStudent(currentStudentId);
 
     if (messages.length === 0) {

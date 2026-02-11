@@ -1,5 +1,10 @@
 // Teacher Daily Overview Page JavaScript
 
+function getLoadingSpinnerHtml() {
+    const loadingText = typeof window.t === 'function' ? window.t('loading') : 'Loading...';
+    return `<div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+}
+
 let selectedDate = new Date();
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -83,6 +88,13 @@ function updateActiveButton(buttonId) {
 
 // Load Overview Data
 async function loadOverviewData() {
+    const bestGrid = document.getElementById('bestStudentsGrid');
+    const tableBody = document.getElementById('overviewTableBody');
+    const loadingText = typeof window.t === 'function' ? window.t('loading') : 'Loading...';
+    const spinnerHtml = `<div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+    if (bestGrid) bestGrid.innerHTML = `<div class="loading-spinner" style="grid-column: 1 / -1;"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+    if (tableBody) tableBody.innerHTML = `<tr><td colspan="20" style="text-align:center;padding:2rem;">${spinnerHtml}</td></tr>`;
+
     const students = await dataManager.getStudents();
     const dailyTasks = await getDailyTasks();
 
@@ -210,6 +222,7 @@ async function buildOverviewTable(studentPerformance, dailyTasks) {
 
         const trophyIcon = isTopPerformer ? '<span class="completion-trophy">🏆</span>' : '';
 
+        const gradeSec = `${student.grade || 'N/A'} • ${student.section || 'N/A'}`;
         rows.push(`
             <tr class="${isTopPerformer ? 'top-performer' : ''}">
                 <td class="sticky-col student-col">
@@ -217,7 +230,8 @@ async function buildOverviewTable(studentPerformance, dailyTasks) {
                         <div class="student-avatar-small">${initial}</div>
                         <div class="student-name-info">
                             <h4>${student.name}</h4>
-                            <p>${student.studentId || 'N/A'}</p>
+                            <p class="desktop-only">${student.studentId || 'N/A'}</p>
+                            <p class="mobile-student-meta">${gradeSec}<br><strong class="completion-cell ${completionClass}">${sp.percentage}%${trophyIcon}</strong></p>
                         </div>
                     </div>
                 </td>
@@ -310,12 +324,20 @@ function truncateText(text, maxLength) {
 // Setup Mobile Menu
 function setupMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
+    const bottomNavMenu = document.getElementById('bottomNavMenu');
     const sidebar = document.getElementById('sidebar');
 
     if (menuToggle) {
         menuToggle.addEventListener('click', function() {
             sidebar.classList.toggle('active');
             toggleOverlay(sidebar.classList.contains('active'));
+        });
+    }
+    if (bottomNavMenu) {
+        bottomNavMenu.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.add('active');
+            toggleOverlay(true);
         });
     }
 

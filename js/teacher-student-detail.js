@@ -1,5 +1,14 @@
 // Teacher Student Detail Page JavaScript
 
+function getLoadingSpinnerHtml() {
+    const loadingText = typeof window.t === 'function' ? window.t('loading') : 'Loading...';
+    return `<div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span>${loadingText}</span></div>`;
+}
+
+function _t(key, params) {
+    return typeof window.t === 'function' ? window.t(key, params) : key;
+}
+
 let currentStudent = null;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -24,7 +33,7 @@ async function initializeStudentDetail() {
     const studentId = urlParams.get('studentId') || sessionStorage.getItem('viewStudentId');
 
     if (!studentId) {
-        alert('No student selected!');
+        alert(_t('no_student_selected'));
         window.location.href = '/pages/teacher-dashboard.html';
         return;
     }
@@ -32,10 +41,16 @@ async function initializeStudentDetail() {
     currentStudent = await dataManager.getStudentById(parseInt(studentId));
 
     if (!currentStudent) {
-        alert('Student not found!');
+        alert(_t('student_not_found'));
         window.location.href = '/pages/teacher-dashboard.html';
         return;
     }
+
+    // Show loading, hide main content
+    const loader = document.getElementById('studentDetailLoader');
+    const main = document.getElementById('studentDetailMain');
+    if (loader) loader.style.display = 'flex';
+    if (main) main.style.opacity = '0.5';
 
     // Store in sessionStorage for page refresh
     sessionStorage.setItem('viewStudentId', studentId);
@@ -60,6 +75,10 @@ async function initializeStudentDetail() {
     await loadStudentExams();
     await loadMessagesTab();
     setupMessageFormTab();
+
+    // Hide loading, show main content
+    if (loader) loader.style.display = 'none';
+    if (main) main.style.opacity = '1';
     console.log('✅ New tabbed interface initialized');
 }
 
@@ -172,31 +191,31 @@ async function handleUpdateStudent(e) {
     
     // Validation (similar to add student)
     if (!updatedData.name) {
-        alert('❌ Student name is required!');
+        alert('❌ ' + _t('alert_student_name_required'));
         return;
     }
     
     // Phone validation
     const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
     if (updatedData.phone && !phoneRegex.test(updatedData.phone)) {
-        alert('❌ Invalid student phone format!');
+        alert('❌ ' + _t('alert_invalid_student_phone'));
         return;
     }
     
     if (updatedData.parentPhone && !phoneRegex.test(updatedData.parentPhone)) {
-        alert('❌ Invalid parent phone format!');
+        alert('❌ ' + _t('alert_invalid_parent_phone'));
         return;
     }
     
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (updatedData.email && !emailRegex.test(updatedData.email)) {
-        alert('❌ Invalid student email format!');
+        alert('❌ ' + _t('alert_invalid_student_email'));
         return;
     }
     
     if (updatedData.parentEmail && !emailRegex.test(updatedData.parentEmail)) {
-        alert('❌ Invalid parent email format!');
+        alert('❌ ' + _t('alert_invalid_parent_email'));
         return;
     }
     
@@ -213,9 +232,9 @@ async function handleUpdateStudent(e) {
         // Close modal
         closeEditStudentModal();
         
-        alert('✅ Student profile updated successfully!');
+        alert('✅ ' + _t('alert_profile_updated'));
     } else {
-        alert('❌ Failed to update student profile!');
+        alert('❌ ' + _t('alert_profile_update_failed'));
     }
 }
 
@@ -639,7 +658,7 @@ function handleAddNote(e) {
     const noteText = document.getElementById('noteText').value.trim();
     
     if (!category || !noteText) {
-        alert('❌ Please fill in all required fields!');
+        alert('❌ ' + _t('alert_fill_required_fields'));
         return;
     }
     
@@ -658,9 +677,9 @@ function handleAddNote(e) {
         // Close modal and reset form
         closeAddNoteModal();
         
-        alert('✅ Note added successfully!');
+        alert('✅ ' + _t('alert_note_added'));
     } else {
-        alert('❌ Failed to add note!');
+        alert('❌ ' + _t('alert_note_add_failed'));
     }
 }
 
@@ -669,7 +688,7 @@ function openEditNoteModal(noteId) {
     const note = currentStudent.notes.find(n => n.id === noteId);
     
     if (!note) {
-        alert('❌ Note not found!');
+        alert('❌ ' + _t('alert_note_not_found'));
         return;
     }
     
@@ -707,7 +726,7 @@ function handleEditNote(e) {
     const noteText = document.getElementById('editNoteText').value.trim();
     
     if (!category || !noteText) {
-        alert('❌ Please fill in all required fields!');
+        alert('❌ ' + _t('alert_fill_required_fields'));
         return;
     }
     
@@ -726,15 +745,15 @@ function handleEditNote(e) {
         // Close modal
         closeEditNoteModal();
         
-        alert('✅ Note updated successfully!');
+        alert('✅ ' + _t('alert_note_updated'));
     } else {
-        alert('❌ Failed to update note!');
+        alert('❌ ' + _t('alert_note_update_failed'));
     }
 }
 
 // Delete Note
 function deleteNote(noteId) {
-    if (!confirm('⚠️ Are you sure you want to delete this note? This action cannot be undone.')) {
+    if (!confirm('⚠️ ' + _t('confirm_delete_note'))) {
         return;
     }
     
@@ -747,9 +766,9 @@ function deleteNote(noteId) {
         // Refresh notes display
         displayStudentNotes();
         
-        alert('✅ Note deleted successfully!');
+        alert('✅ ' + _t('alert_note_deleted'));
     } else {
-        alert('❌ Failed to delete note!');
+        alert('❌ ' + _t('alert_note_delete_failed'));
     }
 }
 

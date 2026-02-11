@@ -1,6 +1,6 @@
 // Student Quiz Taking Logic
-function _t(key) {
-    return typeof window.t === 'function' ? window.t(key) : key;
+function _t(key, params) {
+    return typeof window.t === 'function' ? window.t(key, params) : key;
 }
 
 let currentQuiz = null;
@@ -430,14 +430,14 @@ async function submitQuiz() {
     const unansweredCount = studentAnswers.filter(ans => ans === null).length;
     
     if (unansweredCount > 0) {
-        const confirmSubmit = confirm(`⚠️ You have ${unansweredCount} unanswered question${unansweredCount > 1 ? 's' : ''}.\n\nDo you want to submit anyway?`);
+        const confirmSubmit = confirm('⚠️ ' + _t('confirm_unanswered_submit', { count: unansweredCount }));
         if (!confirmSubmit) {
             return;
         }
     }
     
     // Confirm submission
-    const finalConfirm = confirm('📝 Are you sure you want to submit your quiz?\n\nYou cannot change your answers after submission.');
+    const finalConfirm = confirm('📝 ' + _t('confirm_submit_quiz'));
     if (!finalConfirm) {
         return;
     }
@@ -458,7 +458,7 @@ async function submitQuiz() {
         // Show result immediately
         showResult(result);
     } else {
-        alert('❌ Error submitting quiz!');
+        alert('❌ ' + _t('alert_error_submitting'));
         window.location.href = '/pages/student-dashboard.html';
     }
 }

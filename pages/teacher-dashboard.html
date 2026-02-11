@@ -258,7 +258,8 @@
         <!-- Analytics Section -->
         <section id="analytics-section" class="content-section">
             <h2 data-i18n="analytics_overview">Analytics Overview</h2>
-            <div class="analytics-grid">
+            <div id="analyticsLoader" class="loading-spinner" style="display:none;margin:2rem 0;"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="loading">Loading...</span></div>
+            <div id="analyticsContent" class="analytics-grid">
                 <div class="analytics-card">
                     <h3 data-i18n="overall_completion_rate">Overall Completion Rate</h3>
                     <div class="progress-circle">
@@ -307,7 +308,7 @@
                         <h3><i class="fas fa-trophy"></i> <span data-i18n="best_performing_students">Best Performing Students</span></h3>
                     </div>
                     <div class="best-students-grid" id="bestStudentsGrid">
-                        <!-- Best students will be loaded here -->
+                        <div class="loading-spinner" style="grid-column: 1 / -1;"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="loading">Loading...</span></div>
                     </div>
                 </div>
 
@@ -348,7 +349,7 @@
                                 </tr>
                             </thead>
                             <tbody id="overviewTableBody">
-                                <!-- Table rows will be loaded here -->
+                                <tr><td colspan="20" style="text-align:center;padding:2rem;"><div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="loading">Loading...</span></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -388,29 +389,41 @@
     })();
     </script>
 
-    <!-- Mobile Bottom Navigation (visible on screens ≤768px) -->
-    <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
-        <a href="#" class="bottom-nav-item active" data-section="dashboard" title="Dashboard">
-            <i class="fas fa-home"></i>
-            <span data-i18n="nav_dashboard">Dashboard</span>
-        </a>
-        <a href="#" class="bottom-nav-item" data-section="manage-tasks" title="Tasks">
-            <i class="fas fa-tasks"></i>
-            <span data-i18n="stat_tasks">Tasks</span>
-        </a>
-        <a href="#" class="bottom-nav-item" data-section="students" title="Students">
-            <i class="fas fa-users"></i>
-            <span data-i18n="nav_students">Students</span>
-        </a>
-        <a href="/pages/teacher-messages.html" class="bottom-nav-item" title="Messages">
-            <i class="fas fa-comments"></i>
-            <span data-i18n="nav_messages">Messages</span>
-        </a>
-        <a href="#" class="bottom-nav-item bottom-nav-menu" id="bottomNavMenu" title="More">
-            <i class="fas fa-ellipsis-v"></i>
-            <span data-i18n="nav_menu">Menu</span>
-        </a>
-    </nav>
+    <!-- Mobile Bottom Navigation (scrollable, visible on screens ≤768px) -->
+    <div class="bottom-nav-wrapper">
+        <div class="bottom-nav-fade bottom-nav-fade-left" id="bottomNavFadeLeft" aria-hidden="true"><i class="fas fa-chevron-left"></i></div>
+        <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
+            <a href="#" class="bottom-nav-item active" data-section="dashboard" title="Dashboard">
+                <i class="fas fa-home"></i>
+                <span data-i18n="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-section="manage-tasks" title="Tasks">
+                <i class="fas fa-tasks"></i>
+                <span data-i18n="stat_tasks">Tasks</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-section="students" title="Students">
+                <i class="fas fa-users"></i>
+                <span data-i18n="nav_students">Students</span>
+            </a>
+            <a href="/pages/teacher-messages.html" class="bottom-nav-item" title="Messages">
+                <i class="fas fa-comments"></i>
+                <span data-i18n="nav_messages">Messages</span>
+            </a>
+            <a href="/pages/teacher-daily-overview.html" class="bottom-nav-item" title="Daily Overview">
+                <i class="fas fa-table"></i>
+                <span data-i18n="nav_overview">Overview</span>
+            </a>
+            <a href="/pages/teacher-exams.html" class="bottom-nav-item" title="Exams">
+                <i class="fas fa-graduation-cap"></i>
+                <span data-i18n="nav_exams">Exams</span>
+            </a>
+            <a href="#" class="bottom-nav-item bottom-nav-menu" id="bottomNavMenu" title="More">
+                <i class="fas fa-ellipsis-v"></i>
+                <span data-i18n="nav_menu">Menu</span>
+            </a>
+        </nav>
+        <div class="bottom-nav-fade bottom-nav-fade-right" id="bottomNavFadeRight" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+    </div>
 
     <!-- Add Student Modal - Enhanced Comprehensive Form -->
     <div id="addStudentModal" class="modal">
@@ -602,6 +615,7 @@
     
     <!-- Data Manager & App Logic -->
     <script src="../js/data-manager.js"></script>
+    <script src="../js/bottom-nav-scroll.js"></script>
     <script src="../js/teacher.js"></script>
 </body>
 </html>

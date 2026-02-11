@@ -75,7 +75,7 @@ async function initializeStudentDashboard() {
     currentStudent = await dataManager.getStudentById(parseInt(studentId));
 
     if (!currentStudent) {
-        alert('Student not found!');
+        alert(typeof window.t === 'function' ? window.t('student_not_found') : 'Student not found!');
         window.location.href = '/pages/student-list.html';
         return;
     }
