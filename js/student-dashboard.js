@@ -111,7 +111,9 @@ function loadStudentProfile() {
     
     if (sidebarName) sidebarName.textContent = currentStudent.name;
     if (sidebarRole) sidebarRole.textContent = currentStudent.email || 'Student';
-    if (headerName) headerName.textContent = `মারহাবা, ${currentStudent.name.split(' ')[0]}!`;
+    const greeting = (typeof window.t === 'function' ? window.t('greeting') : null) || 'Marhaba';
+    const firstName = (currentStudent.name || '').trim().split(/\s+/)[0] || 'Student';
+    if (headerName) headerName.textContent = `${greeting}, ${firstName}!`;
 
     // Populate Profile tab
     const fmt = (v) => (v && String(v).trim()) ? v : '-';

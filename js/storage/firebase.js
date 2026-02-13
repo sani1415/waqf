@@ -74,20 +74,31 @@ class FirebaseAdapter extends StorageAdapter {
             const collections = ['students', 'tasks', 'messages', 'quizzes', 'quizResults'];
             console.log('🔍 Checking Firestore collections...');
             
-            for (const collectionName of collections) {
-                const snapshot = await this.db.collection(collectionName).limit(1).get();
-                if (snapshot.empty) {
-                    console.log(`📝 Collection "${collectionName}" is empty - will be created on first write`);
-                } else {
-                    console.log(`✅ Collection "${collectionName}" exists with data`);
-                }
-            }
-            
+            const checks = await Promise.all(collections.map(async (name) => {
+                const snapshot = await this.db.collection(name).limit(1).get();
+                return { name, empty: snapshot.empty };
+            }));
+            checks.forEach(({ name, empty }) => {
+                console.log(empty ? `📝 Collection "${name}" is empty - will be created on first write` : `✅ Collection "${name}" exists with data`);
+            });
             console.log('✅ Firestore ready for use');
         } catch (error) {
             console.warn('⚠️ Could not verify collections:', error.message);
-            // Don't fail initialization - collections will be created on first write
         }
+    }
+
+    /**
+     * Remove undefined values - Firestore does not accept undefined
+     */
+    _sanitizeForFirestore(obj) {
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (Array.isArray(obj)) return obj.map(item => this._sanitizeForFirestore(item));
+        const clean = {};
+        for (const k of Object.keys(obj)) {
+            const v = obj[k];
+            if (v !== undefined) clean[k] = this._sanitizeForFirestore(v);
+        }
+        return clean;
     }
 
     /**
@@ -184,23 +195,19 @@ class FirebaseAdapter extends StorageAdapter {
                     batch.delete(doc.ref);
                 });
 
-                // Then add new documents
+                // Then add new documents (Firestore rejects undefined - strip it)
                 data.forEach(item => {
-                    // Use item.id as document ID if available, otherwise auto-generate
-                    // IMPORTANT: Convert ID to string (Firestore requires string IDs)
                     const docId = item.id ? String(item.id) : this.db.collection(key).doc().id;
                     const docRef = collectionRef.doc(docId);
-                    batch.set(docRef, item);
+                    batch.set(docRef, this._sanitizeForFirestore(item));
                 });
 
                 await batch.commit();
                 console.log(`✅ Saved ${data.length} documents to ${key}`);
             } else {
-                // Single object - save as one document
-                // IMPORTANT: Convert ID to string
                 const docId = data.id ? String(data.id) : 'data';
                 const docRef = this.db.collection(key).doc(docId);
-                await docRef.set(data);
+                await docRef.set(this._sanitizeForFirestore(data));
                 console.log(`✅ Saved document to ${key}`);
             }
 

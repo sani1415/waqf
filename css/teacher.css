@@ -1070,7 +1070,7 @@ body {
 }
 
 /* ===================================
-   MOBILE BOTTOM NAVIGATION (Scrollable)
+   MOBILE BOTTOM NAVIGATION (Matches student nav - stable, accurate sizing)
    =================================== */
 .bottom-nav-wrapper {
     display: none;
@@ -1081,7 +1081,7 @@ body {
     z-index: 900;
     background: white;
     box-shadow: 0 -2px 12px rgba(123, 158, 189, 0.15);
-    overflow: hidden; /* Constrain nav so overflow triggers scroll */
+    overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -1090,7 +1090,7 @@ body {
     }
 }
 
-/* Scroll indicators - chevron arrows show "more this way" */
+/* Scroll indicators */
 .bottom-nav-fade {
     position: absolute;
     top: 0;
@@ -1125,11 +1125,11 @@ body {
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
 }
 
-/* Scrollable nav container - must not expand beyond viewport */
+/* Scrollable nav - same as student */
 .bottom-nav {
     display: flex;
     width: 100%;
-    min-width: 0; /* Allow shrinking so overflow works */
+    min-width: 0;
     min-height: 56px;
     padding: 0.35rem 0;
     padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
@@ -1146,6 +1146,7 @@ body {
     display: none;
 }
 
+/* Nav items - same sizing as student (min-height 64px, 80px width) */
 .bottom-nav-item {
     display: flex;
     flex-direction: column;
@@ -1158,7 +1159,7 @@ body {
     font-size: 0.65rem;
     font-weight: 500;
     flex: 0 0 auto;
-    min-width: 80px; /* Wider so 7 items need scroll on most phones */
+    min-width: 80px;
     max-width: 80px;
     min-height: 64px;
     transition: all 0.2s ease;
@@ -1183,6 +1184,27 @@ body {
 
 .bottom-nav-item.active i {
     color: var(--primary-soft);
+}
+
+/* Unread count badge on Messages (bottom nav) - teacher sees when students send messages */
+.bottom-nav-item-msg {
+    position: relative;
+}
+.bottom-nav .bottom-nav-badge {
+    position: absolute;
+    top: 2px;
+    right: 50%;
+    margin-right: -36px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    background: #E53E3E;
+    color: white;
+    border-radius: 8px;
 }
 
 /* ===================================

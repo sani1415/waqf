@@ -96,43 +96,18 @@ function initializePage() {
 async function initializeTeacherDashboard() {
     await updateDashboard();
     await loadStudentCheckboxes();
-    await updateUnreadBadge();
-    
-    // Update unread badge every 5 seconds
-    setInterval(updateUnreadBadge, 5000);
-}
-
-// Update Unread Badge
-async function updateUnreadBadge() {
-    const students = await dataManager.getStudents();
-    let totalUnread = 0;
-    
-    for (const student of students) {
-        totalUnread += await dataManager.getUnreadCount(student.id, 'teacher');
-    }
-    
-    const badge = document.getElementById('totalUnreadBadge');
-    if (badge) {
-        if (totalUnread > 0) {
-            badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
-            badge.style.display = 'inline-block';
-        } else {
-            badge.style.display = 'none';
-        }
-    }
+    // Unread badge is handled by teacher-unread-badge.js on all teacher pages
 }
 
 // Setup Event Listeners
 function setupEventListeners() {
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(item => {
+    // Navigation - sidebar and in-page tabs
+    document.querySelectorAll('.nav-item[data-section]').forEach(item => {
         item.addEventListener('click', function(e) {
-            if (this.getAttribute('href') === '#') {
-                e.preventDefault();
-                const section = this.getAttribute('data-section');
-                if (section) {
-                    switchSection(section, this);
-                }
+            e.preventDefault();
+            const section = this.getAttribute('data-section');
+            if (section) {
+                switchSection(section, this);
             }
         });
     });
@@ -613,16 +588,18 @@ async function loadStudentsList() {
         return;
     }
 
-    const studentsHTML = [];
-    for (const student of students) {
+    const statsPromises = students.map(s => dataManager.getStudentStats(s.id));
+    const allStats = await Promise.all(statsPromises);
+    
+    const studentsHTML = students.map((student, i) => {
+        const stats = allStats[i];
         const initial = student.name.charAt(0).toUpperCase();
-        const stats = await dataManager.getStudentStats(student.id);
         
         // Calculate percentages for dual progress bars
         const dailyPercent = stats.dailyTotal > 0 ? Math.round((stats.dailyCompletedToday / stats.dailyTotal) * 100) : 0;
         const oneTimePercent = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
-        studentsHTML.push(`
+        return `
             <div class="student-card fade-in">
                 <div class="student-card-header" onclick="viewStudentDetail(${student.id})" style="cursor: pointer;">
                     <div class="student-card-avatar">${initial}</div>
@@ -672,8 +649,8 @@ async function loadStudentsList() {
                     </button>
                 </div>
             </div>
-        `);
-    }
+        `;
+    });
     
     container.innerHTML = studentsHTML.join('');
 }

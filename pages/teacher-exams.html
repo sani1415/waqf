@@ -75,20 +75,20 @@
             </header>
 
             <!-- Tab Navigation (icon + short label) -->
-            <div class="exam-tabs">
-                <button class="quiz-tab-btn active" onclick="switchQuizTab('create')" title="Create Exam">
+            <div class="exam-tabs" id="examTabs">
+                <button type="button" class="quiz-tab-btn active" data-tab="create" title="Create Exam">
                     <i class="fas fa-plus-circle"></i>
                     <span class="tab-label" data-i18n="new_exam">Exam</span>
                 </button>
-                <button class="quiz-tab-btn" onclick="switchQuizTab('view')" title="All Exams">
+                <button type="button" class="quiz-tab-btn" data-tab="view" title="All Exams">
                     <i class="fas fa-list"></i>
                     <span class="tab-label" data-i18n="all_exams">Exams</span>
                 </button>
-                <button class="quiz-tab-btn" onclick="switchQuizTab('results')" title="Results & Analytics">
+                <button type="button" class="quiz-tab-btn" data-tab="results" title="Results & Analytics">
                     <i class="fas fa-chart-line"></i>
                     <span class="tab-label" data-i18n="results">Results</span>
                 </button>
-                <button class="quiz-tab-btn" onclick="switchQuizTab('pending')" title="Pending Reviews">
+                <button type="button" class="quiz-tab-btn" data-tab="pending" title="Pending Reviews">
                     <i class="fas fa-clipboard-check"></i>
                     <span class="tab-label" data-i18n="pending">Pending</span>
                     <span id="pendingCount" class="pending-badge" style="display: none;">0</span>
@@ -242,9 +242,10 @@
                 <i class="fas fa-users"></i>
                 <span data-i18n="nav_students">Students</span>
             </a>
-            <a href="/pages/teacher-messages.html" class="bottom-nav-item" title="Messages">
+            <a href="/pages/teacher-messages.html" class="bottom-nav-item bottom-nav-item-msg" title="Messages">
                 <i class="fas fa-comments"></i>
                 <span data-i18n="nav_messages">Messages</span>
+                <span id="messagesUnreadBadgeNav" class="bottom-nav-badge" style="display: none;" aria-label="Unread messages">0</span>
             </a>
             <a href="/pages/teacher-daily-overview.html" class="bottom-nav-item" title="Daily Overview">
                 <i class="fas fa-table"></i>
@@ -289,6 +290,7 @@
     <!-- Auth & Data Manager -->
     <script src="../js/auth-config.js"></script>
     <script src="../js/data-manager.js"></script>
+    <script src="../js/teacher-unread-badge.js"></script>
     <script src="../js/bottom-nav-scroll.js"></script>
     <script src="../js/teacher-exams.js"></script>
 </body>

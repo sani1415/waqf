@@ -110,9 +110,10 @@
                 <i class="fas fa-users"></i>
                 <span data-i18n="nav_students">Students</span>
             </a>
-            <a href="/pages/teacher-messages.html" class="bottom-nav-item active" title="Messages">
+            <a href="/pages/teacher-messages.html" class="bottom-nav-item bottom-nav-item-msg active" title="Messages">
                 <i class="fas fa-comments"></i>
                 <span data-i18n="nav_messages">Messages</span>
+                <span id="messagesUnreadBadgeNav" class="bottom-nav-badge" style="display: none;" aria-label="Unread messages">0</span>
             </a>
             <a href="/pages/teacher-daily-overview.html" class="bottom-nav-item" title="Daily Overview">
                 <i class="fas fa-table"></i>
@@ -144,6 +145,7 @@
     <!-- Data Manager & App Logic -->
     <script src="../js/auth-config.js"></script>
     <script src="../js/data-manager.js"></script>
+    <script src="../js/teacher-unread-badge.js"></script>
     <script src="../js/bottom-nav-scroll.js"></script>
     <script src="../js/teacher-messages.js"></script>
 </body>

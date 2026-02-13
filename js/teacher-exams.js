@@ -31,6 +31,7 @@ function initializePage() {
     loadQuizResultsSelector();
     updatePendingCount();
     setupMobileMenu();
+    setupExamTabListeners();
 
     // Add first question by default
     addQuestion();
@@ -91,37 +92,48 @@ function toggleOverlay(show) {
    TAB SWITCHING
    =================================== */
 
+const EXAM_TAB_MAP = {
+    create: 'createQuizTab',
+    view: 'viewQuizzesTab',
+    results: 'resultsTab',
+    pending: 'pendingTab'
+};
+
+function setupExamTabListeners() {
+    const container = document.getElementById('examTabs');
+    if (!container) return;
+    container.addEventListener('click', function(e) {
+        const btn = e.target.closest('.quiz-tab-btn[data-tab]');
+        if (btn) {
+            e.preventDefault();
+            switchQuizTab(btn.getAttribute('data-tab'), btn);
+        }
+    });
+}
+
 function switchQuizTab(tabName, clickedElement) {
+    if (!tabName || !EXAM_TAB_MAP[tabName]) return;
     // Update tab buttons
     document.querySelectorAll('.quiz-tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    // Use the passed element or find by tabName
     if (clickedElement) {
         clickedElement.classList.add('active');
     } else {
-        const tabBtn = document.querySelector(`.quiz-tab-btn[onclick*="${tabName}"]`);
+        const tabBtn = document.querySelector(`.quiz-tab-btn[data-tab="${tabName}"]`);
         if (tabBtn) tabBtn.classList.add('active');
     }
-    
     // Hide all tab contents
     document.querySelectorAll('.quiz-tab-content').forEach(content => {
         content.classList.remove('active');
     });
-    
     // Show selected tab
-    if (tabName === 'create') {
-        document.getElementById('createQuizTab').classList.add('active');
-    } else if (tabName === 'view') {
-        document.getElementById('viewQuizzesTab').classList.add('active');
-        loadAllQuizzes();
-    } else if (tabName === 'results') {
-        document.getElementById('resultsTab').classList.add('active');
-        loadQuizResultsSelector();
-    } else if (tabName === 'pending') {
-        document.getElementById('pendingTab').classList.add('active');
-        loadPendingReviews();
-    }
+    const contentId = EXAM_TAB_MAP[tabName];
+    const content = document.getElementById(contentId);
+    if (content) content.classList.add('active');
+    if (tabName === 'view') loadAllQuizzes();
+    else if (tabName === 'results') loadQuizResultsSelector();
+    else if (tabName === 'pending') loadPendingReviews();
 }
 
 /* ===================================
@@ -657,8 +669,6 @@ async function loadQuizResults(quizId) {
     const stats = await dataManager.getQuizStatistics(quizId);
     const results = await dataManager.getResultsForQuiz(quizId);
     const students = await dataManager.getStudents();
-    
-    const displayContainer = document.getElementById('quizResultsDisplay');
     
     if (!quiz) {
         displayContainer.innerHTML = '<p>' + _t('alert_quiz_not_found') + '</p>';

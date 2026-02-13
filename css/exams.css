@@ -1033,23 +1033,7 @@ body:has(.exam-tabs) textarea#quizDescription {
         font-size: 0.8rem !important;
     }
     
-    /* Bottom nav on exam page - compact, less wasted space */
-    body:has(.exam-tabs) .bottom-nav {
-        min-height: 48px;
-        padding: 0.2rem 0;
-        padding-bottom: calc(0.2rem + env(safe-area-inset-bottom, 0px));
-    }
-    
-    body:has(.exam-tabs) .bottom-nav-item {
-        padding: 0.2rem 0.25rem;
-        font-size: 0.6rem;
-        min-height: 44px;
-        gap: 0.1rem;
-    }
-    
-    body:has(.exam-tabs) .bottom-nav-item i {
-        font-size: 0.95rem;
-    }
+    /* Bottom nav on exam page - keep same size as other teacher pages for consistency */
     
     /* Form - tighter spacing */
     .quiz-tab-content form hr,

@@ -22,14 +22,6 @@
         fadeRight.classList.toggle('visible', canScrollRight);
     }
 
-    function scrollActiveIntoView() {
-        var nav = document.getElementById('bottomNav');
-        var active = nav && nav.querySelector('.bottom-nav-item.active');
-        if (active) {
-            active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-    }
-
     function initBottomNavScroll() {
         var nav = document.getElementById('bottomNav');
         if (!nav) return;
@@ -38,11 +30,7 @@
         window.addEventListener('resize', updateBottomNavFades);
 
         updateBottomNavFades();
-        scrollActiveIntoView();
-
-        requestAnimationFrame(function() {
-            updateBottomNavFades();
-        });
+        requestAnimationFrame(updateBottomNavFades);
     }
 
     if (document.readyState === 'loading') {

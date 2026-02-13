@@ -19,14 +19,14 @@
  * If true, the app will NOT fall back to localStorage.
  * Instead, it will show a clear error and stop initialization.
  */
-const FIREBASE_ONLY = true;
+const FIREBASE_ONLY = false;  // Allow fallback to localStorage if Firebase fails
 
 // ============================================
 // CHANGE THIS LINE TO SWITCH STORAGE BACKEND
 // You can also override at runtime via URL, e.g.:
 //   ?storage=localStorage   or   ?storage=firebase
 // ============================================
-const DEFAULT_STORAGE_TYPE = 'firebase';  // Options: 'localStorage', 'firebase'
+const DEFAULT_STORAGE_TYPE = 'firebase';  // Options: 'localStorage', 'firebase' - use firebase for Firestore persistence
 
 // Connection status icon removed per design (no longer shown on any page)
 function showConnectionIcon(status) {

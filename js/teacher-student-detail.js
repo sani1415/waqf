@@ -129,6 +129,7 @@ function loadStudentProfileInfo() {
     
     // Populate profile info
     document.getElementById('profileStudentId').textContent = currentStudent.studentId || '-';
+    const nameEl = document.getElementById('profileStudentName'); if (nameEl) nameEl.textContent = currentStudent.name || '-';
     const loginIdEl = document.getElementById('profileLoginId');
     if (loginIdEl) loginIdEl.textContent = currentStudent.studentId || '-';
     const pinSetAtEl = document.getElementById('profilePinSetAt');

@@ -773,14 +773,18 @@ class DataManager {
     async addTask(task) {
         const tasks = await this.getTasks();
         const assignedTo = (task.assignedTo || []).map(id => String(id));
+        const isDaily = task.type === 'daily';
         const newTask = {
             id: String(Date.now()),
             ...task,
             assignedTo,
-            completedBy: task.type === 'daily' ? undefined : [],
-            dailyCompletions: task.type === 'daily' ? {} : undefined,
             createdAt: new Date().toISOString()
         };
+        if (isDaily) {
+            newTask.dailyCompletions = {};
+        } else {
+            newTask.completedBy = [];
+        }
         tasks.push(newTask);
         await this.storage.set('tasks', tasks);
         return newTask;
@@ -797,12 +801,12 @@ class DataManager {
             
             if (normalized.type && normalized.type !== existingTask.type) {
                 if (normalized.type === 'daily') {
-                    normalized.completedBy = undefined;
+                    delete normalized.completedBy;
                     normalized.dailyCompletions = {};
-                    normalized.deadline = undefined;
+                    normalized.deadline = null;
                 } else {
                     normalized.completedBy = [];
-                    normalized.dailyCompletions = undefined;
+                    delete normalized.dailyCompletions;
                 }
             } else {
                 normalized.completedBy = existingTask.completedBy;

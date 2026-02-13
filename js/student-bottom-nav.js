@@ -25,14 +25,6 @@
         fadeRight.classList.toggle('visible', canScrollRight);
     }
 
-    function scrollActiveIntoView() {
-        var nav = document.getElementById(NAV_ID);
-        var active = nav && nav.querySelector('.bottom-nav-item.active');
-        if (active) {
-            active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-    }
-
     function syncActiveFromRadio() {
         var checked = document.querySelector('input[name="student-tab"]:checked');
         if (!checked) return;
@@ -42,7 +34,6 @@
             var tabId = item.getAttribute('data-tab');
             item.classList.toggle('active', tabId === checked.id);
         });
-        scrollActiveIntoView();
     }
 
     function init() {
