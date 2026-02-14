@@ -529,7 +529,7 @@ function showResult(result) {
                         </div>
                         <div class="quiz-result-item">
                             <span>📅 Submitted At:</span>
-                            <strong>${new Date(result.submittedAt).toLocaleString()}</strong>
+                            <strong>${typeof formatDateTimeDisplay === 'function' ? formatDateTimeDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleString()}</strong>
                         </div>
                     </div>
                 </div>
@@ -582,7 +582,7 @@ function showResult(result) {
                         </div>
                         <div class="quiz-result-item">
                             <span>📅 Submitted At:</span>
-                            <strong>${new Date(result.submittedAt).toLocaleString()}</strong>
+                            <strong>${typeof formatDateTimeDisplay === 'function' ? formatDateTimeDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleString()}</strong>
                         </div>
                     </div>
                 </div>

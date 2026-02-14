@@ -1006,8 +1006,7 @@ function updateDateDisplayOverview() {
     const displayElement = document.getElementById('selectedDateDisplay');
     if (!displayElement) return;
     
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = selectedDateOverview.toLocaleDateString('en-US', options);
+    const formattedDate = typeof formatDateDisplay === 'function' ? formatDateDisplay(selectedDateOverview) : selectedDateOverview.toLocaleDateString('en-US', { year: '2-digit', month: 'long', day: 'numeric' });
     
     const today = new Date();
     const yesterday = new Date();
@@ -1423,7 +1422,7 @@ function renderTaskCard(task) {
     }
     
     const deadlineText = task.deadline ? 
-        `<span class="task-deadline"><i class="fas fa-calendar-alt"></i> ${new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>` : 
+        `<span class="task-deadline"><i class="fas fa-calendar-alt"></i> ${typeof formatDateDisplay === 'function' ? formatDateDisplay(task.deadline) : new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>` : 
         '<span class="no-deadline">No deadline</span>';
     
     const descriptionPreview = task.description ? 

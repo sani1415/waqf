@@ -54,13 +54,14 @@ async function loadMessages() {
     let lastDate = '';
     let messagesHTML = '';
 
+    const toDateKey = (d) => d.toISOString().slice(0, 10);
     messages.forEach(message => {
-        const messageDate = new Date(message.timestamp).toLocaleDateString();
+        const messageDateKey = toDateKey(new Date(message.timestamp));
 
         // Add date separator if date changed
-        if (messageDate !== lastDate) {
+        if (messageDateKey !== lastDate) {
             messagesHTML += `<div class="date-separator">${formatDate(message.timestamp)}</div>`;
-            lastDate = messageDate;
+            lastDate = messageDateKey;
         }
 
         const isSent = message.sender === 'student';
@@ -133,7 +134,7 @@ function formatDate(timestamp) {
     } else if (date.toDateString() === yesterday.toDateString()) {
         return typeof window.t === 'function' ? window.t('yesterday') : 'Yesterday';
     } else {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return typeof formatDateDisplay === 'function' ? formatDateDisplay(date) : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 }
 

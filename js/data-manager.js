@@ -972,23 +972,55 @@ class DataManager {
 
     /** Get daily task completion rate for last N days (for 30-day history view) */
     async getStudentDailyCompletionRateHistory(studentId, days = 30) {
+        return this.getStudentDailyCompletionRateHistoryFromDate(studentId, null, days);
+    }
+
+    /**
+     * Get daily task completion rate from a start date (e.g. admission) to today.
+     * @param {string|number} studentId
+     * @param {string|null} startDateStr - YYYY-MM-DD (e.g. admission date). If null, uses last N days from today.
+     * @param {number} maxDays - Max days to return (cap for performance, default 365)
+     */
+    async getStudentDailyCompletionRateHistoryFromDate(studentId, startDateStr, maxDays = 365) {
         const dailyTasks = await this.getDailyTasksForStudent(studentId);
         const studentIdStr = String(studentId);
         const totalTasks = dailyTasks.length;
 
+        const today = new Date();
+        today.setHours(12, 0, 0, 0);
+        let startDate;
+
+        if (startDateStr) {
+            startDate = new Date(startDateStr + 'T12:00:00');
+            if (isNaN(startDate.getTime())) startDate = new Date(today);
+            const totalDays = Math.ceil((today - startDate) / (24 * 60 * 60 * 1000)) + 1;
+            if (totalDays > maxDays) {
+                startDate.setDate(startDate.getDate() + (totalDays - maxDays));
+            }
+        } else {
+            startDate = new Date(today);
+            startDate.setDate(startDate.getDate() - (maxDays - 1));
+        }
+
+        const days = Math.ceil((today - startDate) / (24 * 60 * 60 * 1000)) + 1;
+
         if (totalTasks === 0) {
-            return Array.from({ length: days }, (_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - (days - 1 - i));
-                return { date: d.toISOString().split('T')[0], completed: 0, total: 0, percentage: 0 };
-            });
+            return Array.from({ length: Math.max(1, days) }, (_, i) => {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + i);
+                const dateStr = d.toISOString().split('T')[0];
+                if (dateStr > today.toISOString().split('T')[0]) return null;
+                return { date: dateStr, completed: 0, total: 0, percentage: 0 };
+            }).filter(Boolean);
         }
 
         const history = [];
-        const currentDate = new Date();
+        const iterDate = new Date(startDate);
+        const todayStr = today.toISOString().split('T')[0];
 
         for (let i = 0; i < days; i++) {
-            const dateStr = currentDate.toISOString().split('T')[0];
+            const dateStr = iterDate.toISOString().split('T')[0];
+            if (dateStr > todayStr) break;
             let completed = 0;
             for (const task of dailyTasks) {
                 const completions = task.dailyCompletions && task.dailyCompletions[studentIdStr]
@@ -998,10 +1030,10 @@ class DataManager {
             }
             const pct = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0;
             history.push({ date: dateStr, completed, total: totalTasks, percentage: pct });
-            currentDate.setDate(currentDate.getDate() - 1);
+            iterDate.setDate(iterDate.getDate() + 1);
         }
 
-        return history.reverse();
+        return history;
     }
 
     /** Get detailed task completion for a specific date (for 30-day date click) */

@@ -107,6 +107,31 @@ body:has(.chat-container) {
     background: linear-gradient(90deg, rgba(123, 158, 189, 0.16) 0%, rgba(168, 197, 227, 0.08) 100%);
 }
 
+/* Date format toggle (Hijri / Gregorian) */
+.date-format-toggle {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+}
+.date-format-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: calc(var(--radius-xl) - 3px);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.date-format-btn:hover {
+    color: var(--primary-soft);
+    background: rgba(123, 158, 189, 0.1);
+}
+.date-format-btn.active {
+    color: var(--primary-soft);
+    background: rgba(123, 158, 189, 0.14);
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 8px;

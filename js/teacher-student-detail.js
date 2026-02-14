@@ -101,7 +101,7 @@ function loadStudentProfileInfo() {
     let formattedDOB = '-';
     if (currentStudent.dateOfBirth) {
         const dob = new Date(currentStudent.dateOfBirth);
-        formattedDOB = dob.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        formattedDOB = typeof formatDateDisplayLong === 'function' ? formatDateDisplayLong(dob) : dob.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     }
     
     // Format enrollment date
@@ -109,7 +109,7 @@ function loadStudentProfileInfo() {
     let memberSince = '-';
     if (currentStudent.enrollmentDate) {
         const enrollment = new Date(currentStudent.enrollmentDate);
-        formattedEnrollment = enrollment.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        formattedEnrollment = typeof formatDateDisplayLong === 'function' ? formatDateDisplayLong(enrollment) : enrollment.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         
         // Calculate member since
         const now = new Date();
@@ -136,7 +136,7 @@ function loadStudentProfileInfo() {
     if (pinSetAtEl) {
         if (currentStudent.pinSetAt) {
             const d = new Date(currentStudent.pinSetAt);
-            pinSetAtEl.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            pinSetAtEl.textContent = typeof formatDateTimeDisplay === 'function' ? formatDateTimeDisplay(d) : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         } else pinSetAtEl.textContent = '-';
     }
     const pinSetByEl = document.getElementById('profilePinSetBy');
@@ -148,7 +148,7 @@ function loadStudentProfileInfo() {
     const profileYearEl = document.getElementById('profileYear');
     if (profileYearEl) profileYearEl.textContent = (yearKey && typeof _t === 'function' ? _t(yearKey) : null) || ('Year ' + yearNum);
     const profileAdmissionEl = document.getElementById('profileAdmissionDate');
-    if (profileAdmissionEl) profileAdmissionEl.textContent = currentStudent.enrollmentDate ? new Date(currentStudent.enrollmentDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+    if (profileAdmissionEl) profileAdmissionEl.textContent = currentStudent.enrollmentDate ? (typeof formatDateDisplayLong === 'function' ? formatDateDisplayLong(currentStudent.enrollmentDate) : new Date(currentStudent.enrollmentDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })) : '-';
     document.getElementById('profilePhone').textContent = currentStudent.phone || '-';
     document.getElementById('profileEmail').textContent = currentStudent.email || '-';
     document.getElementById('profileParentName').textContent = currentStudent.parentName || '-';
@@ -428,7 +428,7 @@ function loadTaskSection(containerId, tasks, isCompleted) {
 
     container.innerHTML = tasks.map(task => {
         const isTaskCompleted = task.completedBy.includes(currentStudent.id);
-        const deadlineDate = task.deadline ? new Date(task.deadline).toLocaleDateString() : null;
+        const deadlineDate = task.deadline ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(task.deadline) : new Date(task.deadline).toLocaleDateString()) : null;
         const daysLeft = task.deadline ? calculateDaysLeft(task.deadline) : null;
         
         // Determine deadline class
@@ -510,11 +510,7 @@ function loadDailyTaskSection(containerId, tasks) {
                 </div>
                 
                 <div class="task-detail-meta">
-                    <span class="task-type-badge daily">
-                        <i class="fas fa-calendar-day"></i>
-                        Daily Routine
-                    </span>
-                    <div class="meta-item">
+                    <div class="meta-item meta-item-plain">
                         <i class="fas fa-sync-alt"></i>
                         <span>Repeats every day</span>
                     </div>
@@ -669,13 +665,7 @@ function displayStudentNotes() {
     
     container.innerHTML = sortedNotes.map(note => {
         const noteDate = new Date(note.date);
-        const formattedDate = noteDate.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const formattedDate = typeof formatDateTimeDisplay === 'function' ? formatDateTimeDisplay(noteDate) : noteDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         
         // Format category for CSS class
         const categoryClass = note.category.replace(/\s+/g, '');
@@ -683,7 +673,7 @@ function displayStudentNotes() {
         // Edited indicator
         const editedText = note.edited ? 
             `<div class="note-edited">
-                <i class="fas fa-edit"></i> Edited ${new Date(note.editedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                <i class="fas fa-edit"></i> Edited ${typeof formatDateDisplay === 'function' ? formatDateDisplay(note.editedAt) : new Date(note.editedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>` : '';
         
         return `
@@ -880,12 +870,7 @@ let selectedTasksDate = new Date();
 
 // Update current date display
 function updateCurrentDateDisplay() {
-    const dateStr = selectedTasksDate.toLocaleDateString('en-US', { 
-        weekday: 'short', 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-    });
+    const dateStr = typeof formatDateDisplay === 'function' ? formatDateDisplay(selectedTasksDate) : selectedTasksDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     const elem = document.getElementById('currentDateDisplay');
     if (elem) {
         const today = new Date();
@@ -999,7 +984,7 @@ async function populateDailyTasksGrid() {
         
         // Add new date columns
         days.forEach(date => {
-            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayName = typeof formatDateDisplay === 'function' ? formatDateDisplay(date, { weekday: 'short' }) : date.toLocaleDateString('en-US', { weekday: 'short' });
             const dayNum = date.getDate();
             const isToday = date.toDateString() === today.toDateString();
             const th = document.createElement('th');
@@ -1054,8 +1039,8 @@ async function populateOnetimeTasksGrid() {
     
     let html = '';
     oneTimeTasks.forEach(task => {
-        const assignedDate = task.createdAt ? new Date(task.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-';
-        const dueDate = task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-';
+        const assignedDate = task.createdAt ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(task.createdAt) : new Date(task.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : '-';
+        const dueDate = task.deadline ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(task.deadline) : new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : '-';
         
         // Check if this student completed the task
         const isCompleted = task.completedBy && task.completedBy.includes(currentStudent.id);
@@ -1065,7 +1050,7 @@ async function populateOnetimeTasksGrid() {
         // Get completion date if available
         let completedText = '—';
         if (isCompleted && task.completionDates && task.completionDates[currentStudent.id]) {
-            completedText = '✓ ' + new Date(task.completionDates[currentStudent.id]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            completedText = '✓ ' + (typeof formatDateDisplay === 'function' ? formatDateDisplay(task.completionDates[currentStudent.id]) : new Date(task.completionDates[currentStudent.id]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
         } else if (isCompleted) {
             completedText = '✓';
         }
@@ -1109,11 +1094,7 @@ async function loadStudentExams() {
         const passed = result.passed;
         const score = result.percentage || 0;
         const totalQuestions = quiz.questions ? quiz.questions.length : 0;
-        const attemptDate = result.submittedAt ? new Date(result.submittedAt).toLocaleDateString('en-US', { 
-            day: 'numeric', 
-            month: 'short', 
-            year: 'numeric' 
-        }) : '-';
+        const attemptDate = result.submittedAt ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: '2-digit' })) : '-';
         const duration = quiz.duration || 0;
         
         const scoreClass = passed ? 'passed' : 'failed';
@@ -1142,13 +1123,7 @@ async function loadStudentExams() {
 function createExamDetailModal(result, quiz, index) {
     const score = result.percentage || 0;
     const passed = result.passed;
-    const attemptDate = result.submittedAt ? new Date(result.submittedAt).toLocaleDateString('en-US', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    }) : '-';
+    const attemptDate = result.submittedAt ? (typeof formatDateTimeDisplay === 'function' ? formatDateTimeDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })) : '-';
     const questions = quiz.questions || [];
     const answers = Array.isArray(result.answers) ? result.answers : [];
     
@@ -1223,12 +1198,18 @@ async function loadMessagesTab() {
     
     let lastDate = '';
     let messagesHTML = '';
+    const toDateKey = function(d) { return d.toISOString().slice(0, 10); };
     messages.forEach(function(msg) {
-        const messageDate = new Date(msg.timestamp).toLocaleDateString();
-        if (messageDate !== lastDate) {
-            const sep = (messageDate === new Date().toLocaleDateString()) ? ((typeof window.t === 'function') ? window.t('today') : 'Today') : (messageDate === new Date(Date.now() - 86400000).toLocaleDateString() ? ((typeof window.t === 'function') ? window.t('yesterday') : 'Yesterday') : new Date(msg.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+        const msgDate = new Date(msg.timestamp);
+        const messageDateKey = toDateKey(msgDate);
+        if (messageDateKey !== lastDate) {
+            const todayKey = toDateKey(new Date());
+            const yesterdayKey = toDateKey(new Date(Date.now() - 86400000));
+            let sep = typeof formatDateDisplay === 'function' ? formatDateDisplay(msg.timestamp) : msgDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            if (messageDateKey === todayKey) sep = (typeof window.t === 'function') ? window.t('today') : 'Today';
+            else if (messageDateKey === yesterdayKey) sep = (typeof window.t === 'function') ? window.t('yesterday') : 'Yesterday';
             messagesHTML += '<div class="date-separator" style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.5rem 0;">' + sep + '</div>';
-            lastDate = messageDate;
+            lastDate = messageDateKey;
         }
         const isSent = msg.sender === 'teacher';
         const msgClass = isSent ? 'message-sent' : 'message-received';

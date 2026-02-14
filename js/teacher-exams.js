@@ -557,7 +557,7 @@ async function loadAllQuizzes() {
                     ${quiz.deadline ? `
                         <div class="quiz-meta-item">
                             <i class="fas fa-calendar"></i>
-                            <span>Due: ${new Date(quiz.deadline).toLocaleDateString()}</span>
+                            <span>Due: ${typeof formatDateDisplay === 'function' ? formatDateDisplay(quiz.deadline) : new Date(quiz.deadline).toLocaleDateString()}</span>
                         </div>
                     ` : ''}
                     <div class="quiz-meta-item">
@@ -742,7 +742,7 @@ async function loadQuizResults(quizId) {
                                         </span>
                                     </td>
                                     <td>${minutes}m ${seconds}s</td>
-                                    <td>${new Date(result.submittedAt).toLocaleString()}</td>
+                                    <td>${typeof formatDateTimeDisplay === 'function' ? formatDateTimeDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleString()}</td>
                                     <td>
                                         ${student ? `
                                             <button class="btn-quiz-action btn-small" onclick="window.location.href='/pages/teacher-student-detail.html?studentId=${student.id}';">
@@ -837,7 +837,7 @@ async function loadPendingReviews() {
                             <div class="pending-review-title">${quiz.title}</div>
                             <div class="pending-review-info">
                                 <span><i class="fas fa-user"></i> ${studentName}</span>
-                                <span><i class="fas fa-calendar"></i> Submitted: ${new Date(result.submittedAt).toLocaleDateString()}</span>
+                                <span><i class="fas fa-calendar"></i> Submitted: ${typeof formatDateDisplay === 'function' ? formatDateDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleDateString()}</span>
                                 <span><i class="fas fa-clipboard-list"></i> ${ungradedAnswers.length} question(s) pending</span>
                             </div>
                         </div>

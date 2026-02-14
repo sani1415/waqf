@@ -72,8 +72,7 @@ async function selectCustomDate() {
 // Update Date Display
 function updateDateDisplay() {
     const displayElement = document.getElementById('selectedDateDisplay');
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = selectedDate.toLocaleDateString('en-US', options);
+    const formattedDate = typeof formatDateDisplay === 'function' ? formatDateDisplay(selectedDate) : selectedDate.toLocaleDateString('en-US', { year: '2-digit', month: 'long', day: 'numeric' });
 
     const today = new Date();
     const yesterday = new Date();

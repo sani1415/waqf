@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Student Dashboard - Task Manager</title>
     <script src="../js/i18n.js"></script>
+    <script src="../js/hijri-date.js"></script>
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/student.css">
     <link rel="stylesheet" href="../css/messaging.css">
@@ -37,6 +38,7 @@
                         <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')" title="English">EN</button>
                         <button type="button" class="lang-btn" data-lang="bn" onclick="setLang('bn')" title="বাংলা">বাং</button>
                     </div>
+                    <div class="date-format-toggle"></div>
                     <a href="/index.html" class="btn-secondary" onclick="if(typeof logoutStudent==='function')logoutStudent();">
                         <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
                     </a>
@@ -135,15 +137,17 @@
                             </div>
                         </div>
 
-                        <!-- 30-Day Completion History -->
-                        <div class="completion-history-section" id="completionHistorySection">
-                            <div class="section-title comp-history-title">
+                        <!-- Overall Overview - date + percentage cells, click opens calendar -->
+                        <div class="overview-compact-card" id="overviewSection">
+                            <div class="overview-compact-header">
                                 <i class="fas fa-chart-line"></i>
-                                <span data-i18n="last_30_days_completion">Last 30 Days</span>
-                                <span class="comp-history-avg" id="compHistoryAvgPct"></span>
+                                <span data-i18n="overall_overview">Overall Overview</span>
+                                <span class="overview-since" id="overviewSince"></span>
+                                <span class="overview-avg" id="overviewAvgPct"></span>
                             </div>
-                            <div class="completion-history-scroll" id="completionHistoryScroll">
-                                <!-- Filled by JS -->
+                            <div class="overview-compact-strip" id="overviewStrip" role="button" tabindex="0" aria-label="View full calendar">
+                                <div class="overview-strip-cells" id="overviewHistoryScroll"></div>
+                                <span class="overview-view-all"><i class="fas fa-calendar-alt"></i> <span data-i18n="view_all">View all</span></span>
                             </div>
                         </div>
 
@@ -371,7 +375,27 @@
         <div class="bottom-nav-fade bottom-nav-fade-right" id="studentNavFadeRight" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
     </div>
 
-    <!-- Modal: 30-Day Date Details -->
+    <!-- Modal: Overview Calendar (by month) -->
+    <div class="overview-calendar-overlay" id="overviewCalendarOverlay" role="dialog" aria-modal="true" aria-labelledby="overviewCalendarTitle" style="display: none;">
+        <div class="overview-calendar-modal">
+            <div class="overview-calendar-modal-header">
+                <h2 id="overviewCalendarTitle" data-i18n="overall_overview">Overall Overview</h2>
+                <button type="button" class="overview-calendar-close" id="overviewCalendarClose" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="overview-calendar-modal-body" id="overviewCalendarBody">
+                <!-- Months filled by JS -->
+            </div>
+            <div class="overview-calendar-legend">
+                <span><span class="legend-dot ov-red"></span> 0%</span>
+                <span><span class="legend-dot ov-yellow"></span> 1-49%</span>
+                <span><span class="legend-dot ov-orange"></span> 50-69%</span>
+                <span><span class="legend-dot ov-sky"></span> 70-99%</span>
+                <span><span class="legend-dot ov-green"></span> 100%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Single Day Details -->
     <div class="day-details-overlay" id="dayDetailsOverlay" role="dialog" aria-modal="true" aria-labelledby="dayDetailsTitle" style="display: none;">
         <div class="day-details-modal">
             <div class="day-details-header">

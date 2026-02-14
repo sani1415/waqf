@@ -1,6 +1,7 @@
 // Student Dashboard JavaScript
 
 let currentStudent = null;
+let overviewHistoryCache = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     // Wait for dataManager to be ready before initializing
@@ -117,7 +118,7 @@ function loadStudentProfile() {
 
     // Populate Profile tab
     const fmt = (v) => (v && String(v).trim()) ? v : '-';
-    const fmtDate = (d) => d ? new Date(d).toLocaleDateString() : '-';
+    const fmtDate = (d) => d ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(d) : new Date(d).toLocaleDateString()) : '-';
     const setProfile = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     setProfile('profileStudentId', fmt(currentStudent.studentId));
     setProfile('profileDateOfBirth', fmtDate(currentStudent.dateOfBirth));
@@ -253,12 +254,7 @@ async function loadStudentTasks() {
     const today = new Date();
     const todayDateElement = document.getElementById('todayDate');
     if (todayDateElement) {
-        todayDateElement.textContent = today.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
+        todayDateElement.textContent = typeof formatDateDisplay === 'function' ? formatDateDisplay(today) : today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }
 
     // Load daily tasks
@@ -272,8 +268,8 @@ async function loadStudentTasks() {
     const dailyTasks = await dataManager.getDailyTasksForStudent(currentStudent.id);
     await loadDailyTaskSection('dailyTasksList', dailyTasks);
 
-    // Load 30-day completion history
-    await loadCompletionHistory30Days();
+    // Load overall overview (from admission date)
+    await loadCompletionOverview();
 
     // Load regular tasks
     const pendingContainer = document.getElementById('pendingTasksList');
@@ -313,7 +309,7 @@ function loadTaskSection(containerId, tasks, isCompleted) {
 
     container.innerHTML = tasks.map(task => {
         const isTaskCompleted = task.completedBy.includes(currentStudent.id);
-        const deadlineDate = task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline';
+        const deadlineDate = task.deadline ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(task.deadline) : new Date(task.deadline).toLocaleDateString()) : 'No deadline';
         const daysLeft = task.deadline ? calculateDaysLeft(task.deadline) : null;
 
         return `
@@ -350,50 +346,78 @@ function loadTaskSection(containerId, tasks, isCompleted) {
     }).join('');
 }
 
-// Load 30-Day Completion History
-async function loadCompletionHistory30Days() {
-    const container = document.getElementById('completionHistoryScroll');
+// Color class for percentage: 0=red, 1-49=yellow, 50-69=orange, 70-99=sky, 100=green
+function getOverviewColorClass(pct) {
+    if (pct >= 100) return 'ov-green';
+    if (pct >= 70) return 'ov-sky';
+    if (pct >= 50) return 'ov-orange';
+    if (pct > 0) return 'ov-yellow';
+    return 'ov-red';
+}
+
+// Load Overall Completion Overview (date + percentage cells; mobile 10 days, desktop responsive)
+async function loadCompletionOverview() {
+    const container = document.getElementById('overviewHistoryScroll');
     if (!container || !currentStudent) return;
 
-    const history = await dataManager.getStudentDailyCompletionRateHistory(currentStudent.id, 30);
+    const admissionDate = currentStudent.enrollmentDate || currentStudent.admissionDate;
+    const startDateStr = admissionDate ? new Date(admissionDate).toISOString().split('T')[0] : null;
+    const history = await dataManager.getStudentDailyCompletionRateHistoryFromDate(
+        currentStudent.id, startDateStr, 365
+    );
     const _t = typeof window.t === 'function' ? window.t : (k) => k;
 
-    const section = document.getElementById('completionHistorySection');
+    const section = document.getElementById('overviewSection');
     if (!history || history.length === 0 || (history[0] && history[0].total === 0)) {
         if (section) section.style.display = 'none';
         return;
     }
     if (section) section.style.display = '';
 
-    // Average percentage for last 30 days - show beside heading
+    // Summary: "Since [date]" + avg%
+    const sinceEl = document.getElementById('overviewSince');
+    const avgEl = document.getElementById('overviewAvgPct');
+    if (sinceEl) {
+        const dateToShow = admissionDate || history[0]?.date;
+        const fmt = dateToShow
+            ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(new Date(dateToShow + (dateToShow.includes('T') ? '' : 'T12:00:00'))) : new Date(dateToShow + (dateToShow.includes('T') ? '' : 'T12:00:00')).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }))
+            : '';
+        sinceEl.textContent = (_t('since') || 'Since') + ' ' + fmt;
+    }
     const totalPct = history.reduce((sum, h) => sum + h.percentage, 0);
     const avgPct = history.length > 0 ? Math.round(totalPct / history.length) : 0;
-    const avgEl = document.getElementById('compHistoryAvgPct');
     if (avgEl) {
-        avgEl.textContent = avgPct + '%';
+        avgEl.textContent = avgPct + '% ' + (_t('avg') || 'avg');
         avgEl.classList.remove('pct-high', 'pct-mid', 'pct-low');
         avgEl.classList.add(avgPct >= 80 ? 'pct-high' : avgPct >= 50 ? 'pct-mid' : 'pct-low');
     }
 
-    // Each column: date on top, percentage below (smaller) - clickable for details
-    const dayCells = history.map(h => {
-        const d = new Date(h.date + 'T12:00:00');
-        const short = d.toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' });
-        const pctClass = h.percentage >= 80 ? 'pct-high' : h.percentage >= 50 ? 'pct-mid' : 'pct-low';
-        return `
-            <div class="comp-history-cell comp-cell-day comp-cell-clickable" data-date="${h.date}" role="button" tabindex="0" title="Click for details">
-                <div class="comp-cell-date">${short}</div>
-                <div class="comp-cell-pct ${pctClass}">${h.percentage}%</div>
-            </div>`;
-    }).join('');
+    // Strip: mobile=10 days, desktop=all that fit (JS renders last 10 on mobile, more on desktop via CSS)
+    const dayOnlyFn = typeof formatDateDisplayDayOnly === 'function' ? formatDateDisplayDayOnly : (d) => String(d.getDate());
+    const fullDateFn = typeof formatDateDisplay === 'function' ? formatDateDisplay : (d) => d.toLocaleDateString();
+    const isMobile = window.innerWidth <= 768;
+    const stripCount = isMobile ? 10 : 20;
+    const stripDays = history.slice(-stripCount);
+    overviewHistoryCache = history;
 
-    container.innerHTML = `
-        <div class="comp-history-grid">
-            <div class="comp-history-row">${dayCells}</div>
+    let stripHtml = '';
+    stripDays.forEach(h => {
+        const d = new Date(h.date + 'T12:00:00');
+        const dayStr = dayOnlyFn(d);
+        const fullDateStr = fullDateFn(d);
+        const colorClass = getOverviewColorClass(h.percentage);
+        stripHtml += `<div class="overview-cell comp-cell-clickable ${colorClass}" data-date="${h.date}" role="button" tabindex="0" title="${fullDateStr}: ${h.percentage}%">
+            <span class="overview-cell-date">${dayStr}</span>
+            <span class="overview-cell-pct">${h.percentage}%</span>
         </div>`;
+    });
+    container.innerHTML = stripHtml;
 
     container.querySelectorAll('.comp-cell-clickable').forEach(cell => {
-        cell.addEventListener('click', () => showDayDetails(cell.dataset.date));
+        cell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showDayDetails(cell.dataset.date);
+        });
         cell.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -401,6 +425,79 @@ async function loadCompletionHistory30Days() {
             }
         });
     });
+
+    // Strip click (outside cells) or "View all" -> open calendar modal
+    const stripEl = document.getElementById('overviewStrip');
+    if (stripEl) {
+        const openCal = () => openOverviewCalendarModal(overviewHistoryCache);
+        stripEl.onclick = (e) => { if (!e.target.closest('.overview-cell')) openCal(); };
+        stripEl.onkeydown = (e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.overview-cell')) {
+                e.preventDefault();
+                openCal();
+            }
+        };
+    }
+}
+
+// Open full calendar modal (months with days)
+async function openOverviewCalendarModal(history) {
+    const overlay = document.getElementById('overviewCalendarOverlay');
+    const body = document.getElementById('overviewCalendarBody');
+    if (!overlay || !body || !history || history.length === 0) return;
+
+    const monthYearFn = typeof formatDateDisplayMonthYear === 'function' ? formatDateDisplayMonthYear : (d) => d.toLocaleDateString(undefined, { month: 'long', year: '2-digit' });
+    const dayOnlyFn = typeof formatDateDisplayDayOnly === 'function' ? formatDateDisplayDayOnly : (d) => String(d.getDate());
+    const fullDateFn = typeof formatDateDisplay === 'function' ? formatDateDisplay : (d) => d.toLocaleDateString();
+
+    let lastMonthKey = '';
+    let html = '';
+    history.forEach(h => {
+        const d = new Date(h.date + 'T12:00:00');
+        const monthKey = monthYearFn(d);
+        if (monthKey !== lastMonthKey) {
+            if (lastMonthKey) html += '</div></div>';
+            html += `<div class="overview-cal-month"><div class="overview-cal-month-header">${monthKey}</div><div class="overview-cal-grid">`;
+            lastMonthKey = monthKey;
+        }
+        const fullDateStr = fullDateFn(d);
+        const colorClass = getOverviewColorClass(h.percentage);
+        html += `<div class="overview-cal-cell comp-cell-clickable ${colorClass}" data-date="${h.date}" role="button" tabindex="0" title="${fullDateStr}: ${h.percentage}%">
+            <span class="overview-cell-date">${dayOnlyFn(d)}</span>
+            <span class="overview-cell-pct">${h.percentage}%</span>
+        </div>`;
+    });
+    if (lastMonthKey) html += '</div></div>';
+    body.innerHTML = html;
+
+    body.querySelectorAll('.comp-cell-clickable').forEach(cell => {
+        cell.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+            showDayDetails(cell.dataset.date);
+        });
+        cell.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+                showDayDetails(cell.dataset.date);
+            }
+        });
+    });
+
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    const closeBtn = document.getElementById('overviewCalendarClose');
+    const close = () => {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    };
+    if (closeBtn) {
+        closeBtn.onclick = close;
+    }
+    overlay.onclick = (e) => { if (e.target === overlay) close(); };
 }
 
 async function showDayDetails(dateStr) {
@@ -412,7 +509,7 @@ async function showDayDetails(dateStr) {
 
     const details = await dataManager.getStudentDailyCompletionDetailsForDate(currentStudent.id, dateStr);
     const d = new Date(dateStr + 'T12:00:00');
-    const formattedDate = d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const formattedDate = typeof formatDateDisplay === 'function' ? formatDateDisplay(d) : d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     titleEl.textContent = formattedDate;
     summaryEl.innerHTML = `<span class="day-details-pct">${details.percentage}%</span> completed: <strong>${details.completed}</strong> of <strong>${details.total}</strong> daily tasks`;
@@ -476,8 +573,7 @@ async function loadDailyTaskSection(containerId, tasks) {
                         </div>
                         ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                         <div class="task-meta">
-                            <span class="task-badge daily">Daily Routine</span>
-                            <div class="task-meta-item">
+                            <div class="task-meta-item task-meta-plain">
                                 <i class="fas fa-sync-alt"></i>
                                 <span>Repeats every day</span>
                             </div>
@@ -583,19 +679,21 @@ async function loadMessagesTab() {
     let lastDate = '';
     let html = '';
     
+    const toDateKey = function(d) { return d.toISOString().slice(0, 10); };
     messages.forEach(function(msg) {
-        const messageDate = new Date(msg.timestamp).toLocaleDateString();
+        const msgDate = new Date(msg.timestamp);
+        const messageDateKey = toDateKey(msgDate);
         
         // Date separator
-        if (messageDate !== lastDate) {
-            const today = new Date().toLocaleDateString();
-            const yesterday = new Date(Date.now() - 86400000).toLocaleDateString();
-            let dateLabel = messageDate;
-            if (messageDate === today) dateLabel = 'Today';
-            else if (messageDate === yesterday) dateLabel = 'Yesterday';
+        if (messageDateKey !== lastDate) {
+            const todayKey = toDateKey(new Date());
+            const yesterdayKey = toDateKey(new Date(Date.now() - 86400000));
+            let dateLabel = typeof formatDateDisplay === 'function' ? formatDateDisplay(msg.timestamp) : msgDate.toLocaleDateString();
+            if (messageDateKey === todayKey) dateLabel = (typeof window.t === 'function' ? window.t('today') : null) || 'Today';
+            else if (messageDateKey === yesterdayKey) dateLabel = (typeof window.t === 'function' ? window.t('yesterday') : null) || 'Yesterday';
             
             html += '<div class="msg-date-sep">' + dateLabel + '</div>';
-            lastDate = messageDate;
+            lastDate = messageDateKey;
         }
         
         const isSent = msg.sender === 'student';
@@ -672,7 +770,7 @@ async function loadRecordsTab() {
         for (const result of sortedResults) {
             const quiz = await dataManager.getQuizById(result.quizId);
             const quizTitle = quiz ? quiz.title : _t('unknown_quiz');
-            const date = result.submittedAt ? new Date(result.submittedAt).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '—';
+            const date = result.submittedAt ? (typeof formatDateDisplay === 'function' ? formatDateDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleDateString(undefined, { dateStyle: 'medium' })) : '—';
             const time = result.submittedAt ? new Date(result.submittedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '';
             const pct = result.percentage != null ? result.percentage.toFixed(1) : '—';
             const passed = result.passed === true;
@@ -791,7 +889,7 @@ function loadAvailableQuizzes(quizzes) {
                     ${deadline ? `
                         <div class="quiz-deadline-warning quiz-row-deadline">
                             <i class="fas fa-calendar-alt"></i>
-                            ${isOverdue ? `⚠️ Deadline passed: ${deadline.toLocaleDateString()}` : `Due: ${deadline.toLocaleDateString()}`}
+                            ${isOverdue ? `⚠️ Deadline passed: ${typeof formatDateDisplay === 'function' ? formatDateDisplay(deadline) : deadline.toLocaleDateString()}` : `Due: ${typeof formatDateDisplay === 'function' ? formatDateDisplay(deadline) : deadline.toLocaleDateString()}`}
                         </div>
                     ` : ''}
                     <a href="/pages/student-exam-take.html?quizId=${quiz.id}" class="btn-take-quiz quiz-row-btn" onclick="event.stopPropagation()">
@@ -855,7 +953,7 @@ async function loadCompletedQuizzes(quizzes, studentId) {
                         </div>
                         <div class="quiz-result-details">
                             <div class="quiz-result-item"><span>Time Taken:</span><strong>${minutes}m ${seconds}s</strong></div>
-                            <div class="quiz-result-item"><span>Submitted:</span><strong>${new Date(result.submittedAt).toLocaleDateString()}</strong></div>
+                            <div class="quiz-result-item"><span>Submitted:</span><strong>${typeof formatDateDisplay === 'function' ? formatDateDisplay(result.submittedAt) : new Date(result.submittedAt).toLocaleDateString()}</strong></div>
                         </div>
                     </div>
                     ${result.answers && result.answers.some(a => a.teacherFeedback) ? `

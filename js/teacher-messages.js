@@ -144,9 +144,9 @@ function formatTime(timestamp) {
     } else if (diffDays === 1) {
         return typeof window.t === 'function' ? window.t('yesterday') : 'Yesterday';
     } else if (diffDays < 7) {
-        return date.toLocaleDateString('en-US', { weekday: 'short' });
+        return typeof formatDateDisplay === 'function' ? formatDateDisplay(date, { weekday: 'short' }) : date.toLocaleDateString('en-US', { weekday: 'short' });
     } else {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return typeof formatDateDisplay === 'function' ? formatDateDisplay(date) : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 }
 
