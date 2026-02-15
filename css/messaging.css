@@ -5,6 +5,23 @@
     padding: 2rem;
     max-width: 900px;
     margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Large screens: use more of the available width */
+@media (min-width: 1200px) {
+    .messages-container {
+        max-width: 1100px;
+        padding: 2rem 2.5rem;
+    }
+}
+
+@media (min-width: 1400px) {
+    .messages-container {
+        max-width: 1200px;
+        padding: 2.5rem 3rem;
+    }
 }
 
 .messages-header {
@@ -167,6 +184,9 @@ body:has(.chat-container) {
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
+    background: var(--bg-primary);
+    display: flex;
+    justify-content: center;
 }
 
 .chat-container {
@@ -177,6 +197,16 @@ body:has(.chat-container) {
     min-height: -webkit-fill-available;
     background: var(--bg-primary);
     overflow: hidden;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Large screens: cap chat width for readability, center it */
+@media (min-width: 1200px) {
+    .chat-container {
+        max-width: 900px;
+        box-shadow: 0 0 24px rgba(123, 158, 189, 0.12);
+    }
 }
 
 .chat-header {

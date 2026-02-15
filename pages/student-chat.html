@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Chat with Teacher - Task Manager</title>
     <script src="../js/i18n.js"></script>
     <script src="../js/hijri-date.js"></script>
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/student.css">
     <link rel="stylesheet" href="../css/messaging.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -59,6 +60,38 @@
         </div>
     </div>
 
+    <!-- Mobile Bottom Navigation (same as student dashboard) -->
+    <div class="student-bottom-nav-wrapper bottom-nav-wrapper">
+        <div class="bottom-nav-fade bottom-nav-fade-left" id="studentNavFadeLeft" aria-hidden="true"><i class="fas fa-chevron-left"></i></div>
+        <nav class="bottom-nav" id="studentBottomNav" aria-label="Student navigation">
+            <a href="/pages/student-dashboard.html" class="bottom-nav-item" title="Today">
+                <i class="fas fa-calendar-day"></i>
+                <span data-i18n="today">Today</span>
+            </a>
+            <a href="/pages/student-dashboard.html" class="bottom-nav-item" title="Tasks">
+                <i class="fas fa-clipboard-list"></i>
+                <span data-i18n="tasks">Tasks</span>
+            </a>
+            <a href="/pages/student-dashboard.html" class="bottom-nav-item" title="Exams">
+                <i class="fas fa-graduation-cap"></i>
+                <span data-i18n="nav_exams">Exams</span>
+            </a>
+            <a href="/pages/student-dashboard.html" class="bottom-nav-item active" title="Messages">
+                <i class="fas fa-comments"></i>
+                <span data-i18n="messages">Messages</span>
+            </a>
+            <a href="/pages/student-dashboard.html" class="bottom-nav-item" title="Records">
+                <i class="fas fa-history"></i>
+                <span data-i18n="tab_records">Records</span>
+            </a>
+            <a href="/pages/student-dashboard.html" class="bottom-nav-item" title="Profile">
+                <i class="fas fa-user"></i>
+                <span data-i18n="profile">Profile</span>
+            </a>
+        </nav>
+        <div class="bottom-nav-fade bottom-nav-fade-right" id="studentNavFadeRight" aria-hidden="true"><i class="fas fa-chevron-right"></i></div>
+    </div>
+
     <!-- Firebase SDK (Uncomment when using Firebase) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -72,6 +105,7 @@
     
     <!-- Data Manager & App Logic -->
     <script src="../js/data-manager.js"></script>
+    <script src="../js/student-bottom-nav.js"></script>
     <script src="../js/student-chat.js"></script>
 </body>
 </html>
