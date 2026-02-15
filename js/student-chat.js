@@ -15,7 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePage() {
     initializeChat();
     setupMessageForm();
-    // No auto-refresh while viewing: messages load on open; when user returns they get latest
+}
+
+// Real-time: refresh messages when new messages arrive
+function setupRealtimeChatMessages() {
+    if (!currentStudentId || typeof dataManager?.subscribeToCollection !== 'function') return;
+    dataManager.subscribeToCollection('messages', function() {
+        if (currentStudentId) loadMessages();
+    });
 }
 
 // Initialize Chat
@@ -30,6 +37,7 @@ async function initializeChat() {
 
     await loadMessages();
     await markAsRead();
+    setupRealtimeChatMessages();
 }
 
 // Load Messages

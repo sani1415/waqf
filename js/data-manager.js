@@ -1530,6 +1530,19 @@ class DataManager {
             .map((answer, index) => ({...answer, index}))
             .filter(a => a.marks === null && !a.autoGraded);
     }
+
+    /**
+     * Subscribe to real-time updates for a collection (Firebase only).
+     * @param {string} key - Collection name (e.g. 'quizResults', 'messages')
+     * @param {Function} callback - Called when data changes
+     * @returns {Function} Unsubscribe function
+     */
+    subscribeToCollection(key, callback) {
+        if (typeof this.storage.onValue === 'function') {
+            return this.storage.onValue(key, callback);
+        }
+        return () => {};
+    }
 }
 
 // Initialize data manager with storage adapter

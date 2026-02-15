@@ -18,9 +18,22 @@ function initializePage() {
     setupMobileMenu();
     setupTabListeners();
     updateUnreadBadge();
+    setupRealtimeMessagesTab();
 
     // Update unread badge every 5 seconds
     setInterval(() => updateUnreadBadge(), 5000);
+}
+
+// Real-time: refresh Messages tab when new messages arrive (teacher reply)
+function setupRealtimeMessagesTab() {
+    if (typeof dataManager?.subscribeToCollection !== 'function') return;
+    dataManager.subscribeToCollection('messages', function() {
+        const messagesTab = document.getElementById('tab-messages');
+        if (messagesTab && messagesTab.checked && currentStudent) {
+            loadMessagesTab();
+            updateUnreadBadge();
+        }
+    });
 }
 
 // Setup Tab Listeners for lazy loading

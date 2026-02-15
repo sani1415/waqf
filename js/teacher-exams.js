@@ -32,12 +32,34 @@ function initializePage() {
     updatePendingCount();
     setupMobileMenu();
     setupExamTabListeners();
+    setupRealtimeQuizResults();
 
     // Add first question by default
     addQuestion();
 
     // Setup form submission
     document.getElementById('createQuizForm').addEventListener('submit', handleCreateQuiz);
+}
+
+// Real-time: refresh when quiz results change (new submissions, grading)
+function setupRealtimeQuizResults() {
+    if (typeof dataManager.subscribeToCollection !== 'function') return;
+    dataManager.subscribeToCollection('quizResults', async function() {
+        updatePendingCount();
+        const activeTab = document.querySelector('.quiz-tab-btn.active');
+        const tabName = activeTab ? activeTab.getAttribute('data-tab') : null;
+        if (tabName === 'results') {
+            const sel = document.getElementById('quizResultsSelector');
+            const currentQuizId = sel ? sel.value : null;
+            await loadQuizResultsSelector();
+            if (currentQuizId) {
+                const newSel = document.getElementById('quizResultsSelector');
+                if (newSel) { newSel.value = currentQuizId; await loadQuizResults(currentQuizId); }
+            }
+        } else if (tabName === 'pending') {
+            loadPendingReviews();
+        }
+    });
 }
 
 // Setup mobile sidebar menu and overlay

@@ -17,7 +17,16 @@ function initializePage() {
     }
     loadChatsList();
     setupMobileMenu();
-    // No auto-refresh: list loads on open; when user returns to page they get latest
+    setupRealtimeMessages();
+}
+
+// Real-time: refresh chat list when messages change
+function setupRealtimeMessages() {
+    if (typeof dataManager !== 'undefined' && typeof dataManager.subscribeToCollection === 'function') {
+        dataManager.subscribeToCollection('messages', function() {
+            loadChatsList();
+        });
+    }
 }
 
 // Prevent blink: only re-render when chat list data actually changed

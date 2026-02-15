@@ -96,7 +96,20 @@ function initializePage() {
 async function initializeTeacherDashboard() {
     await updateDashboard();
     await loadStudentCheckboxes();
+    setupRealtimeDashboard();
     // Unread badge is handled by teacher-unread-badge.js on all teacher pages
+}
+
+// Real-time: refresh dashboard when tasks change (student completions)
+function setupRealtimeDashboard() {
+    if (typeof dataManager?.subscribeToCollection !== 'function') return;
+    const refreshIfDashboard = async function() {
+        const dash = document.getElementById('dashboard-section');
+        if (dash && dash.classList.contains('active')) {
+            await updateDashboard();
+        }
+    };
+    dataManager.subscribeToCollection('tasks', refreshIfDashboard);
 }
 
 // Setup Event Listeners
