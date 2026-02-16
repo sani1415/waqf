@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Task Sheet - Daily Tasks</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/task-sheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="task-sheet-container">
+        <header class="task-sheet-header">
+            <a href="/index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> <span data-i18n="back">Back</span>
+            </a>
+            <div class="header-right">
+                <div class="lang-switcher lang-switcher-compact" aria-label="Language">
+                    <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+                    <button type="button" class="lang-btn" data-lang="bn" onclick="setLang('bn')">বাং</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="task-sheet-main">
+            <div class="sheet-title-area">
+                <h1><i class="fas fa-table"></i> <span data-i18n="task_sheet_title">Daily Task Sheet</span></h1>
+                <p class="sheet-subtitle" data-i18n="task_sheet_subtitle">Tap your name, enter PIN, then check your tasks. Tap elsewhere to lock.</p>
+            </div>
+
+            <div class="spreadsheet-area">
+                <div class="sheet-date-bar">
+                    <button type="button" class="date-nav-btn" id="prevDateBtn" title="Previous day"><i class="fas fa-chevron-left"></i></button>
+                    <div class="date-display-wrap">
+                        <span class="date-display" id="selectedDateDisplay">Today</span>
+                        <input type="date" id="datePicker" class="date-picker-input" aria-label="Select date">
+                    </div>
+                    <button type="button" class="date-nav-btn" id="nextDateBtn" title="Next day"><i class="fas fa-chevron-right"></i></button>
+                    <span class="date-mode-badge" id="dateModeBadge"><span data-i18n="editable">Editable</span></span>
+                </div>
+                <div id="sheetLoading" class="sheet-loading">
+                    <i class="fas fa-circle-notch fa-spin"></i> <span data-i18n="loading">Loading...</span>
+                </div>
+                <div id="sheetEmpty" class="sheet-empty" style="display: none;">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3 data-i18n="no_tasks_yet">No Daily Tasks Yet</h3>
+                    <p data-i18n="task_sheet_empty_hint">Teacher can create daily tasks and assign to students. They will appear here.</p>
+                </div>
+                <p id="sheetTapHint" class="sheet-tap-hint" style="display: none;" data-i18n="task_sheet_tap_hint">Tap a name below to enter your PIN and mark tasks</p>
+                <div id="sheetTableWrap" class="sheet-table-wrap" style="display: none;">
+                    <div class="sheet-scroll">
+                        <table class="task-sheet-table" id="taskSheetTable">
+                            <thead id="sheetTableHead"></thead>
+                            <tbody id="sheetTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Modal -->
+    <div id="pinModal" class="pin-modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+        <div class="pin-modal">
+            <h2 id="pinModalTitle"><span data-i18n="enter_pin">Enter PIN</span> - <span id="pinStudentName"></span></h2>
+            <p class="pin-hint" data-i18n="pin_to_unlock">Enter your PIN to unlock your row and mark tasks</p>
+            <input type="password" id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" aria-label="PIN">
+            <p id="pinError" class="pin-error" style="display: none;"></p>
+            <div class="pin-modal-actions">
+                <button type="button" class="btn-cancel" id="pinCancelBtn" data-i18n="cancel">Cancel</button>
+                <button type="button" class="btn-confirm" id="pinConfirmBtn"><i class="fas fa-unlock"></i> <span data-i18n="unlock">Unlock</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/i18n.js"></script>
+    <script src="../js/hijri-date.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../js/storage/adapter.js"></script>
+    <script src="../js/storage/localStorage.js"></script>
+    <script src="../js/storage/firebase.js"></script>
+    <script src="../js/storage/firebase-config.js"></script>
+    <script src="../js/storage/config.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/task-sheet.js"></script>
+</body>
+</html>

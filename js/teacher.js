@@ -1577,14 +1577,6 @@ function setupDataManagerHelpers() {
             const tasks = await this.getTasks();
             return tasks.filter(task => task.type === 'daily');
         };
-        
-        dataManager.isDailyTaskCompletedForDate = async function(taskId, studentId, dateString) {
-            const task = await this.getTaskById(taskId);
-            if (!task || !task.dailyCompletions) return false;
-            
-            const studentCompletions = task.dailyCompletions[studentId] || [];
-            return studentCompletions.includes(dateString);
-        };
     }
 }
 

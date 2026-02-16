@@ -131,6 +131,18 @@
     border: 2px solid var(--secondary-soft);
 }
 
+.spreadsheet-card:hover {
+    border: 2px solid var(--success-soft);
+}
+
+.spreadsheet-card .card-icon {
+    background: linear-gradient(135deg, #DCFCE7, #BBF7D0);
+}
+
+.spreadsheet-card .card-icon i {
+    color: var(--success-soft);
+}
+
 .card-icon {
     width: 80px;
     height: 80px;

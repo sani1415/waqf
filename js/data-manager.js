@@ -879,16 +879,16 @@ class DataManager {
     }
 
     async isDailyTaskCompletedToday(taskId, studentId) {
+        return this.isDailyTaskCompletedForDate(taskId, studentId, this.getTodayDateString());
+    }
+
+    /** Check if daily task is completed for a specific date (YYYY-MM-DD) */
+    async isDailyTaskCompletedForDate(taskId, studentId, dateString) {
         const task = await this.getTaskById(taskId);
-        if (!task || task.type !== 'daily') return false;
-        
-        const today = this.getTodayDateString();
-        const studentIdStr = studentId.toString();
-        
-        return task.dailyCompletions && 
-               task.dailyCompletions[studentIdStr] && 
-               Array.isArray(task.dailyCompletions[studentIdStr]) &&
-               task.dailyCompletions[studentIdStr].includes(today);
+        if (!task || !task.dailyCompletions) return false;
+        const studentIdStr = String(studentId);
+        const completions = task.dailyCompletions[studentIdStr] || [];
+        return completions.includes(dateString);
     }
 
     async toggleDailyTaskCompletion(taskId, studentId) {

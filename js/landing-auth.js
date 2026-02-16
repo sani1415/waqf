@@ -126,6 +126,12 @@
         document.getElementById('studentCard').addEventListener('click', function() {
             showLoginModal('student');
         });
+        const spreadsheetCard = document.getElementById('spreadsheetCard');
+        if (spreadsheetCard) {
+            spreadsheetCard.addEventListener('click', function() {
+                window.location.href = '/pages/task-sheet.html';
+            });
+        }
 
         document.getElementById('loginModalClose').addEventListener('click', closeLoginModal);
         document.getElementById('loginModal').addEventListener('click', function(e) {

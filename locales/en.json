@@ -6,6 +6,8 @@
   "landing_teacher_desc": "Manage tasks and monitor student progress",
   "landing_student": "Student",
   "landing_student_desc": "View and complete your assigned tasks",
+  "landing_spreadsheet": "Task Sheet",
+  "landing_spreadsheet_desc": "Quick check-in: tap your name, enter PIN, mark tasks",
   "landing_select_role": "Select your role to continue",
   "lang_english": "English",
   "lang_bengali": "বাংলা",
@@ -452,5 +454,22 @@
   "document": "document",
   "documents": "documents",
   "document_column": "Document",
-  "size": "Size"
+  "size": "Size",
+
+  "task_sheet_title": "Daily Task Sheet",
+  "task_sheet_subtitle": "Tap your name, enter PIN, then check your tasks. Tap elsewhere to lock.",
+  "task_sheet_tap_hint": "Tap a name below to enter your PIN and mark tasks",
+  "editable": "Editable",
+  "view_only": "View only",
+  "top_performers_today": "Top Performers Today",
+  "top_performers": "Top Performers",
+  "no_tasks_yet": "No Daily Tasks Yet",
+  "task_sheet_empty_hint": "Teacher can create daily tasks and assign to students. They will appear here.",
+  "enter_pin": "Enter PIN",
+  "pin_to_unlock": "Enter your PIN to unlock your row and mark tasks",
+  "unlock": "Unlock",
+  "cancel": "Cancel",
+  "pin_required": "Please enter your PIN",
+  "pin_incorrect": "Incorrect PIN",
+  "no_data_yet": "No data yet"
 }

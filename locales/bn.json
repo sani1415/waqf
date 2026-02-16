@@ -6,6 +6,8 @@
   "landing_teacher_desc": "কাজ পরিচালনা ও ছাত্রদের অগ্রগতি মনিটর করুন",
   "landing_student": "ছাত্র",
   "landing_student_desc": "আপনার অ্যাসাইন করা কাজ দেখুন ও সম্পন্ন করুন",
+  "landing_spreadsheet": "টাস্ক শীট",
+  "landing_spreadsheet_desc": "দ্রুত চেক-ইন: আপনার নাম ট্যাপ করুন, পিন দিন, কাজ চিহ্নিত করুন",
   "landing_select_role": "চালিয়ে যেতে আপনার ভূমিকা নির্বাচন করুন",
   "lang_english": "English",
   "lang_bengali": "বাংলা",
@@ -452,5 +454,22 @@
   "document": "ডকুমেন্ট",
   "documents": "ডকুমেন্ট",
   "document_column": "ডকুমেন্ট",
-  "size": "আকার"
+  "size": "আকার",
+
+  "task_sheet_title": "দৈনিক টাস্ক শীট",
+  "task_sheet_subtitle": "আপনার নাম ট্যাপ করুন, পিন দিন, তারপর কাজ চেক করুন। লক করতে অন্য কোথাও ট্যাপ করুন।",
+  "task_sheet_tap_hint": "নীচে একটি নাম ট্যাপ করে আপনার পিন দিন এবং কাজ চিহ্নিত করুন",
+  "editable": "সম্পাদনাযোগ্য",
+  "view_only": "শুধু দেখুন",
+  "top_performers_today": "আজকের সেরা পারফর্মার",
+  "top_performers": "সেরা পারফর্মার",
+  "no_tasks_yet": "আরও কোনো দৈনিক কাজ নেই",
+  "task_sheet_empty_hint": "শিক্ষক দৈনিক কাজ তৈরি করে ছাত্রদের অ্যাসাইন করতে পারেন। সেগুলো এখানে দেখা যাবে।",
+  "enter_pin": "পিন দিন",
+  "pin_to_unlock": "আপনার সারি আনলক করতে পিন দিন",
+  "unlock": "আনলক",
+  "cancel": "বাতিল",
+  "pin_required": "অনুগ্রহ করে আপনার পিন দিন",
+  "pin_incorrect": "ভুল পিন",
+  "no_data_yet": "এখনো ডেটা নেই"
 }
