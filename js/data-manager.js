@@ -46,7 +46,7 @@ class DataManager {
 
     // Initialize default data structure
     async initializeData() {
-        const keys = ['students', 'tasks', 'messages', 'quizzes', 'quizResults'];
+        const keys = ['students', 'tasks', 'messages', 'quizzes', 'quizResults', 'submittedDocuments'];
         
         for (const key of keys) {
             const data = await this.storage.get(key);
@@ -1542,6 +1542,63 @@ class DataManager {
             return this.storage.onValue(key, callback);
         }
         return () => {};
+    }
+
+    /* ===================================
+       SUBMITTED DOCUMENTS (for teacher review)
+       =================================== */
+
+    async getSubmittedDocuments() {
+        return (await this.storage.get('submittedDocuments')) || [];
+    }
+
+    /** Get documents marked for teacher review (all students) */
+    async getDocumentsForReview() {
+        const docs = await this.getSubmittedDocuments();
+        return docs.filter(d => d.markedForReview === true).sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+    }
+
+    /** Get documents by student */
+    async getDocumentsByStudent(studentId) {
+        const docs = await this.getSubmittedDocuments();
+        return docs.filter(d => this._eqId(d.studentId, studentId)).sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+    }
+
+    async addSubmittedDocument(doc) {
+        const docs = await this.getSubmittedDocuments();
+        const id = String(Date.now());
+        const newDoc = {
+            id,
+            studentId: String(doc.studentId),
+            studentName: doc.studentName || '',
+            fileName: doc.fileName,
+            fileType: doc.fileType || '',
+            fileSize: doc.fileSize || 0,
+            downloadURL: doc.downloadURL || null,
+            uploadedAt: new Date().toISOString(),
+            markedForReview: doc.markedForReview === true
+        };
+        docs.push(newDoc);
+        await this.storage.set('submittedDocuments', docs);
+        return newDoc;
+    }
+
+    async updateDocumentMarkedForReview(docId, markedForReview) {
+        const docs = await this.getSubmittedDocuments();
+        const idx = docs.findIndex(d => String(d.id) === String(docId));
+        if (idx < 0) return null;
+        docs[idx].markedForReview = !!markedForReview;
+        docs[idx].updatedAt = new Date().toISOString();
+        await this.storage.set('submittedDocuments', docs);
+        return docs[idx];
+    }
+
+    async removeSubmittedDocument(docId) {
+        const docs = await this.getSubmittedDocuments();
+        const filtered = docs.filter(d => String(d.id) !== String(docId));
+        if (filtered.length === docs.length) return false;
+        await this.storage.set('submittedDocuments', filtered);
+        return true;
     }
 }
 

@@ -898,6 +898,168 @@ body {
     margin-bottom: 0.75rem;
 }
 
+/* Documents for Review */
+.documents-review-container {
+    padding: 1.5rem 0;
+}
+
+.documents-review-header {
+    margin-bottom: 1.5rem;
+}
+
+.documents-review-header h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.documents-review-header h2 i {
+    color: var(--primary-soft);
+}
+
+.documents-review-hint {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.documents-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.document-review-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+}
+
+.document-review-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(123, 158, 189, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-soft);
+}
+
+.document-review-icon i {
+    font-size: 1.25rem;
+}
+
+.document-review-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.document-review-name,
+.document-review-name-link {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.document-review-name {
+    color: var(--text-primary);
+}
+
+.document-review-name-link {
+    color: var(--primary-soft);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.document-review-name-link:hover {
+    text-decoration: underline;
+}
+
+.document-review-student {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.document-review-id {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-left: 0.35rem;
+}
+
+.document-review-meta {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.document-review-actions {
+    flex-shrink: 0;
+}
+
+.btn-download-doc {
+    display: inline-flex;
+    border: none;
+    cursor: pointer;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: var(--primary-soft);
+    color: white;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-download-doc:hover {
+    background: #6B8CAD;
+    color: white;
+}
+
+.doc-no-url {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.documents-review-empty {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border-color);
+}
+
+.documents-review-empty i {
+    font-size: 3rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.documents-review-empty h3 {
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.documents-review-empty p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .sidebar {

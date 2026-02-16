@@ -435,10 +435,20 @@ async function loadCompletionOverview() {
         });
     });
 
-    // Strip click (outside cells) or "View all" -> open calendar modal
+    // Header and strip click -> open calendar modal (strip: except when clicking on cells)
+    const openCal = () => openOverviewCalendarModal(overviewHistoryCache);
+    const headerEl = document.getElementById('overviewHeader');
     const stripEl = document.getElementById('overviewStrip');
+    if (headerEl) {
+        headerEl.onclick = () => openCal();
+        headerEl.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openCal();
+            }
+        };
+    }
     if (stripEl) {
-        const openCal = () => openOverviewCalendarModal(overviewHistoryCache);
         stripEl.onclick = (e) => { if (!e.target.closest('.overview-cell')) openCal(); };
         stripEl.onkeydown = (e) => {
             if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.overview-cell')) {

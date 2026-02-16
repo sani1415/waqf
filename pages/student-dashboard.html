@@ -52,6 +52,7 @@
                 <input type="radio" name="student-tab" id="tab-tasks">
                 <input type="radio" name="student-tab" id="tab-exams">
                 <input type="radio" name="student-tab" id="tab-messages">
+                <input type="radio" name="student-tab" id="tab-documents">
                 <input type="radio" name="student-tab" id="tab-records">
                 <input type="radio" name="student-tab" id="tab-profile">
 
@@ -73,6 +74,10 @@
                         <i class="fas fa-comments"></i>
                         <span data-i18n="messages">Messages</span>
                         <span id="msgUnreadDot" class="tab-unread-dot" style="display: none;"></span>
+                    </label>
+                    <label for="tab-documents" class="student-tab-label">
+                        <i class="fas fa-file-upload"></i>
+                        <span data-i18n="nav_documents">Documents</span>
                     </label>
                     <label for="tab-records" class="student-tab-label">
                         <i class="fas fa-history"></i>
@@ -137,9 +142,9 @@
                             </div>
                         </div>
 
-                        <!-- Overall Overview - date + percentage cells, click opens calendar -->
+                        <!-- Overall Overview - date + percentage cells, heading & strip clickable to open calendar -->
                         <div class="overview-compact-card" id="overviewSection">
-                            <div class="overview-compact-header">
+                            <div class="overview-compact-header" id="overviewHeader" role="button" tabindex="0" aria-label="View full calendar">
                                 <i class="fas fa-chart-line"></i>
                                 <span data-i18n="overall_overview">Overall Overview</span>
                                 <span class="overview-since" id="overviewSince"></span>
@@ -229,6 +234,34 @@
                         </div>
                     </div>
                     <!-- END MESSAGES TAB -->
+
+                    <!-- DOCUMENTS TAB -->
+                    <div class="panel-student panel-documents">
+                        <div class="documents-tab-section">
+                            <div class="section-title">
+                                <i class="fas fa-file-upload"></i>
+                                <span data-i18n="my_documents">My Documents</span>
+                            </div>
+                            <p class="documents-hint" data-i18n="documents_hint">Upload documents and mark them for teacher to review.</p>
+                            <label class="document-upload-area" id="documentUploadArea" for="documentFileInput">
+                                <input type="file" id="documentFileInput" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" class="document-file-input-hidden" aria-label="Choose file">
+                                <span id="documentUploadContent">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p data-i18n="click_to_upload">Click to upload or drag and drop</p>
+                                    <small data-i18n="documents_formats">PDF, Image, Word document</small>
+                                </span>
+                            </label>
+                            <div id="documentsList" class="documents-list">
+                                <!-- Documents loaded by JS -->
+                            </div>
+                            <div id="documentsEmpty" class="documents-empty" style="display:none;">
+                                <i class="fas fa-folder-open"></i>
+                                <p data-i18n="no_documents_yet">No documents yet</p>
+                                <small data-i18n="upload_first_document">Upload your first document above</small>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END DOCUMENTS TAB -->
 
                     <!-- RECORDS TAB -->
                     <div class="panel-student panel-records">
@@ -362,6 +395,10 @@
                 <span data-i18n="messages">Messages</span>
                 <span id="msgUnreadDotNav" class="nav-unread-dot" style="display: none;"></span>
             </label>
+            <label for="tab-documents" class="bottom-nav-item" data-tab="tab-documents">
+                <i class="fas fa-file-upload"></i>
+                <span data-i18n="nav_documents">Documents</span>
+            </label>
             <label for="tab-records" class="bottom-nav-item" data-tab="tab-records">
                 <i class="fas fa-history"></i>
                 <span data-i18n="tab_records">Records</span>
@@ -410,9 +447,10 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Storage needed for document upload) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
     <!-- Storage Adapters -->
     <script src="../js/storage/adapter.js"></script>
@@ -425,6 +463,7 @@
     <script src="../js/auth-config.js"></script>
     <script src="../js/data-manager.js"></script>
     <script src="../js/student-dashboard.js"></script>
+    <script src="../js/student-documents.js"></script>
     <script src="../js/student-bottom-nav.js"></script>
 </body>
 </html>

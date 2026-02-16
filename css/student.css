@@ -1487,6 +1487,7 @@
 .tab-wrap-student input#tab-tasks:checked ~ .tab-labels-student label[for="tab-tasks"],
 .tab-wrap-student input#tab-exams:checked ~ .tab-labels-student label[for="tab-exams"],
 .tab-wrap-student input#tab-messages:checked ~ .tab-labels-student label[for="tab-messages"],
+.tab-wrap-student input#tab-documents:checked ~ .tab-labels-student label[for="tab-documents"],
 .tab-wrap-student input#tab-records:checked ~ .tab-labels-student label[for="tab-records"],
 .tab-wrap-student input#tab-profile:checked ~ .tab-labels-student label[for="tab-profile"] {
     background: var(--bg-secondary);
@@ -1511,6 +1512,7 @@
 .tab-wrap-student input#tab-tasks:checked ~ .panels-student .panel-tasks,
 .tab-wrap-student input#tab-exams:checked ~ .panels-student .panel-exams,
 .tab-wrap-student input#tab-messages:checked ~ .panels-student .panel-messages,
+.tab-wrap-student input#tab-documents:checked ~ .panels-student .panel-documents,
 .tab-wrap-student input#tab-records:checked ~ .panels-student .panel-records,
 .tab-wrap-student input#tab-profile:checked ~ .panels-student .panel-profile {
     display: block;
@@ -1730,6 +1732,197 @@
 }
 
 /* ===================================
+   DOCUMENTS TAB STYLING
+   =================================== */
+
+.documents-tab-section {
+    padding: 0;
+}
+
+.documents-tab-section .section-title {
+    margin-bottom: 0.5rem;
+}
+
+.documents-hint {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: -0.5rem 0 1rem 0;
+}
+
+.document-upload-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    padding: 2rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-primary);
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(123, 158, 189, 0.06);
+}
+
+.document-upload-area:hover,
+.document-upload-area.dragover {
+    border-color: var(--primary-soft);
+    background: rgba(123, 158, 189, 0.08);
+}
+
+.document-file-input-hidden {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+
+#documentUploadContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    z-index: 0;
+}
+
+.document-upload-area.uploading {
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+.document-upload-area i {
+    font-size: 2.25rem;
+    color: var(--primary-soft);
+    margin-bottom: 0.5rem;
+}
+
+.document-upload-area p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0.25rem 0;
+}
+
+.document-upload-area small {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.documents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+}
+
+.document-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(123, 158, 189, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-soft);
+}
+
+.document-item-icon i {
+    font-size: 1.25rem;
+}
+
+.document-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.document-item-name {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.document-item-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.document-item-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.document-item-toggle input {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-document-remove {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-document-remove:hover {
+    color: #DC2626;
+    background: rgba(220, 38, 38, 0.08);
+}
+
+.documents-empty {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    color: var(--text-secondary);
+}
+
+.documents-empty i {
+    font-size: 2.5rem;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.documents-empty p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.documents-empty small {
+    font-size: 0.9rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* ===================================
    RECORDS TAB STYLING
    =================================== */
 
@@ -1932,6 +2125,17 @@
     background: linear-gradient(135deg, #7B9EBD 0%, #5a7d9e 100%);
     color: white;
     font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.overview-compact-header:hover {
+    opacity: 0.92;
+}
+
+.overview-compact-header:focus {
+    outline: 2px solid rgba(255,255,255,0.6);
+    outline-offset: 2px;
 }
 
 .overview-compact-header i {
@@ -2549,6 +2753,20 @@
     .messages-tab-area {
         min-height: 180px;
         padding: 0.75rem;
+    }
+    
+    /* Documents tab */
+    .document-upload-area {
+        min-height: 120px;
+        padding: 1.5rem 1rem;
+    }
+    
+    .document-upload-area i {
+        font-size: 1.75rem;
+    }
+    
+    .document-upload-area p {
+        font-size: 0.95rem;
     }
     
     .messages-tab-input {

@@ -71,7 +71,7 @@ class FirebaseAdapter extends StorageAdapter {
      */
     async ensureCollectionsExist() {
         try {
-            const collections = ['students', 'tasks', 'messages', 'quizzes', 'quizResults'];
+            const collections = ['students', 'tasks', 'messages', 'quizzes', 'quizResults', 'submittedDocuments'];
             console.log('🔍 Checking Firestore collections...');
             
             const checks = await Promise.all(collections.map(async (name) => {
@@ -266,7 +266,7 @@ class FirebaseAdapter extends StorageAdapter {
                 throw new Error('Firebase adapter not initialized');
             }
 
-            const collections = ['students', 'tasks', 'messages', 'quizzes', 'quizResults'];
+            const collections = ['students', 'tasks', 'messages', 'quizzes', 'quizResults', 'submittedDocuments'];
             
             for (const collectionName of collections) {
                 await this.delete(collectionName);

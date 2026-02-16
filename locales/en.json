@@ -423,5 +423,24 @@
   "alert_pin_updated": "PIN updated successfully!",
   "alert_pin_mismatch": "New PIN and confirmation do not match.",
   "alert_wrong_current_pin": "Current PIN is incorrect.",
-  "alert_pin_required": "Please enter a 4-6 digit PIN."
+  "alert_pin_required": "Please enter a 4-6 digit PIN.",
+
+  "nav_documents": "Documents",
+  "my_documents": "My Documents",
+  "documents_hint": "Upload documents and mark them for teacher to review.",
+  "click_to_upload": "Click to upload or drag and drop",
+  "documents_formats": "PDF, Image, Word document",
+  "no_documents_yet": "No documents yet",
+  "upload_first_document": "Upload your first document above",
+  "submit_for_review": "Submit for review",
+  "confirm_remove_document": "Remove this document?",
+  "uploading": "Uploading",
+  "downloading": "Downloading",
+  "upload_failed": "Upload failed. Please try again.",
+  "documents_for_review": "Documents for Review",
+  "documents_for_review_hint": "Documents that students have marked for you to view. All in one place.",
+  "no_documents_for_review": "No Documents for Review",
+  "no_documents_for_review_hint": "Students can upload documents and mark them for you to view. They will appear here.",
+  "download": "Download",
+  "no_file_url": "(No file link)"
 }

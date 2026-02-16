@@ -38,7 +38,8 @@ function hashToSection(hash) {
         'create-task': 'manage-tasks', // legacy link used by some pages
         'students': 'students',
         'daily-overview': 'daily-overview',
-        'analytics': 'analytics'
+        'analytics': 'analytics',
+        'documents-for-review': 'documents-for-review'
     };
     return map[h] || null;
 }
@@ -49,7 +50,8 @@ function sectionToHash(sectionName) {
         'manage-tasks': 'manage-tasks',
         'students': 'students',
         'daily-overview': 'daily-overview',
-        'analytics': 'analytics'
+        'analytics': 'analytics',
+        'documents-for-review': 'documents-for-review'
     };
     return map[sectionName] || null;
 }
@@ -210,7 +212,8 @@ const SECTION_TITLE_KEYS = {
     'manage-tasks': 'nav_manage_tasks',
     'students': 'nav_students',
     'daily-overview': 'nav_daily_overview',
-    'analytics': 'nav_analytics'
+    'analytics': 'nav_analytics',
+    'documents-for-review': 'documents_for_review'
 };
 
 // Switch Between Sections
@@ -265,6 +268,8 @@ async function switchSection(sectionName, clickedElement) {
         await loadStudentsList();
     } else if (sectionName === 'analytics') {
         await updateAnalytics();
+    } else if (sectionName === 'documents-for-review') {
+        await loadDocumentsForReview();
     }
 
     // Update URL hash to reflect current section (without jumping/scrolling)
@@ -947,6 +952,109 @@ async function updateAnalytics() {
     if (loader && content) {
         loader.style.display = 'none';
         content.style.opacity = '1';
+    }
+}
+
+// Documents for Review - student-submitted documents marked for teacher view
+async function loadDocumentsForReview() {
+    const listEl = document.getElementById('documentsForReviewList');
+    const emptyEl = document.getElementById('documentsForReviewEmpty');
+    if (!listEl || !emptyEl) return;
+
+    listEl.innerHTML = '<div class="loading-spinner"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="loading">Loading...</span></div>';
+    emptyEl.style.display = 'none';
+
+    const docs = await dataManager.getDocumentsForReview();
+    emptyEl.style.display = docs.length === 0 ? 'block' : 'none';
+
+    if (docs.length === 0) {
+        listEl.innerHTML = '';
+        return;
+    }
+
+    const students = await dataManager.getStudents();
+    const getStudent = (id) => students.find(s => String(s.id) === String(id)) || { name: 'Unknown', studentId: id };
+
+    function escHtml(s) {
+        const div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+    function escAttr(s) {
+        return String(s || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function formatDate(iso) {
+        if (!iso) return '';
+        return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    function formatSize(bytes) {
+        if (!bytes) return ''; if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    listEl.innerHTML = docs.map(d => {
+        const student = getStudent(d.studentId);
+        const name = d.studentName || student.name || 'Unknown';
+        const sid = student.studentId || d.studentId;
+        const url = d.downloadURL ? escAttr(d.downloadURL) : '';
+        const viewLink = url ? `<a href="${url}" target="_blank" rel="noopener" class="document-review-name-link">${escHtml(d.fileName)}</a>` : `<span class="document-review-name">${escHtml(d.fileName)}</span>`;
+        const downloadBtn = url
+            ? `<button type="button" class="btn-download-doc" data-doc-url="${url}" data-doc-name="${escAttr(d.fileName || 'document')}"><i class="fas fa-download"></i> <span data-i18n="download">Download</span></button>`
+            : '<span class="doc-no-url" data-i18n="no_file_url">(No file link)</span>';
+        return `
+            <div class="document-review-item">
+                <div class="document-review-icon"><i class="fas fa-file"></i></div>
+                <div class="document-review-info">
+                    ${viewLink}
+                    <span class="document-review-student">${escHtml(name)} <span class="document-review-id">${escHtml(String(sid))}</span></span>
+                    <span class="document-review-meta">${formatDate(d.uploadedAt)}${d.fileSize ? ' · ' + formatSize(d.fileSize) : ''}</span>
+                </div>
+                <div class="document-review-actions">${downloadBtn}</div>
+            </div>
+        `;
+    }).join('');
+
+    listEl.querySelectorAll('.btn-download-doc').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const url = this.getAttribute('data-doc-url');
+            const name = this.getAttribute('data-doc-name') || 'document';
+            if (!url) return;
+            const origHtml = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>' + (typeof window.t === 'function' ? window.t('downloading') : 'Downloading') + '...</span>';
+            await downloadDocToDevice(url, name);
+            this.disabled = false;
+            this.innerHTML = origHtml;
+        });
+    });
+
+    if (typeof applyI18n === 'function') applyI18n();
+}
+
+// Download document file to device - uses Firebase Storage SDK when available (avoids CORS)
+async function downloadDocToDevice(url, fileName) {
+    const triggerDownload = (blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName || 'document';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+    try {
+        if (typeof firebase !== 'undefined' && firebase.storage) {
+            const ref = firebase.storage().refFromURL(url);
+            const blob = await ref.getBlob();
+            triggerDownload(blob);
+            return;
+        }
+        const res = await fetch(url, { mode: 'cors' });
+        if (!res.ok) throw new Error('Download failed');
+        const blob = await res.blob();
+        triggerDownload(blob);
+    } catch (e) {
+        console.warn('Download failed, opening in new tab:', e);
+        window.open(url, '_blank');
     }
 }
 

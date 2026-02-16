@@ -142,7 +142,16 @@ Chrome, Firefox, Safari, Edge, Opera. Requires localStorage support.
 
 1. Create project at [firebase.google.com](https://firebase.google.com)
 2. Enable **Firestore** Database
-3. Open `js/storage/firebase-config.js` and paste your config
+3. Enable **Storage** (for exam uploads and documents)
+4. Open `js/storage/firebase-config.js` and paste your config
+
+### Firebase Storage CORS (for Download button)
+
+If the **Download** button opens a new tab instead of downloading the file, configure CORS on your Storage bucket:
+
+1. Install [gsutil](https://cloud.google.com/storage/docs/gsutil_install)
+2. Run: `gsutil cors set firebase-storage-cors.json gs://YOUR-PROJECT-ID.appspot.com`
+3. Use the `firebase-storage-cors.json` file in this project root
 
 ### Key config files
 

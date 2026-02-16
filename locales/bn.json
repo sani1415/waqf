@@ -423,5 +423,24 @@
   "alert_pin_updated": "পিন সফলভাবে আপডেট হয়েছে!",
   "alert_pin_mismatch": "নতুন পিন এবং নিশ্চিতকরণ মিলছে না।",
   "alert_wrong_current_pin": "বর্তমান পিন ভুল।",
-  "alert_pin_required": "৪-৬ অঙ্কের পিন লিখুন।"
+  "alert_pin_required": "৪-৬ অঙ্কের পিন লিখুন।",
+
+  "nav_documents": "ডকুমেন্ট",
+  "my_documents": "আমার ডকুমেন্ট",
+  "documents_hint": "ডকুমেন্ট আপলোড করুন এবং শিক্ষকের দেখার জন্য চিহ্নিত করুন।",
+  "click_to_upload": "আপলোড করতে ক্লিক করুন বা ফাইল টেনে আনুন",
+  "documents_formats": "PDF, ইমেজ, ওয়ার্ড ডকুমেন্ট",
+  "no_documents_yet": "এখনো কোনো ডকুমেন্ট নেই",
+  "upload_first_document": "উপরে থেকে আপনার প্রথম ডকুমেন্ট আপলোড করুন",
+  "submit_for_review": "রিভিউতে পাঠান",
+  "confirm_remove_document": "এই ডকুমেন্ট সরানো হবে?",
+  "uploading": "আপলোড হচ্ছে",
+  "downloading": "ডাউনলোড হচ্ছে",
+  "upload_failed": "আপলোড ব্যর্থ। আবার চেষ্টা করুন।",
+  "documents_for_review": "রিভিউর জন্য ডকুমেন্ট",
+  "documents_for_review_hint": "ছাত্ররা যে ডকুমেন্টগুলো আপনার দেখার জন্য চিহ্নিত করেছে। সব এক জায়গায়।",
+  "no_documents_for_review": "রিভিউর জন্য কোনো ডকুমেন্ট নেই",
+  "no_documents_for_review_hint": "ছাত্ররা ডকুমেন্ট আপলোড করে আপনার দেখার জন্য চিহ্নিত করতে পারবে। সেগুলো এখানে দেখা যাবে।",
+  "download": "ডাউনলোড",
+  "no_file_url": "(ফাইল লিঙ্ক নেই)"
 }
