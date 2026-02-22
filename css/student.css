@@ -209,6 +209,87 @@
     font-size: 0.95rem;
 }
 
+/* Student Sidebar Navigation (desktop - like teacher area) */
+.student-sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 0;
+    overflow-y: auto;
+}
+
+.student-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    border: none;
+    background: none;
+    width: 100%;
+    font-size: 1rem;
+    text-align: left;
+    font-family: inherit;
+}
+
+.student-nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 0;
+    background: var(--primary-soft);
+    border-radius: 0 4px 4px 0;
+    transition: height 0.3s ease;
+}
+
+.student-nav-item:hover,
+body:has(#tab-today:checked) .student-sidebar label[for="tab-today"],
+body:has(#tab-tasks:checked) .student-sidebar label[for="tab-tasks"],
+body:has(#tab-exams:checked) .student-sidebar label[for="tab-exams"],
+body:has(#tab-messages:checked) .student-sidebar label[for="tab-messages"],
+body:has(#tab-documents:checked) .student-sidebar label[for="tab-documents"],
+body:has(#tab-records:checked) .student-sidebar label[for="tab-records"],
+body:has(#tab-profile:checked) .student-sidebar label[for="tab-profile"] {
+    background: linear-gradient(90deg, rgba(123, 158, 189, 0.08) 0%, transparent 100%);
+    color: var(--primary-soft);
+}
+
+.student-nav-item:hover::before,
+body:has(#tab-today:checked) .student-sidebar label[for="tab-today"]::before,
+body:has(#tab-tasks:checked) .student-sidebar label[for="tab-tasks"]::before,
+body:has(#tab-exams:checked) .student-sidebar label[for="tab-exams"]::before,
+body:has(#tab-messages:checked) .student-sidebar label[for="tab-messages"]::before,
+body:has(#tab-documents:checked) .student-sidebar label[for="tab-documents"]::before,
+body:has(#tab-records:checked) .student-sidebar label[for="tab-records"]::before,
+body:has(#tab-profile:checked) .student-sidebar label[for="tab-profile"]::before {
+    height: 60%;
+}
+
+.student-nav-item i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.student-nav-item {
+    position: relative;
+}
+
+.nav-unread-dot-sidebar {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #FF5252;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
 /* Daily Progress Section */
 .daily-progress-section {
     background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
@@ -2936,10 +3017,17 @@
     border-radius: 50%;
 }
 
-/* Desktop: show tab labels, hide bottom nav */
-@media (min-width: 769px) {
+/* Tablet: show tab labels (sidebar hidden) */
+@media (min-width: 769px) and (max-width: 1024px) {
     .tab-labels-desktop {
         display: flex !important;
+    }
+}
+
+/* Desktop: sidebar nav visible, hide tab labels (like teacher area) */
+@media (min-width: 1025px) {
+    .tab-labels-desktop {
+        display: none !important;
     }
 }
 

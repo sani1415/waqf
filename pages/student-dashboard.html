@@ -21,6 +21,38 @@
                 <p id="studentRole" data-i18n="student">Student</p>
             </div>
 
+            <nav class="student-sidebar-nav" aria-label="Student navigation">
+                <label for="tab-today" class="student-nav-item">
+                    <i class="fas fa-calendar-day"></i>
+                    <span data-i18n="today">Today</span>
+                </label>
+                <label for="tab-tasks" class="student-nav-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span data-i18n="tasks">Tasks</span>
+                </label>
+                <label for="tab-exams" class="student-nav-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span data-i18n="nav_exams">Exams</span>
+                </label>
+                <label for="tab-messages" class="student-nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span data-i18n="messages">Messages</span>
+                    <span id="msgUnreadDotSidebar" class="nav-unread-dot-sidebar" style="display: none;"></span>
+                </label>
+                <label for="tab-documents" class="student-nav-item">
+                    <i class="fas fa-file-upload"></i>
+                    <span data-i18n="nav_documents">Documents</span>
+                </label>
+                <label for="tab-records" class="student-nav-item">
+                    <i class="fas fa-history"></i>
+                    <span data-i18n="tab_records">Records</span>
+                </label>
+                <label for="tab-profile" class="student-nav-item">
+                    <i class="fas fa-user"></i>
+                    <span data-i18n="profile">Profile</span>
+                </label>
+            </nav>
+
             <div class="sidebar-footer">
                 <a href="/index.html" class="back-btn-sidebar" onclick="if(typeof logoutStudent==='function')logoutStudent();">
                     <i class="fas fa-sign-out-alt"></i>

@@ -83,6 +83,9 @@ async function updateUnreadBadge() {
     
     const navDot = document.getElementById('msgUnreadDotNav');
     if (navDot) navDot.style.display = show;
+    
+    const sidebarDot = document.getElementById('msgUnreadDotSidebar');
+    if (sidebarDot) sidebarDot.style.display = show;
 }
 
 // Initialize Student Dashboard
