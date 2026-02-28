@@ -1,0 +1,109 @@
+{
+  "common": {
+    "app_name": "Aye-Bay",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "logout": "Logout",
+    "back": "Back",
+    "search": "Search",
+    "filter": "Filter",
+    "from": "From",
+    "to": "To",
+    "total": "Total",
+    "date": "Date",
+    "amount": "Amount",
+    "actions": "Actions",
+    "project": "Project",
+    "add_row": "Add row",
+    "save_entry": "Save entry",
+    "lang_english": "English",
+    "lang_bengali": "বাংলা"
+  },
+  "auth": {
+    "login": "Login",
+    "login_title": "Sign in",
+    "user_id": "User ID",
+    "password": "Password",
+    "login_error": "Invalid ID or password.",
+    "login_success": "Signed in successfully."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "income": "Income",
+    "inventory": "Inventory",
+    "sales": "Sales",
+    "expense": "Expense",
+    "reports": "Reports",
+    "admin": "Admin",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "my_projects": "My Projects",
+    "summary": "Summary",
+    "income": "Income",
+    "expense": "Expense",
+    "profit": "Profit",
+    "loss": "Loss"
+  },
+  "projects": {
+    "title": "Projects",
+    "add_project": "Add Project",
+    "project_name": "Project Name",
+    "responsible": "Responsible",
+    "no_projects": "No projects yet.",
+    "create_first": "Create your first project."
+  },
+  "income": {
+    "title": "Income",
+    "inventory": "Inventory",
+    "product_name": "Product Name",
+    "quantity": "Quantity",
+    "price_per_piece": "Price per piece",
+    "sold": "Sold",
+    "discount": "Discount",
+    "murajja": "Murajja (Voluntary)",
+    "add_product": "Add Product",
+    "add_sale": "Record Sale",
+    "sales_history": "Sales History",
+    "no_products": "No products in inventory.",
+    "no_sales": "No sales recorded.",
+    "from_inventory": "from inventory",
+    "no_stock_add_inventory": "No items in stock. Add quantity in Inventory first."
+  },
+  "expense": {
+    "title": "Expense",
+    "add_expense": "Add Expense",
+    "add_row": "Add row",
+    "save_entry": "Save entry",
+    "product_name": "Product / Item",
+    "quantity": "Quantity",
+    "unit_price": "Unit Price",
+    "total_expense": "Total Expense",
+    "no_expenses": "No expenses recorded.",
+    "recent_expenses": "Recent expenses"
+  },
+  "reports": {
+    "title": "Reports",
+    "summary": "Income vs Expense Summary",
+    "date_range": "Date range",
+    "from": "From",
+    "to": "To",
+    "income_total": "Total Income",
+    "expense_total": "Total Expense",
+    "profit_loss": "Profit / Loss",
+    "no_data": "No data for selected period."
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "all_projects": "All Projects",
+    "financial_summary": "Financial Summary",
+    "access_denied": "Access denied. Admin only.",
+    "no_projects": "No projects yet."
+  }
+}

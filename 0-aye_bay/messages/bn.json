@@ -1,0 +1,109 @@
+{
+  "common": {
+    "app_name": "Aye-Bay",
+    "loading": "লোড হচ্ছে...",
+    "save": "সংরক্ষণ",
+    "cancel": "বাতিল",
+    "add": "যোগ করুন",
+    "edit": "সম্পাদনা",
+    "delete": "মুছুন",
+    "logout": "লগআউট",
+    "back": "ফিরে যান",
+    "search": "খুঁজুন",
+    "filter": "ফিল্টার",
+    "from": "থেকে",
+    "to": "পর্যন্ত",
+    "total": "মোট",
+    "date": "তারিখ",
+    "amount": "পরিমাণ",
+    "actions": "কর্ম",
+    "project": "প্রজেক্ট",
+    "add_row": "সারি যোগ করুন",
+    "save_entry": "এন্ট্রি সংরক্ষণ",
+    "lang_english": "English",
+    "lang_bengali": "বাংলা"
+  },
+  "auth": {
+    "login": "লগইন",
+    "login_title": "সাইন ইন",
+    "user_id": "ইউজার আইডি",
+    "password": "পাসওয়ার্ড",
+    "login_error": "আইডি বা পাসওয়ার্ড ভুল।",
+    "login_success": "সফলভাবে সাইন ইন হয়েছে।"
+  },
+  "nav": {
+    "dashboard": "ড্যাশবোর্ড",
+    "projects": "প্রজেক্ট",
+    "income": "আয়",
+    "inventory": "ইনভেন্টরি",
+    "sales": "বিক্রয়",
+    "expense": "ব্যয়",
+    "reports": "রিপোর্ট",
+    "admin": "অ্যাডমিন",
+    "settings": "সেটিংস"
+  },
+  "dashboard": {
+    "welcome": "স্বাগতম",
+    "my_projects": "আমার প্রজেক্ট",
+    "summary": "সারসংক্ষেপ",
+    "income": "আয়",
+    "expense": "ব্যয়",
+    "profit": "লাভ",
+    "loss": "ক্ষতি"
+  },
+  "projects": {
+    "title": "প্রজেক্ট",
+    "add_project": "প্রজেক্ট যোগ করুন",
+    "project_name": "প্রজেক্টের নাম",
+    "responsible": "দায়িত্বশীল",
+    "no_projects": "এখনও কোনো প্রজেক্ট নেই।",
+    "create_first": "প্রথম প্রজেক্ট তৈরি করুন।"
+  },
+  "income": {
+    "title": "আয়",
+    "inventory": "ইনভেন্টরি",
+    "product_name": "পণ্যের নাম",
+    "quantity": "পরিমাণ",
+    "price_per_piece": "প্রতি পিস মূল্য",
+    "sold": "বিক্রিত",
+    "discount": "ছাড়",
+    "murajja": "মর্যাদা (ঐচ্ছিক)",
+    "add_product": "পণ্য যোগ করুন",
+    "add_sale": "বিক্রয় রেকর্ড করুন",
+    "sales_history": "বিক্রয়ের ইতিহাস",
+    "no_products": "ইনভেন্টরিতে কোনো পণ্য নেই।",
+    "no_sales": "কোনো বিক্রয় রেকর্ড নেই।",
+    "from_inventory": "ইনভেন্টরি থেকে",
+    "no_stock_add_inventory": "স্টকে কোনো আইটেম নেই। প্রথমে ইনভেন্টরিতে পরিমাণ যোগ করুন।"
+  },
+  "expense": {
+    "title": "ব্যয়",
+    "add_expense": "ব্যয় যোগ করুন",
+    "add_row": "সারি যোগ করুন",
+    "save_entry": "এন্ট্রি সংরক্ষণ",
+    "product_name": "পণ্য / আইটেম",
+    "quantity": "পরিমাণ",
+    "unit_price": "একক মূল্য",
+    "total_expense": "মোট ব্যয়",
+    "no_expenses": "কোনো ব্যয় রেকর্ড নেই।",
+    "recent_expenses": "সাম্প্রতিক ব্যয়"
+  },
+  "reports": {
+    "title": "রিপোর্ট",
+    "summary": "আয় বনাম ব্যয় সারসংক্ষেপ",
+    "date_range": "তারিখ রেঞ্জ",
+    "from": "থেকে",
+    "to": "পর্যন্ত",
+    "income_total": "মোট আয়",
+    "expense_total": "মোট ব্যয়",
+    "profit_loss": "লাভ / ক্ষতি",
+    "no_data": "নির্বাচিত সময়ের জন্য ডেটা নেই।"
+  },
+  "admin": {
+    "title": "অ্যাডমিন ড্যাশবোর্ড",
+    "all_projects": "সব প্রজেক্ট",
+    "financial_summary": "আর্থিক সারসংক্ষেপ",
+    "access_denied": "অ্যাক্সেস অস্বীকৃত। শুধুমাত্র অ্যাডমিন।",
+    "no_projects": "এখনও কোনো প্রজেক্ট নেই।"
+  }
+}
