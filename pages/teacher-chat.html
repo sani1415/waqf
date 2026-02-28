@@ -25,7 +25,7 @@
                     <p id="studentStatus">Student</p>
                 </div>
             </div>
-            <div class="lang-switcher lang-switcher-compact" style="margin-right: 0.5rem;" aria-label="Language">
+            <div class="lang-switcher lang-switcher-compact lang-switcher-header" style="margin-right: 0.5rem;" aria-label="Language">
                 <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')" title="English">EN</button>
                 <button type="button" class="lang-btn" data-lang="bn" onclick="setLang('bn')" title="বাংলা">বাং</button>
             </div>
@@ -33,6 +33,9 @@
             <button class="info-button" onclick="viewStudentDetail()">
                 <i class="fas fa-info-circle"></i>
             </button>
+            <a href="/index.html" class="btn-secondary btn-logout-header btn-logout-chat" onclick="if(typeof logoutTeacher==='function')logoutTeacher();">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
         </div>
 
         <!-- Messages Area -->

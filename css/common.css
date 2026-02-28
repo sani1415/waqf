@@ -107,6 +107,65 @@ body:has(.chat-container) {
     background: linear-gradient(90deg, rgba(123, 158, 189, 0.16) 0%, rgba(168, 197, 227, 0.08) 100%);
 }
 
+/* Language switcher in sidebar */
+.lang-switcher.lang-switcher-sidebar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    padding: 0.25rem;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: var(--radius-lg);
+}
+.lang-switcher.lang-switcher-sidebar .lang-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+/* Mobile: hide header language switcher, show only on desktop */
+@media (max-width: 1024px) {
+    .lang-switcher.lang-switcher-header {
+        display: none !important;
+    }
+}
+
+/* Desktop: hide logout button in header (it's in sidebar) */
+@media (min-width: 1025px) {
+    .btn-logout-header {
+        display: none !important;
+    }
+    .user-info-desktop {
+        display: flex !important;
+    }
+}
+
+/* Mobile: show logout button in header, hide user-info */
+@media (max-width: 1024px) {
+    .btn-logout-header {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .btn-logout-header:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    .btn-logout-header span {
+        display: none;
+    }
+    .user-info-desktop {
+        display: none !important;
+    }
+}
+
 /* Date format toggle (Hijri / Gregorian) */
 .date-format-toggle {
     display: inline-flex;

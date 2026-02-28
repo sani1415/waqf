@@ -56,6 +56,10 @@
         </nav>
 
         <div class="sidebar-footer">
+            <div class="lang-switcher lang-switcher-sidebar" aria-label="Language">
+                <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')" title="English">EN</button>
+                <button type="button" class="lang-btn" data-lang="bn" onclick="setLang('bn')" title="বাংলা">বাং</button>
+            </div>
             <a href="/index.html" class="nav-item" onclick="if(typeof logoutTeacher==='function')logoutTeacher();">
                 <i class="fas fa-sign-out-alt"></i>
                 <span data-i18n="logout">Logout</span>
@@ -71,15 +75,18 @@
             </button>
             <h1 class="page-title" id="pageTitle" data-i18n="nav_dashboard">Dashboard</h1>
             <div class="top-bar-right">
-                <div class="lang-switcher lang-switcher-compact" aria-label="Language">
+                <div class="lang-switcher lang-switcher-compact lang-switcher-header" aria-label="Language">
                     <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')" title="English">EN</button>
                     <button type="button" class="lang-btn" data-lang="bn" onclick="setLang('bn')" title="বাংলা">বাং</button>
                 </div>
                 <div class="date-format-toggle"></div>
-                <div class="user-info">
+                <div class="user-info user-info-desktop">
                     <i class="fas fa-user-circle"></i>
                     <span data-i18n="teacher">Teacher</span>
                 </div>
+                <a href="/index.html" class="btn-secondary btn-logout-header" onclick="if(typeof logoutTeacher==='function')logoutTeacher();">
+                    <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
+                </a>
             </div>
         </header>
 

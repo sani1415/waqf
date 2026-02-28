@@ -238,6 +238,25 @@ body:has(.chat-container) {
     background: var(--bg-primary);
 }
 
+.btn-logout-chat {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.25rem;
+}
+.btn-logout-chat:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
 .chat-header-info {
     flex: 1;
     display: flex;

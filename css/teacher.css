@@ -107,8 +107,12 @@ body {
 }
 
 .sidebar-footer {
-    padding: 1rem 0;
+    padding: 1rem;
     border-top: 1px solid var(--border-color);
+}
+
+.sidebar-footer .lang-switcher-sidebar {
+    margin-bottom: 0.5rem;
 }
 
 /* Overflow containment handled in common.css for body.teacher-page / body.teacher-dashboard */
