@@ -45,6 +45,9 @@ class FirebaseAdapter extends StorageAdapter {
                 firebase.initializeApp(firebaseConfig);
             }
 
+            // Sign in anonymously for security rules
+            await this.signInAnonymously();
+
             // Get Firestore reference
             this.db = firebase.firestore();
             this.ready = true;
@@ -62,6 +65,31 @@ class FirebaseAdapter extends StorageAdapter {
             console.error('❌ Firebase initialization failed:', error);
             this.ready = false;
             return false;
+        }
+    }
+
+    /**
+     * Sign in anonymously to Firebase Auth
+     * This provides a security layer without requiring user accounts
+     */
+    async signInAnonymously() {
+        try {
+            const auth = firebase.auth();
+            
+            // Check if already signed in
+            if (auth.currentUser) {
+                console.log('✅ Already signed in anonymously:', auth.currentUser.uid);
+                return auth.currentUser;
+            }
+
+            // Sign in anonymously
+            const result = await auth.signInAnonymously();
+            console.log('✅ Signed in anonymously:', result.user.uid);
+            return result.user;
+
+        } catch (error) {
+            console.error('❌ Anonymous sign-in failed:', error);
+            throw error;
         }
     }
 
